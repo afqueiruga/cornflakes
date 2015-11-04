@@ -1,4 +1,6 @@
 *~
 *.pyc
 *.so
+*.vtk
+*_wrap.c
 *.o
