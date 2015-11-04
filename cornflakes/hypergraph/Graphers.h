@@ -1,5 +1,5 @@
-#ifndef __Graphers_H
-#define __Graphers_H
+#ifndef __GRAPHERS_H
+#define __GRAPHERS_H
 
 #include "SpatialHash.h"
 #include "hypergraph.h"

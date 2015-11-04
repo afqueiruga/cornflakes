@@ -28,7 +28,7 @@ void SpatialHash_init(spatialhash_t * sh, int Npart, int dim,
     sh->Ncell[i] = ceil( ( (end)[i]-(start)[i] )/ (h)[i] );
     celltot *= sh->Ncell[i];
   }
-  printf("ncells: %d\n",celltot);
+  
   sh->cells = (int*)malloc(sizeof(int)*celltot);
 
   sh->list = (int*)malloc(sizeof(int)*Npart);
@@ -58,10 +58,8 @@ void SpatialHash_Push(spatialhash_t * sh, int A, real_t * x) {
   int i;
   int hs[sh->dim];
   for(i=0;i<sh->dim;i++) hs[i]=HASH((x)[i],i);
-  printf("hs: %d,%d\n",hs[0],hs[1]);
   sh->list[A] = sh->cells[CC(hs)];
   sh->cells[CC(hs)] = A;
-  printf("cc: %d,%d\n",CC(hs),sh->cells[CC(hs)]);
 #undef HASH
 #undef CC
 }
@@ -105,11 +103,9 @@ void Build_New_Hash(spatialhash_t * sh,  int Npart,int dim, real_t * x, real_t b
   
   /* Build the hash */
   for(A=0;A<Npart;A++) {
-    printf("%d",A);
     SpatialHash_Push(sh, A, x+dim*A);
   }
-  for(i=0;i<dim;i++) printf("%lf, %lf, %lf\n",start[i],end[i],h[i]);
-  SpatialHash_print(sh);
+  //SpatialHash_print(sh);
 }
 
 void SpatialHash_Scanall(spatialhash_t * sh, real_t * x,void act(int,int) )
@@ -119,9 +115,8 @@ void SpatialHash_Scanall(spatialhash_t * sh, real_t * x,void act(int,int) )
   int A,i, hs[sh->dim];
   // Loop accross it to make contact pairs
   for(A=0;A<sh->Npart;A++) {
-    // std::cout << "d" << a <<std::endl;
     for(i=0;i<sh->dim;i++) { hs[i]=HASH((x)[A*sh->dim+i],i); }
-    printf("%d : %d,%d\n",A,hs[0],hs[1]);
+    
     // We scan in this pattern on the grid
     //    ooo   ooo   xxx
     //    ooo   oXx   xxx
@@ -161,18 +156,15 @@ void SpatialHash_Scan_Cell(spatialhash_t * sh, void act(int,int),
   int i, iter;
   int c[sh->dim];
   for(i=0;i<sh->dim;i++) c[i]=hs[i]+off[i];
-  for(i=0;i<sh->dim;i++) printf("%d,",c[i]); printf("\n");
   for(i=0;i<sh->dim;i++) if(c[i]<0||c[i]>=sh->Ncell[i]) return;
   
   iter = sh->cells[CC(c)];
-  printf("  %d,%d\n",CC(c),iter); 
   while(iter>-1) {
-    printf("  %d\n",iter);
-    //if( !filter || a>iter ) {
+    if( !filter || a>iter ) {
       if(iter!=a) {
 	act(a,iter);
       }
-      //}
+    }
     iter=sh->list[iter];
   }
 #undef CC

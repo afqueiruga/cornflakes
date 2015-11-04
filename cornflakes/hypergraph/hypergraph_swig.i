@@ -4,6 +4,8 @@
 #include "hypergraph.h"
 #include "SpatialHash.h"
 #include "Graphers.h"
+#include "kernel.h"
+#include "assemble.h"
 %}
 
 %include "numpy.i"
@@ -15,12 +17,16 @@ import_array();
 %apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {(int Npart, int dim, real_t * x)};
 %include "carrays.i"
 %array_class(int,intArray)
+%array_class(dof_t,dofArray)
 %include "cpointer.i"
 %pointer_class(int, intp)
 
 %include "hypergraph.h"
 %include "SpatialHash.h"
 %include "Graphers.h"
+%include "kernel.h"
+%include "assemble.h"
+
 
 %exception Hypergraph_Push_Edge_np {
     $action
@@ -61,4 +67,35 @@ import_array();
   }
   //void Hypergraph_Get_Edge
 
+  void assemble_vector_np(int DIM1, real_t * INPLACE_ARRAY1,
+			  kernel_t * ke, hypergraph_t * hg,
+			  int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
+			  PyObject * datalist) {
+    if(PyList_Check(datalist)) {
+      int ndata = PyList_Size(datalist);
+      
+      real_t *data_ptrs[ndata];
+      PyArrayObject * nda[ndata];
+      int isnewobj[ndata];
+      int i;
+      for(i=0;i<ndata;i++) {
+	PyObject * obj = NULL;
+	nda[i] = NULL;
+	obj = PyList_GetItem(datalist, i);
+	isnewobj[i];
+	nda[i] = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,isnewobj+i);
+	printf("%d ", array_size(nda[i],0));
+	data_ptrs[i] = array_data(nda[i]);
+      }
+      printf("%d\n",ndata);
+
+      // Call the assembler
+      assemble_vector(INPLACE_ARRAY1, ke,hg, INPLACE_ARRAY_FLAT, data_ptrs);
+      
+      // Tell python we don't want those arrays anymore, if we actually made any
+      for(i=0;i<ndata;i++) {
+	if(isnewobj[i]) Py_DECREF( nda[i] );
+      }
+    }
+  }
 %}
