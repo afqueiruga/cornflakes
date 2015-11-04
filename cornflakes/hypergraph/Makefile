@@ -3,11 +3,11 @@ SWIG = swig3.0
 
 CFLAGS = -c -fpic
 IFLAGS = -I/usr/include/python2.7/
-
+#LFLAGS = -lpython -lmath
 SWIGINFS = hypergraph_swig.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 SWIGPYS = $(SWIGINFS:.i=.py)
-SRCS = hypergraph.c SpatialHash.c Graphers.c $(WRAPPERS)
+SRCS = hypergraph.c SpatialHash.c Graphers.c assemble.c kernel.c $(WRAPPERS)
 OBJS = $(SRCS:.c=.o)
 
 TARGETS = _mylibrary.so
