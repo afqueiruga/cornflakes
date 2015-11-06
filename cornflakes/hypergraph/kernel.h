@@ -26,6 +26,10 @@ typedef struct kernel_t {
 } kernel_t ;
 
 
+int kernel_inp_len(kernel_t * ke, int l_edge);
+int kernel_outp_len(kernel_t * ke, int l_edge);
+
+
 
 extern kernel_t particle_kernel_strct ;
 

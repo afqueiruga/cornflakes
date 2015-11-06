@@ -1,5 +1,35 @@
 import mylibrary
+import numpy as np
 
+class DofMap():
+    def __init__(self):
+        self.vertex_dofs = []
+        self.edge_dofs = []
+        self.global_dofs = []
+
+        self.R_order = []
+    def __init__(self, h, ke, Nnode):
+        dofs = mylibrary.dofArray_frompointer(ke.outp)
+        
+        nvertdof = 0
+        nedgedof = 0
+        nglobaldof = 0
+        
+        for i in xrange(ke.noutp):
+            if dofs[i].loc == mylibrary.LOC_NODE:
+                nvertdof += dofs[i].len
+            elif dofs[i].loc == mylibrary.LOC_EDGE:
+                nedgedof += dofs[i].len
+            else:
+                nglobaldof += dofs[i].len
+        
+        self.vertex_dofs = np.zeros( (Nnode, nvertdof),dtype=np.intc)
+        for i in xrange(self.vertex_dofs.size):
+            self.vertex_dofs.ravel()[i] = i
+            
+        self.edge_dofs = np.zeros( (h.hg.n_edge, nedgedof), dtype=np.intc)
+        self.global_dofs = np.zeros( (nglobaldof), dtype=np.intc)
+        
 def make_dofmap(h, ke, Nnode):
     # Make the dofmap for where the kernel output will be
     # assembled into. It will look like
@@ -30,3 +60,6 @@ def make_dofmap(h, ke, Nnode):
             else:
                 pass
     return outmap
+
+def select_nodes(X,fil):
+    return np.where(map(fil,X))
