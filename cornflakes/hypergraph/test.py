@@ -50,32 +50,35 @@ def STATICTEST():
         x.ravel()[:] -= dx[:]
         print "Err = ", eps
         output()
+from IPython import embed
 def DYNAMICTEST():
-    from RKnew import RKbase, exRK
+    from RKnew import RKbase, exRK, imRK
     def sys_mech(time,tang=False):
-        global R
+        #global R
         if tang:
-            return R,None,None
+            R,KX,KV = Assemble_Targets(pks,hyper.hg,dofmap,x.size, [x,vel,X,params])
+            R*=-1.0
+            return R,KX,KV
         else:
-            R[:] = 0.0
-            mylibrary.assemble_vector_np(R, pks,hyper.hg, dofmap, [x,vel,X,params])
+            R,KX,KV = Assemble_Targets(pks,hyper.hg,dofmap,x.size, [x,vel,X,params])
             R*=-1.0
             return R
     def bcapp_mech(K,R,t,hold=False):
+        #embed()
         Apply_BC(botdofs, botvals, K,R)
     def update():
         pass
     Mechfield = RKbase.RK_field(2,[vel.ravel(),x.ravel()],None,
                            sys_mech,bcapp_mech,update)
     Tmax = 100.0
-    NT = 900
+    NT = 100
     h = Tmax/NT
 
-    step = exRK.exRK(h, exRK.exRK_table['RK4'], [Mechfield])
-
+    #step = exRK.exRK(h, exRK.exRK_table['RK4'], [Mechfield])
+    step = imRK.DIRK(h, imRK.LDIRK['BWEuler'], [Mechfield])
     for tx in xrange(NT):
         step.march()
-        if tx % 3 ==0:
+        if tx % 1 ==0:
             output()
         
 outcnt=0
@@ -84,7 +87,8 @@ def output():
     graphio.write_graph("foo_{0}.vtk".format(outcnt),hyper,x, {'x':X,'v':vel})
     outcnt += 1
 
+#R,KX,KV=Assemble_Targets(pks,hyper.hg, dofmap,x.size, [x,vel,X,params])
 
 
-#DYNAMICTEST()
-STATICTEST()
+DYNAMICTEST()
+#STATICTEST()

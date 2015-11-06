@@ -33,6 +33,31 @@ def Assemble_Vector_Matrix(ke,hg, dofmap,ndof, data):
 
     return R,K
 
+def Assemble_Targets(ke,hg, dofmap,ndof, data):
+    ranks=(1,2,2)
+    len_loc_out = mylibrary.kernel_outp_len(ke,hg.l_edge)
+    matsize = len_loc_out*len_loc_out*hg.n_edge
+    allocator = {
+        0:(lambda : np.zeros(1,dtype=np.double)),
+        1:(lambda : np.zeros(ndof,dtype=np.double)),
+        2:(lambda : (np.zeros(matsize,dtype=np.double),
+                     np.zeros(matsize,dtype=np.intc),
+                     np.zeros(matsize,dtype=np.intc)))
+    }
+    forms = [ allocator[r]() for r in ranks ]
+    from IPython import embed
+    
+    mylibrary.assemble_targets_np(forms,
+                                  ke,hg,dofmap,
+                                  data)
+    
+    for i,r in enumerate(ranks):
+        if r==2:
+            Kcoo = scipy.sparse.coo_matrix((forms[i][0],(forms[i][1],forms[i][2])), (ndof,ndof))
+            K = Kcoo.tocsr()
+            forms[i]=K
+    return forms
+
 def Apply_BC(dofs,vals, K=None,R=None):
     if K!=None:
         for i in dofs:

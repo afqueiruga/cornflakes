@@ -31,6 +31,79 @@ void collect(real_t * loc_in, kernel_t * ke, int hx, int* edge, int l_edge, real
   }
 }
 
+
+real_t * push_target(assemble_target_t * att, int len_loc_out, int hx, int * outmap, real_t * loc_out)
+{
+  int i,j;
+  switch(att->rank) {
+  case 1:
+    for(i=0;i<len_loc_out;i++) {
+      att->V[ outmap[i] ] += loc_out[i];
+    }
+    return loc_out + len_loc_out;
+    break;
+  case 2:
+    for(i=0;i<len_loc_out;i++) {
+      for(j=0;j<len_loc_out;j++) {
+	att->II[ len_loc_out*len_loc_out*hx+len_loc_out*i + j] = outmap[ i ];
+	att->JJ[ len_loc_out*len_loc_out*hx+len_loc_out*i + j] = outmap[ j ];
+	att->V [ len_loc_out*len_loc_out*hx+len_loc_out*i + j] = loc_out[len_loc_out*i + j];
+      }
+    }
+    return loc_out + len_loc_out*len_loc_out;
+    break;
+  default:
+    att->V[0] += loc_out[0];
+    return loc_out + 1;
+    break;
+  }
+  
+}
+
+void assemble_targets(int ntarget, assemble_target_t * att,
+		      kernel_t * ke, hypergraph_t * hg,
+		      int * outmap, real_t ** data)
+{
+  int i,j,hx;
+  /* II,JJ,KK better have size len_loc_out^2 * hg->n_edge */
+  /*
+   * Allocate local vectors
+   */
+  int len_loc_in = kernel_inp_len(ke, hg->l_edge);
+  int len_loc_out = kernel_outp_len(ke, hg->l_edge);
+  real_t loc_in[len_loc_in];
+  int out_alloc = 0; // THE KERNEL SHOULD ENCODE THIS INFORMATION....
+  for(i=0;i<ntarget;i++) {
+    switch(att[i].rank) {
+    case 0: out_alloc += 1; break;
+    case 1: out_alloc += len_loc_out; break;
+    case 2: out_alloc += len_loc_out*len_loc_out; break; // FOR NOW: ONLY SQUARE MATRICES
+    }
+  }
+  real_t loc_out[out_alloc];
+
+  /*
+   * Loop over the edges in the graph
+   */
+  int * edge;
+  for(hx=0; hx<hg->n_edge; hx++) {
+    edge = Hypergraph_Get_Edge(hg,hx);
+    //for(i=0;i<hg->l_edge;i++) printf("%d ",edge[i]); printf("\n");
+
+    /* Pull data */
+    collect(loc_in, ke, hx,edge,hg->l_edge, data);
+
+    //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
+    /* Call the kernel */
+    ke->assem( loc_in, loc_out );
+
+    real_t * iter_out = loc_out;
+    for(i=0;i<ntarget;i++) {
+      iter_out = push_target(att+i,len_loc_out, hx,outmap+len_loc_out*hx, iter_out);
+    }
+  }
+}
+
 void assemble_vector(real_t * R, kernel_t * ke,hypergraph_t * hg, int * outmap, real_t ** data)
 {
   int hx,i,j,A;
