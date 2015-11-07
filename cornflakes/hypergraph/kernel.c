@@ -28,10 +28,6 @@ int kernel_outp_len(kernel_t * ke,int l_edge) {
   return len_loc_out;
 }
 
-
-
-
-
 void eval_peri(/*Inputs:*/
 real_t * x,
 real_t * v,
@@ -40,36 +36,51 @@ real_t * params
 ,
 /*Outputs:*/
 double * F,
-double * K)
+double * KX,
+double * KV)
 {
 /* Evalaute F:*/
-F[0] = params[0]*(x[0] - x[2])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
-F[1] = params[0]*(x[1] - x[3])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
-F[2] = params[0]*(-x[0] + x[2])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
-F[3] = params[0]*(-x[1] + x[3])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
+F[0] = -params[0]*(x[0] - x[2])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)) - params[1]*(-x[0] + x[2])*((-v[0] + v[2])*(-x[0] + x[2]) + (-v[1] + v[3])*(-x[1] + x[3]))/(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
+F[1] = -params[0]*(x[1] - x[3])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)) - params[1]*(-x[1] + x[3])*((-v[0] + v[2])*(-x[0] + x[2]) + (-v[1] + v[3])*(-x[1] + x[3]))/(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
+F[2] = -params[0]*(-x[0] + x[2])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)) + params[1]*(-x[0] + x[2])*((-v[0] + v[2])*(-x[0] + x[2]) + (-v[1] + v[3])*(-x[1] + x[3]))/(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
+F[3] = -params[0]*(-x[1] + x[3])*(-sqrt(pow(-X[0] + X[2], 2) + pow(-X[1] + X[3], 2)) + sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)))/sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)) + params[1]*(-x[1] + x[3])*((-v[0] + v[2])*(-x[0] + x[2]) + (-v[1] + v[3])*(-x[1] + x[3]))/(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2));
 
-/* Evalaute K:*/
-K[0] = params[0]*pow(x[0] - x[2], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) - params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) + params[0];
-K[1] = params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[2] = -params[0]*pow(x[0] - x[2], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) + params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) - params[0];
-K[3] = -params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[4] = params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[5] = params[0]*pow(x[1] - x[3], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) - params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) + params[0];
-K[6] = -params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[7] = -params[0]*pow(x[1] - x[3], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) + params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) - params[0];
-K[8] = -params[0]*pow(x[0] - x[2], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) + params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) - params[0];
-K[9] = -params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[10] = params[0]*pow(x[0] - x[2], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) - params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) + params[0];
-K[11] = params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[12] = -params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[13] = -params[0]*pow(x[1] - x[3], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) + params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) - params[0];
-K[14] = params[0]*(x[0]*x[1] - x[0]*x[3] - x[1]*x[2] + x[2]*x[3])*sqrt(pow(X[0], 2) - 2*X[0]*X[2] + pow(X[1], 2) - 2*X[1]*X[3] + pow(X[2], 2) + pow(X[3], 2))/pow(pow(x[0], 2) - 2*x[0]*x[2] + pow(x[1], 2) - 2*x[1]*x[3] + pow(x[2], 2) + pow(x[3], 2), 3.0L/2.0L);
-K[15] = params[0]*pow(x[1] - x[3], 2)*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3.0L/2.0L) - params[0]*sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2))/sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2)) + params[0];
+/* Evalaute KX:*/
+KX[0] = (-params[0]*pow(x[0] - x[2], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*pow(x[0] - x[2], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(-params[0]*pow(x[0] - x[2], 2) + params[1]*(v[0] - v[2])*(x[0] - x[2]) + params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+KX[1] = (x[0] - x[2])*(-params[0]*(x[1] - x[3])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*(x[1] - x[3])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (-params[0]*(x[1] - x[3]) + params[1]*(v[1] - v[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[2] = (params[0]*pow(x[0] - x[2], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*pow(x[0] - x[2], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(params[0]*pow(x[0] - x[2], 2) - params[1]*(v[0] - v[2])*(x[0] - x[2]) - params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+KX[3] = (x[0] - x[2])*(params[0]*(x[1] - x[3])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*(x[1] - x[3])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (params[0]*(x[1] - x[3]) - params[1]*(v[1] - v[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[4] = (x[1] - x[3])*(-params[0]*(x[0] - x[2])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*(x[0] - x[2])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (-params[0]*(x[0] - x[2]) + params[1]*(v[0] - v[2]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[5] = (-params[0]*pow(x[1] - x[3], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*pow(x[1] - x[3], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(-params[0]*pow(x[1] - x[3], 2) + params[1]*(v[1] - v[3])*(x[1] - x[3]) + params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+KX[6] = (x[1] - x[3])*(params[0]*(x[0] - x[2])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*(x[0] - x[2])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (params[0]*(x[0] - x[2]) - params[1]*(v[0] - v[2]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[7] = (params[0]*pow(x[1] - x[3], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*pow(x[1] - x[3], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(params[0]*pow(x[1] - x[3], 2) - params[1]*(v[1] - v[3])*(x[1] - x[3]) - params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+KX[8] = (params[0]*pow(x[0] - x[2], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*pow(x[0] - x[2], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(params[0]*pow(x[0] - x[2], 2) - params[1]*(v[0] - v[2])*(x[0] - x[2]) - params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+KX[9] = (x[0] - x[2])*(params[0]*(x[1] - x[3])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*(x[1] - x[3])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (params[0]*(x[1] - x[3]) - params[1]*(v[1] - v[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[10] = (-params[0]*pow(x[0] - x[2], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*pow(x[0] - x[2], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(-params[0]*pow(x[0] - x[2], 2) + params[1]*(v[0] - v[2])*(x[0] - x[2]) + params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+KX[11] = (x[0] - x[2])*(-params[0]*(x[1] - x[3])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*(x[1] - x[3])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (-params[0]*(x[1] - x[3]) + params[1]*(v[1] - v[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[12] = (x[1] - x[3])*(params[0]*(x[0] - x[2])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*(x[0] - x[2])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (params[0]*(x[0] - x[2]) - params[1]*(v[0] - v[2]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[13] = (params[0]*pow(x[1] - x[3], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + 2*params[1]*pow(x[1] - x[3], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(params[0]*pow(x[1] - x[3], 2) - params[1]*(v[1] - v[3])*(x[1] - x[3]) - params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+KX[14] = (x[1] - x[3])*(-params[0]*(x[0] - x[2])*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*(x[0] - x[2])*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5.0L/2.0L) + (-params[0]*(x[0] - x[2]) + params[1]*(v[0] - v[2]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L);
+KX[15] = (-params[0]*pow(x[1] - x[3], 2)*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 7.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) + params[0]*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 9.0L/2.0L)*(sqrt(pow(X[0] - X[2], 2) + pow(X[1] - X[3], 2)) - sqrt(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2))) - 2*params[1]*pow(x[1] - x[3], 2)*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))*pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 3) + pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 4)*(-params[0]*pow(x[1] - x[3], 2) + params[1]*(v[1] - v[3])*(x[1] - x[3]) + params[1]*((v[0] - v[2])*(x[0] - x[2]) + (v[1] - v[3])*(x[1] - x[3]))))/pow(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2), 5);
+
+/* Evalaute KV:*/
+KV[0] = params[1]*pow(x[0] - x[2], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[1] = params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[2] = -params[1]*pow(x[0] - x[2], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[3] = -params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[4] = params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[5] = params[1]*pow(x[1] - x[3], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[6] = -params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[7] = -params[1]*pow(x[1] - x[3], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[8] = -params[1]*pow(x[0] - x[2], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[9] = -params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[10] = params[1]*pow(x[0] - x[2], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[11] = params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[12] = -params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[13] = -params[1]*pow(x[1] - x[3], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[14] = params[1]*(x[0] - x[2])*(x[1] - x[3])/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
+KV[15] = params[1]*pow(x[1] - x[3], 2)/(pow(x[0] - x[2], 2) + pow(x[1] - x[3], 2));
 }
-
-
-
-
 
 void particle_kernel_calc(real_t* in,real_t* out) {
   eval_peri(
@@ -79,7 +90,8 @@ void particle_kernel_calc(real_t* in,real_t* out) {
 	    in+12,
 
 	    out,
-	    out+4
+	    out+4,
+	    out+4+16
 	    );
 	    
 }
