@@ -1,7 +1,7 @@
 import numpy as np
 import mylibrary as ml
 
-def write_graph(fname, H, X, nodefields=None):
+def write_graph(fname, H, X, nodefields=None,edgefields=None):
     celltypekey = {
         1:1,
         2:3,
@@ -48,6 +48,13 @@ def write_graph(fname, H, X, nodefields=None):
             #fh.write("LOOKUP_TABLE default\n")
             for l in f:
                 fh.write(vecfmt.format(*l))
+    if edgefields:
+        fh.write("CELL_DATA {0}\n".format(H.hg.n_edge))
+        for n,f in edgefields.iteritems():
+            fh.write("SCALARS {0} double\n".format(n))
+            fh.write("LOOKUP_TABLE default\n")
+            for l in f:
+                fh.write("{0}\n".format(l))
     fh.close()
     
 

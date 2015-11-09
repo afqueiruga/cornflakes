@@ -9,22 +9,25 @@ from Assemble import *
 import graphio
 #print "A"
 pks=mylibrary.cvar.particle3d_kernel_strct
+damagekernel = mylibrary.cvar.damage3d_kernel_strct
 print "B"
-X = particle_placers.init_cube(11,11,11, [0,0,0], [10,0,0],[0,10,0],[0,0,10], 0.0)
+X = particle_placers.init_cube(21,21,21, [0,0,0], [10,0,0],[0,10,0],[0,0,10], 0.0)
 hole = particle_placers.sphere_test(np.array((5.0,5.0,0.0)),10.0)
 X = particle_placers.delete_particles(X,[hole])
 print "B,5"
 hyper = Hypergraph()
-mylibrary.Build_Particle_Graph(hyper.hg, X, 1.5)
+mylibrary.Build_Particle_Graph(hyper.hg, X, 0.7)
 print "C"
 dofmap = make_dofmap(hyper, pks, X.shape[1])
+dofmap_edges = np.arange(hyper.hg.n_edge,dtype=np.intc)
 dofnew = DofMap(hyper,pks,X.shape[0])
 
 R = np.zeros(X.size,dtype=np.double)
 x = X.copy()
 #x[:,0]*=1.1 #*x[:,0]
 vel = np.zeros(X.shape)
-params = np.array([1.0,-2.0],dtype=np.double)
+params = np.array([10.0,-2.0],dtype=np.double)
+alpha = np.ones((hyper.hg.n_edge,),dtype=np.double)
 
 botnodes = select_nodes(X,lambda a:a[1]<0.1)
 topnodes = select_nodes(X,lambda a:a[1]>9.9)
@@ -39,12 +42,12 @@ def DYNAMICS():
     def sys_mech(time,tang=False):
         #global R
         if tang:
-            R = Assemble_Targets((1,),pks,hyper.hg,dofmap,x.size, [x,vel,X,params])[0]
-            R[topdofs] += 1.0
+            R = Assemble_Targets((1,),pks,hyper.hg,dofmap,x.size, [x,vel,X,alpha,params])[0]
+            R[topdofs] += 0.25
             return R,None,None
         else:
-            R = Assemble_Targets((1,),pks,hyper.hg,dofmap,x.size, [x,vel,X,params])[0]
-            R[topdofs] += 1.0
+            R = Assemble_Targets((1,),pks,hyper.hg,dofmap,x.size, [x,vel,X,alpha,params])[0]
+            R[topdofs] += 0.25
             return R
     def bcapp_mech(K,R,t,hold=False):
         #embed()
@@ -56,14 +59,11 @@ def DYNAMICS():
     Tmax = 10.0
     NT = 1000
     h = Tmax/NT
-
+    
     step = exRK.exRK(h, exRK.exRK_table['FWEuler'], [Mechfield])
     #step = imRK.DIRK(h, imRK.LDIRK['BWEuler'], [Mechfield])
     from IPython import embed
     #embed()
-    print "whu"
-    
-    print "uh"
     output()
     #step.march()
     NT=1000
@@ -72,10 +72,13 @@ def DYNAMICS():
         step.march()
         if tx % 10 ==0:
             output()
+        R = Assemble_Targets((1,),damagekernel, hyper.hg,
+                             dofmap_edges, hyper.hg.n_edge, [x,vel,X,alpha,params])[0]
+        alpha[:] = R[:]
 outcnt=0
 def output():
     global outcnt
-    graphio.write_graph("outs/foo_{0}.vtk".format(outcnt),hyper,x, {'x':X,'v':vel})
+    graphio.write_graph("outs/foo_{0}.vtk".format(outcnt),hyper,x, {'x':X,'v':vel},{'alpha':alpha})
     outcnt += 1
 
 DYNAMICS()

@@ -113,23 +113,47 @@ kernel_t particle_kernel_strct = {
 };
 
 
+
+
+
+
 void eval_peri3d(/*Inputs:*/
 real_t * x,
 real_t * v,
 real_t * X,
+real_t * alpha,
 real_t * params
 ,
 /*Outputs:*/
 double * F)
 {
 /* Evalaute F:*/
-F[0] = -1.0*params[0]*(x[0] - x[3])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) - params[1]*(-x[0] + x[3])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
-F[1] = -1.0*params[0]*(x[1] - x[4])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) - params[1]*(-x[1] + x[4])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
-F[2] = -1.0*params[0]*(x[2] - x[5])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) - params[1]*(-x[2] + x[5])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
-F[3] = -1.0*params[0]*(-x[0] + x[3])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) + params[1]*(-x[0] + x[3])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
-F[4] = -1.0*params[0]*(-x[1] + x[4])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) + params[1]*(-x[1] + x[4])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
-F[5] = -1.0*params[0]*(-x[2] + x[5])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) + params[1]*(-x[2] + x[5])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
+F[0] = -1.0*alpha[0]*params[0]*(x[0] - x[3])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) - alpha[0]*params[1]*(-x[0] + x[3])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
+F[1] = -1.0*alpha[0]*params[0]*(x[1] - x[4])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) - alpha[0]*params[1]*(-x[1] + x[4])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
+F[2] = -1.0*alpha[0]*params[0]*(x[2] - x[5])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) - alpha[0]*params[1]*(-x[2] + x[5])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
+F[3] = -1.0*alpha[0]*params[0]*(-x[0] + x[3])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) + alpha[0]*params[1]*(-x[0] + x[3])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
+F[4] = -1.0*alpha[0]*params[0]*(-x[1] + x[4])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) + alpha[0]*params[1]*(-x[1] + x[4])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
+F[5] = -1.0*alpha[0]*params[0]*(-x[2] + x[5])*(-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) + alpha[0]*params[1]*(-x[2] + x[5])*((-v[0] + v[3])*(-x[0] + x[3]) + (-v[1] + v[4])*(-x[1] + x[4]) + (-v[2] + v[5])*(-x[2] + x[5]))/(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2));
 }
+void eval_damage(/*Inputs:*/
+real_t * x,
+real_t * v,
+real_t * X,
+real_t * alpha,
+real_t * params
+,
+/*Outputs:*/
+double * alphaout)
+{
+/* Evalaute alphaout:*/
+if ((-sqrt(pow(-X[0] + X[3], 2) + pow(-X[1] + X[4], 2) + pow(-X[2] + X[5], 2)) + sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)))/sqrt(pow(-x[0] + x[3], 2) + pow(-x[1] + x[4], 2) + pow(-x[2] + x[5], 2)) < 0.05) {
+   alphaout[0] = 1.0;
+}
+else {
+   alphaout[0] = 0.0;
+}
+}
+
 
 
 
@@ -139,6 +163,7 @@ void particle3d_kernel_calc(real_t* in,real_t* out) {
 	    in+6,
 	    in+12,
 	    in+18,
+	    in+19,
 
 	    out
 	    
@@ -147,12 +172,13 @@ void particle3d_kernel_calc(real_t* in,real_t* out) {
 }
 
 kernel_t particle3d_kernel_strct = {
-  .ninp = 4,
+  .ninp = 5,
   .inp = { {LOC_NODE,3},
 	   {LOC_NODE,3},
 	   {LOC_NODE,3},
-	   {LOC_GLOBAL,2},
-	   {LOC_GLOBAL,0} },
+	   {LOC_EDGE,1},
+	   {LOC_GLOBAL,2}
+  },
   .noutp = 1,
   .outp = { {LOC_NODE,3},
 	    {LOC_GLOBAL,0},
@@ -161,3 +187,37 @@ kernel_t particle3d_kernel_strct = {
 	    {LOC_GLOBAL,0} },
   .assem = particle3d_kernel_calc
 };
+
+
+
+void damage3d_kernel_calc(real_t* in,real_t* out) {
+  eval_damage(
+	    in,
+	    in+6,
+	    in+12,
+	    in+18,
+	    in+19,
+
+	    out
+	    
+	    );
+	    
+}
+
+kernel_t damage3d_kernel_strct = {
+  .ninp = 5,
+  .inp = { {LOC_NODE,3},
+	   {LOC_NODE,3},
+	   {LOC_NODE,3},
+	   {LOC_EDGE,1},
+	   {LOC_GLOBAL,2}
+  },
+  .noutp = 1,
+  .outp = { {LOC_EDGE,1},
+	    {LOC_GLOBAL,0},
+	    {LOC_GLOBAL,0},
+	    {LOC_GLOBAL,0},
+	    {LOC_GLOBAL,0} },
+  .assem = damage3d_kernel_calc
+};
+

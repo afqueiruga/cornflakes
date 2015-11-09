@@ -149,7 +149,7 @@ import_array();
 		     INPLACE_ARRAY_FLAT,
 		     data_ptrs);
 
-    // printf("Recreasing references of %d objects\n",nnewobj);
+    //printf("Recreasing references of %d objects\n",nnewobj);
     /* Step 4: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {
       Py_DECREF(newobjs[i]);
