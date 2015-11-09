@@ -32,5 +32,6 @@ int kernel_outp_len(kernel_t * ke, int l_edge);
 
 
 extern kernel_t particle_kernel_strct ;
+extern kernel_t particle3d_kernel_strct ;
 
 #endif

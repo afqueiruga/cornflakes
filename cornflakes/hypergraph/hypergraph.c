@@ -1,6 +1,6 @@
 #include "hypergraph.h"
-#include "malloc.h"
-
+//#include "malloc.h"
+#include "stdlib.h"
 /*
   Allocate a new hypergraph
 */

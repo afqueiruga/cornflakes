@@ -33,8 +33,8 @@ def Assemble_Vector_Matrix(ke,hg, dofmap,ndof, data):
 
     return R,K
 
-def Assemble_Targets(ke,hg, dofmap,ndof, data):
-    ranks=(1,2,2)
+def Assemble_Targets(ranks, ke,hg, dofmap,ndof, data):
+    #ranks=(1,2,2)
     len_loc_out = mylibrary.kernel_outp_len(ke,hg.l_edge)
     matsize = len_loc_out*len_loc_out*hg.n_edge
     allocator = {
@@ -46,11 +46,11 @@ def Assemble_Targets(ke,hg, dofmap,ndof, data):
     }
     forms = [ allocator[r]() for r in ranks ]
     from IPython import embed
-    
+    #print "ayuuup"
     mylibrary.assemble_targets_np(forms,
                                   ke,hg,dofmap,
                                   data)
-    
+    #print "anoope"
     for i,r in enumerate(ranks):
         if r==2:
             Kcoo = scipy.sparse.coo_matrix((forms[i][0],(forms[i][1],forms[i][2])), (ndof,ndof))

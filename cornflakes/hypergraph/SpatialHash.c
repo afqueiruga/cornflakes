@@ -79,7 +79,7 @@ void Build_New_Hash(spatialhash_t * sh,  int Npart,int dim, real_t * x, real_t b
 {
 
   // #define CC(a,b,c) ( this->Ncell[1]*this->Ncell[2]*(a) + this->Ncell[1]*(b) + (c) )
-
+  //printf("limits\n");
   int A,i;
   /* Determine the limits */
   real_t start[dim], end[dim],h[dim];
@@ -94,17 +94,20 @@ void Build_New_Hash(spatialhash_t * sh,  int Npart,int dim, real_t * x, real_t b
       end[i] = MAX(end[i],x[A*dim + i]);
     }
   }
-  for(i=0;i<Npart;i++) {
+  for(i=0;i<dim;i++) {
     start[i] -= 1.0*binsize;
     end[i] += 2.0*binsize;
   }
+  //printf("initing\n");
   /* Initialize the hash */
   SpatialHash_init(sh, Npart,dim, start,end,h);
-  
+  //printf("building...");
   /* Build the hash */
   for(A=0;A<Npart;A++) {
+    //printf("%d ",A);
     SpatialHash_Push(sh, A, x+dim*A);
   }
+  //printf("\n");
   //SpatialHash_print(sh);
 }
 

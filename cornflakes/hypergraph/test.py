@@ -1,19 +1,22 @@
-from pyHypergraph import Hypergraph
+print "1"
+
 import numpy as np
 import scipy.sparse.linalg as splin
 
+print "A"
+from pyHypergraph import Hypergraph
 h = Hypergraph(2)
 h.Push_Edge(np.array([1,2],dtype=np.intc))
-
+print "B"
 import mylibrary
 import particle_placers
 hyper = Hypergraph()
 X = particle_placers.init_grid(21,21,[0.0,0.0],[10.0,0.0],[0.0,10.0],0.0)
 hole = particle_placers.sphere_test(np.array((5.0,5.0)),2.0)
 X = particle_placers.delete_particles(X,[hole])
-
+print "C"
 mylibrary.Build_Particle_Graph(hyper.hg, X, 1.5)
-
+print "D"
 
 pks=mylibrary.cvar.particle_kernel_strct
 

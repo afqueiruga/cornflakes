@@ -10,10 +10,11 @@ double dist(int dim, real_t * x, real_t * y) {
 
 void Build_Particle_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff) {
   spatialhash_t sh;
+  //printf("alloc hg\n");
   Hypergraph_Alloc(hg,2, Npart);
-  
+  //printf("alloc hash\n");
   Build_New_Hash(&sh, Npart,dim,x, cutoff);
-
+  //printf("scan\n");
   void action(int a, int b) {
     if(dist(dim, x+dim*a,x+dim*b)<=cutoff) {
       int v[2] = {a,b};
@@ -21,6 +22,6 @@ void Build_Particle_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, rea
     }
   }
   SpatialHash_Scanall(&sh,x,action);
-  
+  //printf("destroy hash\n");
   SpatialHash_destroy(&sh);
 }
