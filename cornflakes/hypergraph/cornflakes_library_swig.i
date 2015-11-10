@@ -1,9 +1,9 @@
-%module mylibrary
+%module cornflakes_library
 %{
 #define SWIG_FILE_WITH_INIT
 #include "hypergraph.h"
-#include "SpatialHash.h"
-#include "Graphers.h"
+#include "spatialhash.h"
+#include "graphers.h"
 #include "kernel.h"
 #include "assemble.h"
 %}

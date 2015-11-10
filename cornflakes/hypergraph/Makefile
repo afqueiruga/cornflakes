@@ -14,13 +14,13 @@ LDSETTING = -dynamiclib
 endif
 
 
-SWIGINFS = hypergraph_swig.i
+SWIGINFS = swig_library.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 SWIGPYS = $(SWIGINFS:.i=.py)
-SRCS = hypergraph.c SpatialHash.c Graphers.c assemble.c kernel.c $(WRAPPERS)
+SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c $(WRAPPERS)
 OBJS = $(SRCS:.c=.o)
 
-TARGETS = _mylibrary.so
+TARGETS = _cornflakes_library.so
 
 all: $(TARGETS)
 
