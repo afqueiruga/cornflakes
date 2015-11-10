@@ -1,0 +1,27 @@
+* Current state:<2015-11-09 Mon>
+Right now it's all in a sub-sub-subfolder. Need to:
+** TODO Restructure directory to segregate scripts
+** TODO Better build system to segregate .o's etc
+** TODO Top level library
+** TODO Consolidate DOFMAP data structure
+** TODO _kerngen_ needs to auto-make the data structure. 
+   - kernel.h should be part of kerngen
+** TODO Write _Husker_ to auto-wrap the kernels. 
+
+* Roadmap:
+* TODO Peridynamic states
+We want to be able to handle $\nu \neq \nicefrac{1}{4}$. The library
+shouldn't need too much more structure.
+** TODO New graph structure:
+   - (1) -> 2,3,4,5
+   - One way directed (only matters that Hu's on first)
+   - variable length hyperedge
+** TODO Reading up on that Silling 2007 paper
+
+* TODO Implement SPH Model
+** TODO Implement shape function routines
+** TODO Start with lid-driven cavity and coutte flow
+** TODO Coupling with solid models: handling of multiple graphs and node-types
+
+* TODO Microstructure model
+** TODO Generation of rock microstruture
