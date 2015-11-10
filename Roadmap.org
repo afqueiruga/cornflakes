@@ -16,7 +16,12 @@ shouldn't need too much more structure.
    - (1) -> 2,3,4,5
    - One way directed (only matters that Hu's on first)
    - variable length hyperedge
+** TODO Kerngen needs a syntax for variable-length inputs
 ** TODO Reading up on that Silling 2007 paper
+** TODO Unit tests!
+*** TODO Uniaxial extension, Biaxial, shear w/no damage
+*** TODO Notched crack growth
+*** TODO Plate w/ circle crack nucleation
 
 * TODO Implement SPH Model
 ** TODO Implement shape function routines
@@ -25,3 +30,5 @@ shouldn't need too much more structure.
 
 * TODO Microstructure model
 ** TODO Generation of rock microstruture
+** TODO Fast and loose: Make a vornoi tessalation with scipy, assign material properties
+   - If a bond crosses one of them, it gets a cementous strength
