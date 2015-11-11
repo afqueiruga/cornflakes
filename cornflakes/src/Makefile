@@ -25,22 +25,23 @@ WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c
 OBJS = $(SRCS:.c=.o)
 WRAPOBJS = $(WRAPPERS:.c=.o)
-TARGETS = _cornflakes_library.so cornflakes_library.py
-
-OBJSB = $(OBJS:%=$(BUILDDIR)/%)
+TARGETS = _cornflakes_library.so 
+PYTARGETS = cornflakes_library.py
 
 TARGETSI = $(TARGETS:%=$(INSTALLDIR)/%)
+PYTARGETSI = $(PYTARGETS:%=$(INSTALLDIR)/%)
 WRAPPERSB = $(WRAPPERS:%=$(BUILDDIR)/%)
 WRAPOBJSB = $(WRAPOBJS:%=$(BUILDDIR)/%)
+OBJSB = $(OBJS:%=$(BUILDDIR)/%)
 
-all: $(TARGETSI)
+all: $(TARGETSI) $(PYTARGETSI)
 	@echo $(WRAPPERSB)
 	@echo $(WRAPOBJSB)
 $(TARGETSI): $(OBJSB) $(WRAPOBJSB)
 	$(CC) $(LDSETTING) $(OBJSB) $(WRAPOBJSB) $(LFLAGS) -o $@
 
 $(WRAPPERSB): $(BUILDDIR)/%_wrap.c : %.i
-	$(SWIG) -python -outdir $(BUILDDIR) -o $@ $<
+	$(SWIG) -python -outdir $(INSTALLDIR) -o $@ $<
 
 $(OBJSB): $(BUILDDIR)/%.o : %.c
 	$(CC) $(CFLAGS) $(IFLAGS) $< -o $@
@@ -49,4 +50,4 @@ $(WRAPOBJSB): %.o : %.c
 
 .PHONY: clean
 clean:
-	rm -f $(TARGETSI) $(OBJSB) $(WRAPPERSB)
+	rm -f $(TARGETSI) $(PYTARGETSI) $(OBJSB) $(WRAPPERSB)
