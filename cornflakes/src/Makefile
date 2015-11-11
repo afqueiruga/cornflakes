@@ -1,9 +1,13 @@
+SRCDIR = .
+BUILDDIR = build
+INSTALLDIR = ..
+
 ARCH = linuxbox
 ifeq ($(ARCH),linuxbox)
 CC = gcc
 SWIG = swig3.0
 CFLAGS = -c -fpic #-framework Python
-IFLAGS = -I/usr/include/python2.7/ -I/usr/include/sys/
+IFLAGS = -I/usr/include/python2.7/ -I/usr/include/sys/ -I$(SRCDIR)
 LDSETTING = -shared
 else
 CC = gcc-mp-5
@@ -14,24 +18,35 @@ LDSETTING = -dynamiclib
 endif
 
 
+
 SWIGINFS = cornflakes_library_swig.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
-SWIGPYS = $(SWIGINFS:.i=.py)
-SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c $(WRAPPERS)
+#SWIGPYS = $(SWIGINFS:.i=.py)
+SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c
 OBJS = $(SRCS:.c=.o)
+WRAPOBJS = $(WRAPPERS:.c=.o)
+TARGETS = _cornflakes_library.so cornflakes_library.py
 
-TARGETS = _cornflakes_library.so
+OBJSB = $(OBJS:%=$(BUILDDIR)/%)
 
-all: $(TARGETS)
+TARGETSI = $(TARGETS:%=$(INSTALLDIR)/%)
+WRAPPERSB = $(WRAPPERS:%=$(BUILDDIR)/%)
+WRAPOBJSB = $(WRAPOBJS:%=$(BUILDDIR)/%)
 
-$(TARGETS): $(OBJS)
-	$(CC) $(LDSETTING) $(OBJS) $(LFLAGS) -o $@
+all: $(TARGETSI)
+	@echo $(WRAPPERSB)
+	@echo $(WRAPOBJSB)
+$(TARGETSI): $(OBJSB) $(WRAPOBJSB)
+	$(CC) $(LDSETTING) $(OBJSB) $(WRAPOBJSB) $(LFLAGS) -o $@
 
-$(WRAPPERS): %_wrap.c : %.i
-	$(SWIG) -python $<
+$(WRAPPERSB): $(BUILDDIR)/%_wrap.c : %.i
+	$(SWIG) -python -outdir $(BUILDDIR) -o $@ $<
 
-$(OBJS): %.o : %.c
+$(OBJSB): $(BUILDDIR)/%.o : %.c
+	$(CC) $(CFLAGS) $(IFLAGS) $< -o $@
+$(WRAPOBJSB): %.o : %.c
 	$(CC) $(CFLAGS) $(IFLAGS) $< -o $@
 
+.PHONY: clean
 clean:
-	rm $(TARGETS) $(OBJS) $(SWIGPYS) $(WRAPPERS)
+	rm -f $(TARGETSI) $(OBJSB) $(WRAPPERSB)
