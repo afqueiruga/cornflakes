@@ -1,6 +1,6 @@
 * Current state:<2015-11-09 Mon>
 Right now it's all in a sub-sub-subfolder. Need to:
-** TODO Restructure directory to segregate scripts
+** DONE Restructure directory to segregate scripts
 ** TODO Better build system to segregate .o's etc
 ** TODO Top level library
 ** TODO Consolidate DOFMAP data structure
@@ -12,7 +12,7 @@ Right now it's all in a sub-sub-subfolder. Need to:
 * TODO Peridynamic states
 We want to be able to handle $\nu \neq \nicefrac{1}{4}$. The library
 shouldn't need too much more structure.
-** TODO New graph structure:
+** DONE New graph structure:
    - (1) -> 2,3,4,5
    - One way directed (only matters that Hu's on first)
    - variable length hyperedge
@@ -32,3 +32,5 @@ shouldn't need too much more structure.
 ** TODO Generation of rock microstruture
 ** TODO Fast and loose: Make a vornoi tessalation with scipy, assign material properties
    - If a bond crosses one of them, it gets a cementous strength
+asdf
+
