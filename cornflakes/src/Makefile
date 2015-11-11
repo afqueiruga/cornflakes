@@ -23,6 +23,7 @@ SWIGINFS = cornflakes_library_swig.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 #SWIGPYS = $(SWIGINFS:.i=.py)
 SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c
+HEADERS = $(SRCS:.c=.h)
 OBJS = $(SRCS:.c=.o)
 WRAPOBJS = $(WRAPPERS:.c=.o)
 TARGETS = _cornflakes_library.so 
@@ -35,17 +36,16 @@ WRAPOBJSB = $(WRAPOBJS:%=$(BUILDDIR)/%)
 OBJSB = $(OBJS:%=$(BUILDDIR)/%)
 
 all: $(TARGETSI) $(PYTARGETSI)
-	@echo $(WRAPPERSB)
-	@echo $(WRAPOBJSB)
+
 $(TARGETSI): $(OBJSB) $(WRAPOBJSB)
 	$(CC) $(LDSETTING) $(OBJSB) $(WRAPOBJSB) $(LFLAGS) -o $@
 
-$(WRAPPERSB): $(BUILDDIR)/%_wrap.c : %.i
+$(WRAPPERSB): $(BUILDDIR)/%_wrap.c : %.i $(HEADERS)
 	$(SWIG) -python -outdir $(INSTALLDIR) -o $@ $<
 
-$(OBJSB): $(BUILDDIR)/%.o : %.c
+$(OBJSB): $(BUILDDIR)/%.o : %.c %.h
 	$(CC) $(CFLAGS) $(IFLAGS) $< -o $@
-$(WRAPOBJSB): %.o : %.c
+$(WRAPOBJSB): %.o : %.c $(HEADERS)
 	$(CC) $(CFLAGS) $(IFLAGS) $< -o $@
 
 .PHONY: clean

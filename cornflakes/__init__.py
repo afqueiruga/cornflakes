@@ -7,3 +7,4 @@ from Assemble import Assemble_Targets, Apply_BC
 from Hypergraph import Hypergraph
 from Dofmap import Dofmap, make_dofmap
 from GraphIO import write_graph
+import ParticlePlacers as PP
