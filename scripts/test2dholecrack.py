@@ -12,10 +12,10 @@ from Assemble import *
 # Place the particles and build a connectivity
 #
 hyper = Hypergraph()
-X = particle_placers.init_grid(50,50,[0.0,0.0],[10.0,0.0],[0.0,10.0],0.1)
+X = particle_placers.init_grid(50,50,[0.0,0.0],[10.0,0.0],[0.0,10.0],0.05)
 hole = particle_placers.sphere_test(np.array((5.0,5.0)),2.0)
 X = particle_placers.delete_particles(X,[hole])
-mylibrary.Build_Particle_Graph(hyper.hg, X, 0.4)
+mylibrary.Build_Particle_Graph(hyper.hg, X, 0.45)
 
 #
 # Handles to the kernels

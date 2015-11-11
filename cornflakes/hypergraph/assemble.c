@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-void collect(real_t * loc_in, kernel_t * ke, int hx, int* edge, int l_edge, real_t ** data) {
+void collect(real_t * loc_in, kernel_t * ke, int hx, hypervertex_t* edge, int l_edge, real_t ** data) {
   int j,i,A;
   int offs = 0;
   for(j=0; j<ke->ninp; j++) {
@@ -61,16 +61,16 @@ real_t * push_target(assemble_target_t * att, int len_loc_out, int hx, int * out
 }
 
 void assemble_targets(int ntarget, assemble_target_t * att,
-		      kernel_t * ke, hypergraph_t * hg,
+		      kernel_t * ke, hyperedges_t * he,
 		      int * outmap, real_t ** data)
 {
   int i,j,hx;
-  /* II,JJ,KK better have size len_loc_out^2 * hg->n_edge */
+  /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
   /*
    * Allocate local vectors
    */
-  int len_loc_in = kernel_inp_len(ke, hg->l_edge);
-  int len_loc_out = kernel_outp_len(ke, hg->l_edge);
+  int len_loc_in = kernel_inp_len(ke, he->l_edge);
+  int len_loc_out = kernel_outp_len(ke, he->l_edge);
   real_t loc_in[len_loc_in];
   int out_alloc = 0; // THE KERNEL SHOULD ENCODE THIS INFORMATION....
   for(i=0;i<ntarget;i++) {
@@ -85,13 +85,13 @@ void assemble_targets(int ntarget, assemble_target_t * att,
   /*
    * Loop over the edges in the graph
    */
-  int * edge;
-  for(hx=0; hx<hg->n_edge; hx++) {
-    edge = Hypergraph_Get_Edge(hg,hx);
-    //for(i=0;i<hg->l_edge;i++) printf("%d ",edge[i]); printf("\n");
+  hypervertex_t * edge;
+  for(hx=0; hx<he->n_edge; hx++) {
+    edge = Hyperedges_Get_Edge(he,hx);
+    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
 
     /* Pull data */
-    collect(loc_in, ke, hx,edge,hg->l_edge, data);
+    collect(loc_in, ke, hx,edge,he->l_edge, data);
 
     //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
     /* Call the kernel */
@@ -104,7 +104,15 @@ void assemble_targets(int ntarget, assemble_target_t * att,
   }
 }
 
-void assemble_vector(real_t * R, kernel_t * ke,hypergraph_t * hg, int * outmap, real_t ** data)
+
+
+
+/************************************
+ ***         DEPRECATED:          ***
+ ************************************/
+
+
+void assemble_vector(real_t * R, kernel_t * ke,hyperedges_t * he, int * outmap, real_t ** data)
 {
   int hx,i,j,A;
   /*
@@ -114,8 +122,8 @@ void assemble_vector(real_t * R, kernel_t * ke,hypergraph_t * hg, int * outmap, 
   /*
    * Allocate local vectors
    */
-  int len_loc_in = kernel_inp_len(ke, hg->l_edge);
-  int len_loc_out = kernel_outp_len(ke, hg->l_edge);
+  int len_loc_in = kernel_inp_len(ke, he->l_edge);
+  int len_loc_out = kernel_outp_len(ke, he->l_edge);
   real_t loc_in[len_loc_in]; 
   real_t loc_out[len_loc_out];
 
@@ -126,12 +134,12 @@ void assemble_vector(real_t * R, kernel_t * ke,hypergraph_t * hg, int * outmap, 
    * Loop over the edges in the graph
    */
   int * edge;
-  for(hx=0; hx<hg->n_edge; hx++) {
-    edge = Hypergraph_Get_Edge(hg,hx);
-    //for(i=0;i<hg->l_edge;i++) printf("%d ",edge[i]); printf("\n");
+  for(hx=0; hx<he->n_edge; hx++) {
+    edge = Hyperedges_Get_Edge(he,hx);
+    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
 
     /* Pull data */
-    collect(loc_in, ke, hx,edge,hg->l_edge, data);
+    collect(loc_in, ke, hx,edge,he->l_edge, data);
 
     //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
     /* Call the kernel */
@@ -147,16 +155,16 @@ void assemble_vector(real_t * R, kernel_t * ke,hypergraph_t * hg, int * outmap, 
 
 
 void assemble_matrix(int * II, int * JJ, real_t * KK,
-		     kernel_t * ke, hypergraph_t * hg,
+		     kernel_t * ke, hyperedges_t * he,
 		     int * outmap, real_t ** data)
 {
   int i,j,hx;
-  /* II,JJ,KK better have size len_loc_out^2 * hg->n_edge */
+  /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
   /*
    * Allocate local vectors
    */
-  int len_loc_in = kernel_inp_len(ke, hg->l_edge);
-  int len_loc_out = kernel_outp_len(ke, hg->l_edge);
+  int len_loc_in = kernel_inp_len(ke, he->l_edge);
+  int len_loc_out = kernel_outp_len(ke, he->l_edge);
   real_t loc_in[len_loc_in]; 
   // Don't need this guy, we just plop it into KK
   //real_t loc_out[len_loc_out*len_loc_out]; // FOR NOW: ONLY SQUARE MATRICES
@@ -164,14 +172,14 @@ void assemble_matrix(int * II, int * JJ, real_t * KK,
   /*
    * Loop over the edges in the graph
    */
-  int * edge;
+  hypervertex_t * edge;
   
-  for(hx=0; hx<hg->n_edge; hx++) {
-    edge = Hypergraph_Get_Edge(hg,hx);
-    //for(i=0;i<hg->l_edge;i++) printf("%d ",edge[i]); printf("\n");
+  for(hx=0; hx<he->n_edge; hx++) {
+    edge = Hyperedges_Get_Edge(he,hx);
+    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
 
     /* Pull data */
-    collect(loc_in, ke, hx,edge,hg->l_edge, data);
+    collect(loc_in, ke, hx,edge,he->l_edge, data);
 
     //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
     /* Call the kernel */
@@ -192,30 +200,30 @@ void assemble_matrix(int * II, int * JJ, real_t * KK,
 
 void assemble_vector_matrix(real_t * R,
 			    int * II, int * JJ, real_t * KK,
-			    kernel_t * ke, hypergraph_t * hg,
+			    kernel_t * ke, hyperedges_t * he,
 			    int * outmap, real_t ** data)
 {
     int i,j,hx;
-  /* II,JJ,KK better have size len_loc_out^2 * hg->n_edge */
+  /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
   /*
    * Allocate local vectors
    */
-  int len_loc_in = kernel_inp_len(ke, hg->l_edge);
-  int len_loc_out = kernel_outp_len(ke, hg->l_edge);
+  int len_loc_in = kernel_inp_len(ke, he->l_edge);
+  int len_loc_out = kernel_outp_len(ke, he->l_edge);
   real_t loc_in[len_loc_in]; 
   real_t loc_out[len_loc_out + len_loc_out*len_loc_out]; // FOR NOW: ONLY SQUARE MATRICES
 
   /*
    * Loop over the edges in the graph
    */
-  int * edge;
+  hypervertex_t * edge;
   
-  for(hx=0; hx<hg->n_edge; hx++) {
-    edge = Hypergraph_Get_Edge(hg,hx);
-    //for(i=0;i<hg->l_edge;i++) printf("%d ",edge[i]); printf("\n");
+  for(hx=0; hx<he->n_edge; hx++) {
+    edge = Hyperedges_Get_Edge(he,hx);
+    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
 
     /* Pull data */
-    collect(loc_in, ke, hx,edge,hg->l_edge, data);
+    collect(loc_in, ke, hx,edge,he->l_edge, data);
 
     //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
     /* Call the kernel */

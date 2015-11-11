@@ -13,7 +13,8 @@
 import_array();
 %}
 
-%apply (int DIM1, int* IN_ARRAY1) {(int nvert, int * verts)};
+%apply (int DIM1, int* IN_ARRAY1) {(int nvert, hypervertex_t * verts),
+                                   (int l_edge, hypervertex_t * verts)};
 %apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {(int Npart, int dim, real_t * x)};
 %apply (int DIM1, int* INPLACE_ARRAY1) {(int dim_II, int * array_II),
                                         (int dim_JJ, int * array_JJ)};
@@ -25,8 +26,8 @@ import_array();
 %pointer_class(int, intp)
 
 %include "hypergraph.h"
-%include "SpatialHash.h"
-%include "Graphers.h"
+%include "spatialhash.h"
+%include "graphers.h"
 %include "kernel.h"
 %include "assemble.h"
 
@@ -41,37 +42,47 @@ import_array();
 }
 
 %inline %{
-  void Hypergraph_Push_Edge_np(hypergraph_t * hg, int nvert, int * verts) {
-    if (nvert < hg->l_edge) {
+  /*
+   * Extra wrappers for Hypergraph and Hyperedges
+   */
+  void Hyperedges_Push_Edge_np(hyperedges_t * he, int nvert, int * verts) {
+    if (nvert < he->l_edge) {
         PyErr_Format(PyExc_ValueError,
                      "Array of insufficent length (verts %d < edge length %d)",
-                     nvert, hg->l_edge);
+                     nvert, he->l_edge);
         return;
     }
-    Hypergraph_Push_Edge(hg,verts);
+    Hyperedges_Push_Edge(he,verts);
   }
-  void Hypergraph_Get_Edge_np(hypergraph_t * hg, int i,
+  void Hyperedges_Get_Edge_np(hyperedges_t * he, int i,
 			      int * DIM1,int** ARGOUTVIEW_ARRAY1) {
-    if(i<0 || i>=hg->n_edge) {
+    if(i<0 || i>=he->n_edge) {
         PyErr_Format(PyExc_ValueError,
                      "Bad index: require 0<%d<%d",
-                     i, hg->n_edge);
+                     i, he->n_edge);
         return;
     }
-    *DIM1 = hg->l_edge;
-    *ARGOUTVIEW_ARRAY1 = Hypergraph_Get_Edge(hg,i);
+    *DIM1 = he->l_edge;
+    *ARGOUTVIEW_ARRAY1 = Hyperedges_Get_Edge(he,i);
   }
 
-  void Hypergraph_Get_View_np(hypergraph_t * hg,
+  void Hyperedges_Get_View_np(hyperedges_t * he,
 			       int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
-    *DIM1 = hg->n_edge;
-    *DIM2 = hg->l_edge;
-    *ARGOUTVIEW_ARRAY2 = hg->edges;
+    *DIM1 = he->n_edge;
+    *DIM2 = he->l_edge;
+    *ARGOUTVIEW_ARRAY2 = he->edges;
   }
 
-  
+  void Hypergraph_Get_Edge_View_np(hypergraph_t * hg, int i,
+				int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
+    Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
+  }
+
+  /*
+   * Assembly wrappers
+   */
   void assemble_targets_np(PyObject * targetlist,
-			   kernel_t * ke, hypergraph_t * hg,
+			   kernel_t * ke, hyperedges_t * he,
 			   int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
 			   PyObject * datalist)
   {
@@ -145,7 +156,7 @@ import_array();
     //printf("Assembling\n");
     /* Step 3: Assemble */
     assemble_targets(ntarget, att,
-		     ke, hg,
+		     ke, he,
 		     INPLACE_ARRAY_FLAT,
 		     data_ptrs);
 
@@ -159,7 +170,7 @@ import_array();
   }
 
   void assemble_vector_np(int DIM1, real_t * INPLACE_ARRAY1,
-			  kernel_t * ke, hypergraph_t * hg,
+			  kernel_t * ke, hyperedges_t * he,
 			  int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
 			  PyObject * datalist)
   {
@@ -181,7 +192,7 @@ import_array();
       
 
       // Call the assembler
-      assemble_vector(INPLACE_ARRAY1, ke,hg, INPLACE_ARRAY_FLAT, data_ptrs);
+      assemble_vector(INPLACE_ARRAY1, ke,he, INPLACE_ARRAY_FLAT, data_ptrs);
       
       // Tell python we don't want those arrays anymore, if we actually made any
       for(i=0;i<ndata;i++) {
@@ -193,7 +204,7 @@ import_array();
   void assemble_matrix_np(int dim_II, int * array_II,
 			  int dim_JJ, int * array_JJ,
 			  int dim_KK, real_t * array_KK,
-			  kernel_t * ke, hypergraph_t * hg,
+			  kernel_t * ke, hyperedges_t * he,
 			  int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
 			  PyObject * datalist)
   {
@@ -215,7 +226,7 @@ import_array();
       
 
       // Call the assembler
-      assemble_matrix(array_II,array_JJ,array_KK, ke,hg, INPLACE_ARRAY_FLAT, data_ptrs);
+      assemble_matrix(array_II,array_JJ,array_KK, ke,he, INPLACE_ARRAY_FLAT, data_ptrs);
       
       // Tell python we don't want those arrays anymore, if we actually made any
       for(i=0;i<ndata;i++) {
@@ -228,7 +239,7 @@ import_array();
 				 int dim_II, int * array_II,
 				 int dim_JJ, int * array_JJ,
 				 int dim_KK, real_t * array_KK,
-				 kernel_t * ke, hypergraph_t * hg,
+				 kernel_t * ke, hyperedges_t * he,
 				 int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
 				 PyObject * datalist)
   {
@@ -250,7 +261,7 @@ import_array();
       
 
       // Call the assembler
-      assemble_vector_matrix(INPLACE_ARRAY1,array_II,array_JJ,array_KK, ke,hg, INPLACE_ARRAY_FLAT, data_ptrs);
+      assemble_vector_matrix(INPLACE_ARRAY1,array_II,array_JJ,array_KK, ke,he, INPLACE_ARRAY_FLAT, data_ptrs);
       
       // Tell python we don't want those arrays anymore, if we actually made any
       for(i=0;i<ndata;i++) {

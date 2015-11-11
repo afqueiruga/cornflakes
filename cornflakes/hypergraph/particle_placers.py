@@ -9,7 +9,9 @@ def init_grid(Nx,Ny, start,e1,e2, dev=0.0):
     for j in xrange(Ny):
         for i in xrange(Nx):
             x[j*Nx+i,:] = start + float(i/(Nx-1.0))*e1 + float(j/(Ny-1.0))*e2 \
-                          + random.uniform(-dev,dev,len(start))
+                           + (0.0 
+                             if i==0 or i==Nx-1 or j==0 or j==Ny-1else
+                          random.uniform(-dev,dev,len(start)))
     return x
 def init_cube(Nx,Ny,Nz, start,e1,e2,e3, dev=0.0):
     start = np.array(start)

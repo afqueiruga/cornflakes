@@ -14,7 +14,7 @@ LDSETTING = -dynamiclib
 endif
 
 
-SWIGINFS = swig_library.i
+SWIGINFS = cornflakes_library_swig.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 SWIGPYS = $(SWIGINFS:.i=.py)
 SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c $(WRAPPERS)

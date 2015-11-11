@@ -1,4 +1,4 @@
-#include "SpatialHash.h"
+#include "spatialhash.h"
 
 #include <math.h>
 #include <stdlib.h>
