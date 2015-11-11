@@ -1,7 +1,7 @@
-import mylibrary
+import cornflakes_library as cflib
 import numpy as np
 
-class DofMap():
+class Dofmap():
     def __init__(self):
         self.vertex_dofs = []
         self.edge_dofs = []
@@ -9,16 +9,16 @@ class DofMap():
 
         self.R_order = []
     def __init__(self, h, ke, Nnode):
-        dofs = mylibrary.dofArray_frompointer(ke.outp)
+        dofs = cflib.dofArray_frompointer(ke.outp)
         
         nvertdof = 0
         nedgedof = 0
         nglobaldof = 0
         
         for i in xrange(ke.noutp):
-            if dofs[i].loc == mylibrary.LOC_NODE:
+            if dofs[i].loc == cflib.LOC_NODE:
                 nvertdof += dofs[i].len
-            elif dofs[i].loc == mylibrary.LOC_EDGE:
+            elif dofs[i].loc == cflib.LOC_EDGE:
                 nedgedof += dofs[i].len
             else:
                 nglobaldof += dofs[i].len
@@ -39,10 +39,10 @@ def make_dofmap(h, ke, Nnode):
     
     v = h.view()
     outlen = 0
-    dofs = mylibrary.dofArray_frompointer(ke.outp)
+    dofs = cflib.dofArray_frompointer(ke.outp)
     
     for i in xrange(ke.noutp):
-        if dofs[i].loc == mylibrary.LOC_NODE:
+        if dofs[i].loc == cflib.LOC_NODE:
             outlen+=dofs[i].len*h.hg.l_edge
         else:
             outlen+=dofs[i].len
@@ -53,7 +53,7 @@ def make_dofmap(h, ke, Nnode):
         # Loop over the dofs
         off = 0
         for d in xrange(ke.noutp):
-            if dofs[d].loc == mylibrary.LOC_NODE:
+            if dofs[d].loc == cflib.LOC_NODE:
                 for j,n in enumerate(e):
                     outmap[i,off+dofs[d].len*j:dofs[d].len*(j+1)] = range(n*dofs[d].len,(n+1)*dofs[d].len)
                 off+= len(e)*dofs[d].len

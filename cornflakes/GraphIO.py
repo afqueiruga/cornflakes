@@ -1,5 +1,6 @@
-import numpy as np
-import mylibrary as ml
+#
+# IO Routines
+#
 
 def write_graph(fname, H, X, nodefields=None,edgefields=None):
     celltypekey = {
