@@ -11,6 +11,7 @@
 #endif
 
 
+// TODO: Why did I redefine macros everywhere??? That was a bad idea
 
 void SpatialHash_init(spatialhash_t * sh, int Npart, int dim,
 		      real_t *start, real_t * end,real_t *h)
@@ -111,6 +112,20 @@ void Build_New_Hash(spatialhash_t * sh,  int Npart,int dim, real_t * x, real_t b
   //SpatialHash_print(sh);
 }
 
+
+/*
+ * Top level scanning operations:
+ */
+void SpatialHash_ScanPt(spatialhash_t * sh, real_t * x, void act(int,int) )
+{
+  #define HASH(p,i) ((int)( ((p)-sh->start[i])/sh->h[i] + 0.5 ))
+
+  int i, hs[sh->dim];
+  for(i=0;i<sh->dim;i++) { hs[i]=HASH((x)[i],i); }
+  SpatialHash_Scan_Area(sh,hs,-1,act, 0);
+  
+  #undef HASH
+}
 void SpatialHash_Scanall(spatialhash_t * sh, real_t * x,void act(int,int) )
 {
   #define HASH(p,i) ((int)( ((p)-sh->start[i])/sh->h[i] + 0.5 ))
@@ -119,35 +134,86 @@ void SpatialHash_Scanall(spatialhash_t * sh, real_t * x,void act(int,int) )
   // Loop accross it to make contact pairs
   for(A=0;A<sh->Npart;A++) {
     for(i=0;i<sh->dim;i++) { hs[i]=HASH((x)[A*sh->dim+i],i); }
-    
-    // We scan in this pattern on the grid
-    //    ooo   ooo   xxx
-    //    ooo   oXx   xxx
-    //    ooo   xxx   xxx
-    // to save work.
-    int off[sh->dim];
-    for(i=0;i<sh->dim;i++) off[i]=0;
-    
-    SpatialHash_Scan_Cell(sh,act, A, hs, off, 1); // The center
-    off[0] = 1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
-    if(sh->dim > 1) { // idk why this would be used in just 1D... but RIGOR!
-      off[1]=1; 
-      off[0] = -1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
-      off[0] =  0; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
-      off[0] =  1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
-      // Do the next flat if 3D
-      if(sh->dim > 2) {
-	off[2]=1;
-	for(i=-1;i<2;i++) {
-	  off[1]=i;
-	  off[0] = -1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
-	  off[0] =  0; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
-	  off[0] =  1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+    SpatialHash_Scan_Area(sh,hs,A,act,1);
+  } // end loop over entries
+  
+  #undef HASH
+}
+
+/*
+ * Low level scanning operations:
+ */
+void SpatialHash_Scan_Area_Full(spatialhash_t * sh, int * hs, int A, void act(int,int) )
+{
+  int i,off[sh->dim];
+  
+  for(i=0;i<sh->dim;i++) off[i]=-1;
+
+  switch(sh->dim) {
+  case 1:
+    for(off[0]=-1;off[0]<=1;off[0]++) {
+      SpatialHash_Scan_Cell(sh,act, A,hs,off, 0);
+    }
+    break;
+  case 2:
+    for(off[0]=-1;off[0]<=1;off[0]++) {
+      for(off[1]=-1;off[1]<=1;off[1]++) {
+	SpatialHash_Scan_Cell(sh,act, A,hs,off, 0);
+      }
+    }
+    break;
+  case 3:
+    for(off[0]=-1;off[0]<=1;off[0]++) {
+      for(off[1]=-1;off[1]<=1;off[1]++) {
+	for(off[2]=-1;off[2]<=1;off[2]++) {
+	  SpatialHash_Scan_Cell(sh,act, A,hs,off, 0);
 	}
       }
     }
-  } // end loop over entries
-  #undef HASH
+    break;
+  default:
+    break;
+  }
+
+    
+}
+void SpatialHash_Scan_Area_Half(spatialhash_t * sh, int * hs, int A, void act(int,int) )
+{
+  // We scan in this pattern on the grid
+  //    ooo   ooo   xxx
+  //    ooo   oXx   xxx
+  //    ooo   xxx   xxx
+  // to save work.
+  int i, off[sh->dim];
+  for(i=0;i<sh->dim;i++) off[i]=0;
+  
+  SpatialHash_Scan_Cell(sh,act, A, hs, off, 1); // The center
+  off[0] = 1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+  if(sh->dim > 1) { // idk why this would be used in just 1D... but RIGOR!
+    off[1]=1; 
+    off[0] = -1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+    off[0] =  0; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+    off[0] =  1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+    // Do the next flat if 3D
+    if(sh->dim > 2) {
+      off[2]=1;
+      for(i=-1;i<2;i++) {
+	off[1]=i;
+	off[0] = -1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+	off[0] =  0; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+	off[0] =  1; SpatialHash_Scan_Cell(sh,act, A, hs, off, 0);
+      }
+    }
+  }
+}
+
+void SpatialHash_Scan_Area(spatialhash_t * sh, int * hs, int A, void act(int,int), int half)
+{
+  if(half) {
+    SpatialHash_Scan_Area_Half(sh,hs,A,act);
+  } else {
+    SpatialHash_Scan_Area_Full(sh,hs,A,act);
+  }
 }
 
 void SpatialHash_Scan_Cell(spatialhash_t * sh, void act(int,int),

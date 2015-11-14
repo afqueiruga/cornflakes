@@ -24,6 +24,9 @@ void SpatialHash_destroy(spatialhash_t * sh);
 void SpatialHash_Push(spatialhash_t * sh, int A, real_t * x);
 void Build_New_Hash(spatialhash_t * sh, int npart,int dim, real_t * x, real_t cutoff);
 void SpatialHash_Scanall(spatialhash_t * sh, real_t * x,void act(int,int) );
+void SpatialHash_ScanPt(spatialhash_t * sh, real_t * x, void act(int,int) );
+
+void SpatialHash_Scan_Area(spatialhash_t * sh, int * hs, int A, void act(int,int), int half );
 void SpatialHash_Scan_Cell(spatialhash_t * sh, void act(int,int),
 			   int a,
 			   int * hs, int * off, int filter);

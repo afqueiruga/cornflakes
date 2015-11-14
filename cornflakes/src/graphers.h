@@ -4,6 +4,7 @@
 #include "spatialhash.h"
 #include "hypergraph.h"
 
-void Build_Particle_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff);
+void Build_Pair_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff);
+void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff);
 
 #endif

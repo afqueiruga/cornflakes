@@ -25,6 +25,8 @@ def graph_test_A():
     assert H.view()[0][0,0]==10, "Views should be mutable"
     print v
     print "Graph Test A Passed"
+
+    
 if __name__=="__main__":
     graph_test_A()
     print "All graph tests passed"
