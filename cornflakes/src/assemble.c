@@ -2,7 +2,26 @@
 
 #include <stdio.h>
 
-void collect(real_t * loc_in, kernel_t * ke, int hx, hypervertex_t* edge, int l_edge, real_t ** data) {
+void collect(real_t * loc_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
+	     dofmap_t ** dms, real_t ** data)
+{
+  hypervertex_t V;
+  int i, j, fnum, maxlen;
+  dofmap_t * dmap;
+  real_t * datum;
+  for(i=0;i<ke->ninp;i++) {
+    fnum = ke->inp[i].field_number;
+    dmap = dms[i];
+    datum = data[i];
+    maxlen = Dofmap_Max_Len(dmap);
+    int dofs[maxlen];
+    int ndof;
+    for(j=0;j<l_edge;j++) {
+      V = edge[j];
+      
+    }
+  }
+  /*
   int j,i,A;
   int offs = 0;
   for(j=0; j<ke->ninp; j++) {
@@ -29,11 +48,13 @@ void collect(real_t * loc_in, kernel_t * ke, int hx, hypervertex_t* edge, int l_
       break;
     }
   }
+  */
 }
 
 
 real_t * push_target(assemble_target_t * att, int len_loc_out, int hx, int * outmap, real_t * loc_out)
 {
+  
   int i,j;
   switch(att->rank) {
   case 1:
@@ -64,6 +85,7 @@ void assemble_targets(int ntarget, assemble_target_t * att,
 		      kernel_t * ke, hyperedges_t * he,
 		      int * outmap, real_t ** data)
 {
+  #if 0
   int i,j,hx;
   /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
   /*
@@ -102,6 +124,7 @@ void assemble_targets(int ntarget, assemble_target_t * att,
       iter_out = push_target(att+i,len_loc_out, hx,outmap+len_loc_out*hx, iter_out);
     }
   }
+  #endif
 }
 
 
@@ -114,6 +137,7 @@ void assemble_targets(int ntarget, assemble_target_t * att,
 
 void assemble_vector(real_t * R, kernel_t * ke,hyperedges_t * he, int * outmap, real_t ** data)
 {
+#if 0
   int hx,i,j,A;
   /*
    * R will be accumalated onto!
@@ -150,7 +174,7 @@ void assemble_vector(real_t * R, kernel_t * ke,hyperedges_t * he, int * outmap, 
       R[ outmap[len_loc_out*hx + i] ] += loc_out[i];
     }
   }
-  
+  #endif
 }
 
 
@@ -158,6 +182,7 @@ void assemble_matrix(int * II, int * JJ, real_t * KK,
 		     kernel_t * ke, hyperedges_t * he,
 		     int * outmap, real_t ** data)
 {
+  #if 0
   int i,j,hx;
   /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
   /*
@@ -194,7 +219,7 @@ void assemble_matrix(int * II, int * JJ, real_t * KK,
     }
   }
 
-  
+ #endif 
 }
 
 
@@ -203,6 +228,7 @@ void assemble_vector_matrix(real_t * R,
 			    kernel_t * ke, hyperedges_t * he,
 			    int * outmap, real_t ** data)
 {
+  #if 0
     int i,j,hx;
   /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
   /*
@@ -240,4 +266,6 @@ void assemble_vector_matrix(real_t * R,
     }
     
   }
+#endif
 }
+

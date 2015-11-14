@@ -6,11 +6,13 @@
 #include "graphers.h"
 #include "kernel.h"
 #include "assemble.h"
+#include "dofmap.h"
 %}
 
 %include "numpy.i"
 %init %{
-import_array();
+  import_array();
+  //import_managed();
 %}
 
 %apply (int DIM1, int* IN_ARRAY1) {(int nvert, hypervertex_t * verts),
@@ -19,6 +21,9 @@ import_array();
 %apply (int DIM1, int* INPLACE_ARRAY1) {(int dim_II, int * array_II),
                                         (int dim_JJ, int * array_JJ)};
 %apply (int DIM1, real_t* INPLACE_ARRAY1) {(int dim_KK, real_t * array_KK)};
+%apply (int* ARGOUT_ARRAY1, int * DIM1) {(int * dofs, int *ndofs)};
+
+
 %include "carrays.i"
 %array_class(int,intArray)
 %array_class(dof_t,dofArray)
@@ -30,6 +35,7 @@ import_array();
 %include "graphers.h"
 %include "kernel.h"
 %include "assemble.h"
+%include "dofmap.h"
 
 
 %exception Hypergraph_Push_Edge_np {
@@ -42,6 +48,19 @@ import_array();
 }
 
 %inline %{
+  /*
+   * Extrawrappers for the Dofmap
+   */
+  void Dofmap_Get_np(dofmap_t * dm, hypervertex_t V,
+		     int* DIM1, int** ARGOUTVIEW_ARRAY1) {
+    int len;
+    int *pay;
+    len = Dofmap_Max_Len(dm);
+    pay = (int*)malloc( sizeof(int)* (len));
+    Dofmap_Get(dm,V, pay, DIM1);
+    *ARGOUTVIEW_ARRAY1 = pay;
+    // MEMLEAK!
+  }
   /*
    * Extra wrappers for Hypergraph and Hyperedges
    */
