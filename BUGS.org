@@ -1,0 +1,8 @@
+* SWIG Bugs
+** TODO ARGOUTVIEWM_ARRAY1 typemap memleak
+   Dofmap_Get_np
+   Numpy is a version behind and import_managed() isn't linked.
+   Output array is currently leaky.
+   Solution: Switch to a new version of numpy.
+   Stopgaps: Free memory manually.
+             Don't call it; not needed by C library.
