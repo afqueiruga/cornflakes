@@ -3,7 +3,7 @@
 
 #include "kernel.h"
 #include "hypergraph.h"
-  
+#include "dofmap.h"
 
 typedef struct assemble_target_t {
   int rank;

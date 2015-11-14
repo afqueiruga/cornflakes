@@ -2,13 +2,15 @@
 
 #include <stdio.h>
 
-void collect(real_t * loc_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
+void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
 	     dofmap_t ** dms, real_t ** data)
 {
   hypervertex_t V;
-  int i, j, fnum, maxlen;
+  int i, j, k, fnum, maxlen;
   dofmap_t * dmap;
   real_t * datum;
+  real_t * ker_in_iter = ker_in;
+  // TODO: Fringe case of global and variable length data.
   for(i=0;i<ke->ninp;i++) {
     fnum = ke->inp[i].field_number;
     dmap = dms[i];
@@ -18,37 +20,12 @@ void collect(real_t * loc_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
     int ndof;
     for(j=0;j<l_edge;j++) {
       V = edge[j];
-      
+      Dofmap_Get(dmap, V, dofs,&ndof);
+      for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
+      ker_in_iter += ndof;
     }
   }
-  /*
-  int j,i,A;
-  int offs = 0;
-  for(j=0; j<ke->ninp; j++) {
-    switch(ke->inp[j].loc) {
-    case LOC_NODE:
-      for(A=0;A<l_edge;A++) {
-	for(i=0; i<ke->inp[j].len; i++) {
-	  loc_in[offs + A*ke->inp[j].len + i] = data[j][ edge[A]*ke->inp[j].len + i] ;
-	}
-      }
-      offs += ke->inp[j].len*l_edge;
-      break;
-    case LOC_EDGE:
-      for(i=0; i<ke->inp[j].len; i++) {
-	loc_in[offs + i] = data[j][ hx*ke->inp[j].len + i ];
-      }
-      offs += ke->inp[j].len;
-      break;
-    default:
-      for(i=0; i<ke->inp[j].len; i++) {
-	loc_in[offs + i] = data[j][ i ];
-      }
-      offs += ke->inp[j].len;
-      break;
-    }
-  }
-  */
+
 }
 
 
@@ -81,9 +58,52 @@ real_t * push_target(assemble_target_t * att, int len_loc_out, int hx, int * out
   
 }
 
-void assemble_targets(int ntarget, assemble_target_t * att,
-		      kernel_t * ke, hyperedges_t * he,
-		      int * outmap, real_t ** data)
+void place_targets(assemble_targets_t * att, real_t * ker_out, int len_ker_out,
+		   hypervertex_t * edge, int l_edge)
+{
+  
+}
+
+void assemble_targets(kernel_t * ke, hypergraph_t * hg,
+		      dofmap_t ** dofmaps, real_t ** data,
+		      int * outmap, // TODO KILL
+		      assemble_target_t * att)
+{
+  int i,j, hex,hx;
+  hyperedges_t * he;
+  /* Loop over the graph sets */
+  for(he = hg->he; he < hg->he+hg->n_types ; he++) {
+    /* Allocate the loca vectors for this size edge */
+    int len_ker_in = kernel_inp_len(ke, he->l_edge);
+    int len_ker_out = kernel_outp_len(ke, he->l_edge); // RIGHT NOW SAME DOFMAP FOR ALL OF THEM
+    real_t ker_in[ len_ker_in];
+    real_t ker_out[len_ker_out];
+
+    /* Loop over the edges */
+    hypervertex_t * edge;
+    for(hex=0; hex<he->n_edge; hex++) {
+      edge = Hyperedges_Get_Edge(he, hex);
+
+      /* Collect the data */
+      collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some overheard outside of loop
+
+      /* Calculate the kernel */
+      ke->eval(he->l_edge, ker_in, ker_out);
+
+      /* Push the data */
+      
+    }
+  }
+
+  
+}
+
+
+
+
+void assemble_targets_dep(int ntarget, assemble_target_t * att,
+			  kernel_t * ke, hyperedges_t * hg,
+			  int * outmap, real_t ** data);
 {
   #if 0
   int i,j,hx;
