@@ -1,9 +1,20 @@
 * Current state:<2015-11-09 Mon>
 Right now it's all in a sub-sub-subfolder. Need to:
 ** DONE Restructure directory to segregate scripts
-** TODO Better build system to segregate .o's etc
+** DONE Better build system to segregate .o's etc
 ** TODO Top level library
 ** TODO Consolidate DOFMAP data structure
+   Do I want a C-struct dofmap? Or should I keep it as just arrays.
+   I want it to stay super-simple.
+   What would even go in a struct?
+   
+   -- ALso, I said graphs are un-oredered, but how do I associate output DOFMAPS??
+   -- Might just have to order it...
+   -- The output should be unassociated from the edge, since you can reuse an edge
+   -- for multiple kernels. The kernel implies the output DOFMAP. even though 
+   -- I didn't want kerngen to specifically think about hypergraphs. Should it?
+   -- 
+
 ** TODO _kerngen_ needs to auto-make the data structure. 
    - kernel.h should be part of kerngen
 ** TODO Write _Husker_ to auto-wrap the kernels. 

@@ -1,7 +1,10 @@
 *~
+*#
+
 *.pyc
 *.so
 *.vtk
 *_wrap.c
 *.o
+
 cornflakes_library.py

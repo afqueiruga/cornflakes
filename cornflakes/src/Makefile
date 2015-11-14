@@ -22,7 +22,7 @@ endif
 SWIGINFS = cornflakes_library_swig.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 #SWIGPYS = $(SWIGINFS:.i=.py)
-SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c
+SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c dofmap.c
 HEADERS = $(SRCS:.c=.h)
 OBJS = $(SRCS:.c=.o)
 WRAPOBJS = $(WRAPPERS:.c=.o)
