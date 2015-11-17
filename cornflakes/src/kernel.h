@@ -5,7 +5,9 @@ typedef double real_t;
 
 #define KERNEL_OUTP_MAX 5
 #define KERNEL_IN_DOF_MAX 5
-#define KERNEL_NAME_MAX 10
+#define KERNEL_OUT_DOF_MAX 5
+// User only gets 31 characters to name
+#define KERNEL_NAME_MAX 32
 
 /* DEPRECATED
 enum dof_loc {
@@ -34,7 +36,7 @@ typedef struct kernel_t {
  * g_ : Global ordering amongst all processors
  * l_ : Local ordering on this processor
  * k_ : Kernel-level ordering for computation (small numbers)
- * g  : geometry (no _ ) Should be 1,2,3 
+ * g  : geometry (no _ ) Should be 1,2, or 3  (or even 4 O_o)
  * t  : topology (no _ ) Meh....
  */
 
@@ -42,7 +44,7 @@ typedef struct kernel_t {
  * Data type for DOF naming.
  */
 typedef struct dof_t {
-  int field_number; //Which location in **data is it in?
+  int field_number; //Which location in **data and **dmap is it in?
   int dim; // How many dofs are associated with a vertex?
   int v_start; // What's the position of the first vertex in the edge?
                // -1 Means it is a global DOF (Not associated with the vertices).
@@ -60,27 +62,34 @@ typedef struct dof_t {
  */
 typedef struct outp_t {
   int rank; // Scalar, vector, or matrix
-  int k_len; // How long is the kernel calculation // VARIABLE LENGTH?????
-  // HOW TO MAP IT OUT? // SHOULD JUST BE IN THE MAPPING FUNCTION
+  //int k_len; // How long is the kernel calculation // VARIABLE LENGTH?????
+  // Same dof_t struct is used, so the hyperedge vertices have to store sufficient info
+  int ndof;
+  // for the output mapping as well.
+  dof_t dofs[KERNEL_OUT_DOF_MAX];
 } outp_t;
 
 /*
  * Kernel data type
  */
 typedef struct kernel_t {
+  // Each input is directly a dof_t
   int ninp;
   dof_t inp[KERNEL_IN_DOF_MAX];
 
+  // The kernels can have multiple outputs
+  // The outputs need their own types
   int noutp;
-  outp_t outp[KERNEL_OUTP_MAX]; // The kernels can have multiple outputs
+  outp_t outps[KERNEL_OUTP_MAX]; 
   
   char name[KERNEL_NAME_MAX]; // Identifier for infoing
 
-  void (*eval)(int * len, real_t * in, real_t * out); // The payload. Eval the kernel.
+  void (*eval)(int len, real_t * in, real_t * out); // The payload. Eval the kernel.
 } kernel_t;
 
 
 int kernel_inp_len(kernel_t * ke, int l_edge);
-int kernel_outp_len(kernel_t * ke, int l_edge);
+int kernel_outp_len(outp_t * ou, int l_edge);
+int kernel_outps_len(kernel_t * ke, int l_edge);
 
 #endif

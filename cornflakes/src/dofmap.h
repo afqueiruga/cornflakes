@@ -3,12 +3,6 @@
 
 #include "hypergraph.h"
 
-enum dofmap_type  {
-  DOFMAP_STRIDED,
-  DOFMAP_TABLE
-} ;
-
-
 /* Vtable forward declaration*/
 typedef struct _DOFMAP_VTABLE_t _DOFMAP_VTABLE_t;
 

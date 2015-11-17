@@ -100,7 +100,112 @@
   /*
    * Assembly wrappers
    */
+
   void assemble_targets_np(PyObject * targetlist,
+			   kernel_t * ke, hypergraph_t * hg,
+			   PyObject * dofmaplist,
+			   PyObject * datalist)
+  {
+    int i=0, isnewobj=0;
+    PyObject *obj, *subobj;
+    PyArrayObject * arrobj;
+
+    if(!PyList_Check(targetlist)) return;
+    if(!PyList_Check(datalist)) return;
+    if(!PyList_Check(dofmaplist)) return;
+
+    int ntarget = PyList_Size(targetlist);
+    int ndata = PyList_Size(datalist);
+    int ndofmap = PyList_Size(dofmaplist);
+
+    
+    dofmap_t * dofmaps[ndofmap];
+    assemble_target_t att[ntarget];
+    real_t * data_ptrs[ndata];
+    
+    int nnewobj = 0;
+    PyArrayObject * newobjs[3*ntarget + ndata];
+    /* Step 1: Build the target list */
+    for(i=0;i<ntarget;i++) {
+      //printf("Target %d ",i);
+      obj = PyList_GetItem(targetlist, i);
+      if(PyTuple_Check(obj)) {
+	//printf("Is a tuple\n");
+	att[i].rank = 2;
+	// 0: Get KK
+	subobj = PyTuple_GetItem(obj,0);
+	isnewobj = 0;
+	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_DOUBLE,&isnewobj);
+	att[i].V = array_data(arrobj);
+	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+	// 1: Get II
+	subobj = PyTuple_GetItem(obj,1);
+	isnewobj = 0;
+	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
+	att[i].II = array_data(arrobj);
+	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+	// 2: Get JJ
+	subobj = PyTuple_GetItem(obj,2);
+	isnewobj = 0;
+	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
+	att[i].JJ = array_data(arrobj);
+	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+      }
+      else { //  obj is (BETTER BE) a ndarray
+	//printf("Is an ndarray\n");
+	isnewobj = 0;
+	arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
+	att[i].V = array_data(arrobj);
+	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+	if(array_size(arrobj,0)>1) {
+	  att[i].rank=1;
+	} else {
+	  att[i].rank=0;
+	}
+	att[i].II = NULL;
+	att[i].JJ = NULL;
+      }
+      // Set the iterators just 'cuz
+      att[i].IIiter = att[i].II;
+      att[i].JJiter = att[i].JJ;
+      att[i].Viter  = att[i].V;
+    }
+    
+    /* Step 2: Collect the data ptrs */
+    for(i=0;i<ndata;i++) {
+      obj = PyList_GetItem(datalist,i );
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
+      data_ptrs[i] = array_data(arrobj);
+      if(isnewobj) {
+	newobjs[nnewobj] = arrobj;
+	nnewobj++;
+      }
+    }
+    /* Step 3: Create the dofmap list */
+    for(i=0;i<ndofmap;i++) {
+      obj = PyList_GetItem(dofmaplist,i);
+      // FIXMEFIXMEFIXMEFIXMEFIXMEFIXMEFIXMEFIXME
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0); // TODO: IDK??
+      //if (!SWIG_IsOK(res)) {
+      //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
+      //}
+    }
+
+    /* Step 4: assemble! */
+    assemble_targets(ke, hg,
+		     dofmaps, data_ptrs,
+		     att);
+
+    /* Step 5: Decrease reference counts */
+    for(i=0;i<nnewobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
+
+  }
+
+  
+  void assemble_targets_dep_np(PyObject * targetlist,
 			   kernel_t * ke, hyperedges_t * he,
 			   int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
 			   PyObject * datalist)
@@ -174,7 +279,7 @@
     }
     //printf("Assembling\n");
     /* Step 3: Assemble */
-    assemble_targets(ntarget, att,
+    assemble_targets_dep(ntarget, att,
 		     ke, he,
 		     INPLACE_ARRAY_FLAT,
 		     data_ptrs);

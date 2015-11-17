@@ -13,12 +13,12 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
   // TODO: Fringe case of global and variable length data.
   for(i=0;i<ke->ninp;i++) {
     fnum = ke->inp[i].field_number;
-    dmap = dms[i];
-    datum = data[i];
+    dmap = dms[fnum];
+    datum = data[fnum];
     maxlen = Dofmap_Max_Len(dmap);
     int dofs[maxlen];
     int ndof;
-    for(j=0;j<l_edge;j++) {
+    for(j=0;j<l_edge;j++) { // BUG
       V = edge[j];
       Dofmap_Get(dmap, V, dofs,&ndof);
       for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
@@ -28,54 +28,91 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
 
 }
 
-
-real_t * push_target(assemble_target_t * att, int len_loc_out, int hx, int * outmap, real_t * loc_out)
-{
-  
+real_t * place_target(assemble_target_t * att,
+		      int * dofs, int n,
+		      real_t * ker_out) {
   int i,j;
   switch(att->rank) {
-  case 1:
-    for(i=0;i<len_loc_out;i++) {
-      att->V[ outmap[i] ] += loc_out[i];
-    }
-    return loc_out + len_loc_out;
-    break;
   case 2:
-    for(i=0;i<len_loc_out;i++) {
-      for(j=0;j<len_loc_out;j++) {
-	att->II[ len_loc_out*len_loc_out*hx+len_loc_out*i + j] = outmap[ i ];
-	att->JJ[ len_loc_out*len_loc_out*hx+len_loc_out*i + j] = outmap[ j ];
-	att->V [ len_loc_out*len_loc_out*hx+len_loc_out*i + j] = loc_out[len_loc_out*i + j];
+    // Fill this block
+    for(i=0;i<n;i++) {
+      for(j=0;j<n;j++) {
+	att->IIiter[n*i + j ] = dofs[i];
+	att->JJiter[n*i + j ] = dofs[j];
+	att->Viter [n*i + j ] = ker_out[ n*i + j];
       }
     }
-    return loc_out + len_loc_out*len_loc_out;
+    // Advance our iterators.
+    att->IIiter += n*n;
+    att->JJiter += n*n;
+    att->Viter += n*n;
+    return ker_out + n*n;
+    break;
+  case 1:
+    for(i=0;i<n;i++) {
+      att->V[dofs[i]] += ker_out[i];
+    }
+    return ker_out + n;
     break;
   default:
-    att->V[0] += loc_out[0];
-    return loc_out + 1;
+    for(i=0;i<n;i++) {
+      att->V[0] += ker_out[i];
+    }
+    return ker_out + 1;
     break;
   }
-  
-}
 
-void place_targets(assemble_targets_t * att, real_t * ker_out, int len_ker_out,
+}
+void place_targets(assemble_target_t ** atts,
+		   kernel_t * ke,
+		   real_t * ker_out, int len_ker_out,
+		   dofmap_t ** dms,
 		   hypervertex_t * edge, int l_edge)
 {
-  
+  int i,j,k, t,d;
+  dofmap_t * dmap;
+  int fnum;
+  hypervertex_t V;
+  real_t * ker_out_iter;
+  int ndof, maxlen;
+  // Loop over the targets
+  for(t=0; t<ke->noutp; t++) {
+    // Make the array of all of the DOFs for simplicity
+    int nalldofs = kernel_outp_len(ke->outps + t,l_edge);
+    int alldofs[nalldofs]; //TODO: This should be in a routine
+    int iter=0;
+    for(d=0; d<ke->outps[t].ndof; d++) {
+      fnum = ke->outps[t].dofs[d].field_number;
+      dmap = dms[fnum];
+      maxlen = Dofmap_Max_Len(dmap);
+      int dofs[maxlen];
+      // Loop over the vertices
+      for(j=0;j<l_edge;j++) { // BUG
+	V = edge[j];
+	Dofmap_Get(dmap, V, dofs,&ndof);
+	for(k=0;k<ndof;k++) {
+	  alldofs[iter+k] = dofs[k];
+	}
+	iter+=ndof;
+      }
+    }
+    // Now assemble in:
+    ker_out_iter = place_target(atts[t], alldofs,nalldofs, ker_out_iter);
+  } // end target loop
 }
 
 void assemble_targets(kernel_t * ke, hypergraph_t * hg,
 		      dofmap_t ** dofmaps, real_t ** data,
-		      int * outmap, // TODO KILL
 		      assemble_target_t * att)
 {
   int i,j, hex,hx;
   hyperedges_t * he;
+  
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
     /* Allocate the loca vectors for this size edge */
     int len_ker_in = kernel_inp_len(ke, he->l_edge);
-    int len_ker_out = kernel_outp_len(ke, he->l_edge); // RIGHT NOW SAME DOFMAP FOR ALL OF THEM
+    int len_ker_out = kernel_outps_len(ke, he->l_edge);
     real_t ker_in[ len_ker_in];
     real_t ker_out[len_ker_out];
 
@@ -103,7 +140,7 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
 
 void assemble_targets_dep(int ntarget, assemble_target_t * att,
 			  kernel_t * ke, hyperedges_t * hg,
-			  int * outmap, real_t ** data);
+			  int * outmap, real_t ** data)
 {
   #if 0
   int i,j,hx;

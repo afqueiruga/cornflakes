@@ -10,9 +10,19 @@ typedef struct assemble_target_t {
   real_t * V;
   int * II;
   int * JJ;
+
+  real_t * Viter;
+  int * IIiter;
+  int * JJiter;
 } assemble_target_t;
 
-void assemble_targets(int ntarget, assemble_target_t * att,
+
+
+void assemble_targets(kernel_t * ke, hypergraph_t * hg,
+		      dofmap_t ** dofmaps, real_t ** data,
+		      assemble_target_t * att);
+/* More deprecation */
+void assemble_targets_dep(int ntarget, assemble_target_t * att,
 		      kernel_t * ke, hyperedges_t * hg,
 		      int * outmap, real_t ** data);
 
