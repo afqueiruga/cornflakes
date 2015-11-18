@@ -1,7 +1,26 @@
 import cornflakes_library as cflib
 import numpy as np
 
+
+# interface class
 class Dofmap():
+    def __init__(self):
+        self.dm = cflib.dofmap_t()
+        # NO VTABLE SET
+    def Get(self,V):
+        return cflib.Dofmap_Get_np(self.dm,V)
+    def Max_Len(self):
+        return cflib.Dofmap_Max_Len(self.dm)
+class Dofmap_Strided(Dofmap):
+    def __init__(self, stride, offset=0):
+        self.dm = cflib.dofmap_t()
+        cflib.Dofmap_Strided(self.dm, stride,offset)
+class Dofmap_Tabled(Dofmap):
+    pass # UNIMPLEMENTED
+
+
+# DEPRECATED
+class Dofmap_dep():
     def __init__(self):
         self.vertex_dofs = []
         self.edge_dofs = []
@@ -29,7 +48,8 @@ class Dofmap():
             
         self.edge_dofs = np.zeros( (h.hg.n_edge, nedgedof), dtype=np.intc)
         self.global_dofs = np.zeros( (nglobaldof), dtype=np.intc)
-        
+
+# DEPRECATED
 def make_dofmap(h, ke, Nnode):
     # Make the dofmap for where the kernel output will be
     # assembled into. It will look like

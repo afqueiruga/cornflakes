@@ -2,7 +2,12 @@ import numpy as np
 import scipy.sparse
 import cornflakes_library as clfib
 
-def Assemble_Targets(ranks, ke,hg, dofmap,ndof, data):
+
+
+def Assemble_Targets(ke,hg, dofmaps,data):
+    pass
+
+def Assemble_Targets_dep(ranks, ke,hg, dofmap,ndof, data):
     #ranks=(1,2,2)
     len_loc_out = cflib.kernel_outp_len(ke,hg.l_edge)
     matsize = len_loc_out*len_loc_out*hg.n_edge
