@@ -65,6 +65,6 @@ void Hypergraph_Destroy(hypergraph_t * hg);
  */
 void Hyperedges_Alloc(hyperedges_t * he, int l_edge, int alloc_init);
 void Hyperedges_Push_Edge(hyperedges_t * he, int * verts);
-int* Hyperedges_Get_Edge(hyperedges_t * he, int i);
+hypervertex_t * Hyperedges_Get_Edge(hyperedges_t * he, int i);
 void Hyperedges_Destroy(hyperedges_t * he);
 #endif

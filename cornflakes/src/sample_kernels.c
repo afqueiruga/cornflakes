@@ -1,4 +1,10 @@
-#include "kernel.h"
+#include "sample_kernels.h"
+
+
+
+void peri2d_eval(int ninp, real_t * in, real_t * out) {
+
+}
 
 kernel_t peri2d_kernel = {
   .ninp = 3,
@@ -10,12 +16,22 @@ kernel_t peri2d_kernel = {
     { .field_number = 4, .dim = 2, .v_start=0, .v_end=1, .name = "param" }
   },
   .noutp = 3,
-  .outp = {
-    { .rank = 1, .len = 4 },
-    { .rank = 2, .len = 4 },
-    { .rank = 2, .len = 4 },
-    { .rank = -1, .len = -1 },
-    { .rank = -1, .len = -1 },
+  .outps = {
+    { .rank = 1, .ndof=1, .dofs = {
+	{ .field_number = 0, .dim = 2, .v_start=0, .v_end=1, .name = "fx" } }
+    },
+    { .rank = 2, .ndof=1, .dofs = {
+	{ .field_number = 0, .dim = 2, .v_start=0, .v_end=1, .name = "kx" } }
+    },
+    { .rank = 2, .ndof=1, .dofs = {
+	{ .field_number = 0, .dim = 2, .v_start=0, .v_end=1, .name = "kv" } }
+    },
+    { .rank = -1, .ndof = -1 },
+    { .rank = -1, .ndof = -1 },
   },
+  .eval = peri2d_eval,
   .name = {"peri2d"}
 };
+
+
+

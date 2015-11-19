@@ -19,3 +19,9 @@ class Hypergraph():
             cflib.Hypergraph_Get_Edge_View_np(self.hg,i)
             for i in xrange(self.hg.n_types)
         ]
+
+    def Add_Edge_Vertex(self,offset=0):
+        hgnew = cflib.hypergraph_t()
+        cflib.Add_Edge_Vertex(hgnew, self.hg, offset)
+        cflib.Hypergraph_Destroy(self.hg)
+        self.hg = hgnew

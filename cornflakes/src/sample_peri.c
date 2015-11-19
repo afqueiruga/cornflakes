@@ -81,8 +81,8 @@ kernel_t kern_peri = {
 { .field_number = 0, .dim = 2, .v_start = 0, .v_end = 2, .name = "x" },
 { .field_number = 1, .dim = 2, .v_start = 0, .v_end = 2, .name = "v" },
 { .field_number = 2, .dim = 2, .v_start = 0, .v_end = 2, .name = "X" },
-{ .field_number = 3, .dim = 1, .v_start = 0, .v_end = 1, .name = "alpha" },
-{ .field_number = 4, .dim = 1, .v_start = 0, .v_end = 2, .name = "params" }
+{ .field_number = 3, .dim = 1, .v_start = 2, .v_end = 3, .name = "alpha" },
+{ .field_number = 4, .dim = 1, .v_start = 2, .v_end = 3, .name = "params" }
 },
 
 .noutp = 3,

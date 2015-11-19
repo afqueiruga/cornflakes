@@ -53,7 +53,7 @@ void Hyperedges_Destroy(hyperedges_t * he) {
   free(he->edges);
 }
 
-int * Hyperedges_Get_Edge(hyperedges_t * he, int i) {
+hypervertex_t * Hyperedges_Get_Edge(hyperedges_t * he, int i) {
   if(i<0 || i>=he->n_edge) {
     return NULL;
   }

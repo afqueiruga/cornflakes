@@ -26,7 +26,7 @@ int kernel_inp_len(kernel_t * ke, int l_edge) {
   return ndof;
 }
 int kernel_outp_len(outp_t * ou, int l_edge) {
-  int i, len;
+  int i, len=0;
   if(ou->rank==0) return 1;
   for(i=0;i<ou->ndof;i++) {
     len += kernel_dof_len(ou->dofs + i, l_edge);

@@ -53,3 +53,25 @@ void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t
   //printf("destroy hash\n");
   SpatialHash_destroy(&sh);
 }
+
+
+void Add_Edge_Vertex(hypergraph_t * hgnew, hypergraph_t * hgold, int offset) {
+  int i,j,k;
+  Hypergraph_Alloc(hgnew, hgold->n_types);
+
+  int edgenum = offset;
+  for(i=0;i<hgold->n_types;i++) {
+    hyperedges_t * he = hgold->he + i;
+    hypervertex_t edge[ he->l_edge + 1];
+    hypervertex_t * e;
+    for(j=0;j<he->n_edge; j++) {
+      e = Hyperedges_Get_Edge(he, j);
+      for(k=0;k<he->l_edge;k++) {
+	edge[k] = e[k];
+      }
+      edge[he->l_edge] = edgenum;
+      Hypergraph_Push_Edge(hgnew,he->l_edge+1,edge);
+      edgenum++;
+    }
+  }
+}

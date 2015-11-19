@@ -7,6 +7,7 @@
 #include "kernel.h"
 #include "assemble.h"
 #include "dofmap.h"
+#include "sample_peri.h"
 %}
 
 %include "numpy.i"
@@ -27,6 +28,9 @@
 %include "carrays.i"
 %array_class(int,intArray)
 %array_class(dof_t,dofArray)
+%array_class(outp_t,outpArray)
+%array_class(hyperedges_t,hyperedgesArray)
+
 %include "cpointer.i"
 %pointer_class(int, intp)
 
@@ -36,7 +40,7 @@
 %include "kernel.h"
 %include "assemble.h"
 %include "dofmap.h"
-
+%include "sample_peri.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action
@@ -127,10 +131,10 @@
     PyArrayObject * newobjs[3*ntarget + ndata];
     /* Step 1: Build the target list */
     for(i=0;i<ntarget;i++) {
-      //printf("Target %d ",i);
+      printf("Target %d ",i);
       obj = PyList_GetItem(targetlist, i);
       if(PyTuple_Check(obj)) {
-	//printf("Is a tuple\n");
+	printf("Is a tuple\n");
 	att[i].rank = 2;
 	// 0: Get KK
 	subobj = PyTuple_GetItem(obj,0);
@@ -172,6 +176,7 @@
     }
     
     /* Step 2: Collect the data ptrs */
+    printf("2\n");
     for(i=0;i<ndata;i++) {
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
@@ -182,6 +187,7 @@
 	nnewobj++;
       }
     }
+    printf("3\n");
     /* Step 3: Create the dofmap list */
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
@@ -191,7 +197,7 @@
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
     }
-
+    printf("4\n");
     /* Step 4: assemble! */
     assemble_targets(ke, hg,
 		     dofmaps, data_ptrs,

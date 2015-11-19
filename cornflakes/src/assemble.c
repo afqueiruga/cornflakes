@@ -12,13 +12,17 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
   real_t * ker_in_iter = ker_in;
   // TODO: Fringe case of global and variable length data.
   for(i=0;i<ke->ninp;i++) {
+    
     fnum = ke->inp[i].field_number;
+    printf("inp %d on %d\n",i,fnum);
     dmap = dms[fnum];
+    printf("%lx : %d \n",dmap, dmap->U.strided.stride);
     datum = data[fnum];
     maxlen = Dofmap_Max_Len(dmap);
     int dofs[maxlen];
     int ndof;
-    for(j=0;j<l_edge;j++) { // BUG
+    for(j=ke->inp[i].v_start;j<ke->inp[i].v_end;j++) { // BUG
+      printf("j:%d\n",j);
       V = edge[j];
       Dofmap_Get(dmap, V, dofs,&ndof);
       for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
@@ -107,7 +111,7 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
 {
   int i,j, hex,hx;
   hyperedges_t * he;
-  
+  printf("A\n");
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
     /* Allocate the loca vectors for this size edge */
@@ -115,18 +119,18 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
     int len_ker_out = kernel_outps_len(ke, he->l_edge);
     real_t ker_in[ len_ker_in];
     real_t ker_out[len_ker_out];
-
+    printf("B\n");
     /* Loop over the edges */
     hypervertex_t * edge;
     for(hex=0; hex<he->n_edge; hex++) {
       edge = Hyperedges_Get_Edge(he, hex);
-
+      printf("e %d\n",hex);
       /* Collect the data */
       collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some overheard outside of loop
-
+      printf("did\n");
       /* Calculate the kernel */
       ke->eval(he->l_edge, ker_in, ker_out);
-
+      printf("eval\n");
       /* Push the data */
       
     }
