@@ -45,3 +45,14 @@ shouldn't need too much more structure.
    - If a bond crosses one of them, it gets a cementous strength
 asdf
 
+* TODO Import meshes from TOUGH
+
+* Curret State <2015-11-20 Fri>
+-- Hypergraphs can store edges of variable length
+-- New data structures for variable sized computation edges
+-- Helper routines for assign vertices to unordered edges that need a cell-DOF
+-- Kernel data structure will be reshuffled to have a list of DOFs, a list
+    of inputs, and a list of outputs
+-- Added Silo files (only pair-bonds, but that's easy to fix)
+   Support for storing a single mesh for multiple time series (implemented for TOUGH)
+

@@ -41,18 +41,11 @@ dmaps  = [dmap_vec,dmap_vec,dmap_vec,dmap_bond,dmap_bond]
 ke = cflib.cvar.kern_peri
 
 
-#silo = GraphIO.start_silo("foo.silo",hyper,X)
-#GraphIO.push_silo(silo, hyper,X,time=0.0,  nodefields=[("m2",m2),("x",v),("v",X),("m",m)], edgefields=[("alpha",alpha)] )
-#GraphIO.write_silo("out/foo_0.silo".format(0),hyper,X,cycle=0,time=0, nodefields=[("m2",m2),("x",v),("v",X),("m",m)], edgefields=[("alpha",alpha)], PUTMESH=True,PUTCONN=True)
-#for t in range(1,10):
-    #GraphIO.write_silo("out/foo_{0}.silo".format(t),hyper,X,cycle=t,time=t, nodefields=[("m2",m2),("x",v),("v",X),("m",m)], edgefields=[("alpha",alpha)], PUTMESH=False,PUTCONN=False)
-    #m2[:]*=2.0
-
 GraphIO.write_silo_meshfile("out/foo_mesh.silo", hyper,X)
 for t in xrange(10):
     GraphIO.write_silo_datfile("out/foo_{0}.silo".format(t),"foo_mesh.silo",cycle=t,time=t, nodefields=[("m2",m2),("x",v),("v",X),("m",m)], edgefields=[("alpha",alpha)])
     m2[:]*=2.0
-#GraphIO.end_silo(silo)
+
 #R,KX,KV = Assemble_Targets(ke, hyper, dmaps,fields, X.size)
 
 

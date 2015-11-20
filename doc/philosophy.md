@@ -28,4 +28,13 @@ Dofmap objects can be recycled to save on memory and reduce lines of code.
 
 There can be different types and sizes of hyperedges associated with different computational kernels. They can be mixed-and matched into one large hypergraph. For simplicity, each kernel is associated with _one_ hypergraph, and it is up to the user to juggle different hypergraphs with one common vertex-naming scheme. For partitioning, a union of all the kernel-hypergraphs is taken, and then the processors re-divy up the subsets. 
 
-For the most part, every piece of data is associated with a Vertex. The Big Exception is _global data_. It is allowed and handled as a fringe case when the kernel says the input field is associated with vertex position "-1" in the hyperedge. We could define a "global" vertex, but that'll just mess up the partitioning.
+For the most part, every piece of data is associated with a Vertex. The Big Exception is _global data_. It is allowed and handled as a fringe case when the kernel says the input field is associated with vertex position "-1" in the hyperedge. We could define a "global" vertex, but that'll just mess up the partitioning. The user will definitely want parameters such as "time" or "dampening" to be global often enough to merit this.
+
+
+
+On Hypergraphs
+--------------
+
+1. The hyperedges do not need to span the vertices (there can be vertices that do not belong to any edge).
+2. Therefore, the number of vertices cannot be infered from the hypergraph structure.
+3. The hypergraphs are designed to be subsets of the total computation graph in the simulation with implied unions via summations of kernel calculations.
