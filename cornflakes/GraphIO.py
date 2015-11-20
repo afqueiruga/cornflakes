@@ -57,5 +57,101 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
             for l in f:
                 fh.write("{0}\n".format(l))
     fh.close()
+
+             
+def write_silo(fname, H,X,cycle=0, time=0,nodefields=[], edgefields=[], PUTMESH=True, PUTCONN=True):
+    from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME
+    import numpy as np
+    silo = SiloFile(fname)
+
+    pair_edges = H.view()[0]
+    zonelist_name = "foo_zonelist"
+    nodelist = IntVector()
+    nodelist.extend( int(i) for i in pair_edges[:,0:2].flat)
+    shapetypes = IntVector()
+    shapetypes.append(DB_ZONETYPE_BEAM)
+    shapesizes = IntVector()
+    shapesizes.append(2)
+    shapecounts = IntVector()
+    shapecounts.append(len(pair_edges))
+    #from IPython import embed
+    #embed()
+    if PUTCONN:
+        silo.put_zonelist_2(zonelist_name, len(pair_edges), 2, nodelist,
+                            0,0, shapetypes, shapesizes, shapecounts)
+    if PUTMESH:
+        silo.put_ucdmesh("foo", [],
+                     np.asarray(X.T,order="C"), len(pair_edges),
+                     zonelist_name, None)
+    def putvar(n,fo,LOC):
+        if len(f.shape)==1 or f.shape[1]==1:
+            silo.put_ucdvar1("node_"+n,"foo",
+                             np.asarray(f.T,order="C",dtype=np.double),
+                             LOC, {DBOPT_CYCLE:cycle,DBOPT_DTIME:float(time),DBOPT_TIME:float(time)})
+        elif f.shape[1]==2:
+            silo.put_ucdvar("node_"+n,"foo", [n+"x",n+"y"],
+                            np.asarray(f.T,order="C",dtype=np.double),
+                            LOC, {DBOPT_CYCLE:cycle,DBOPT_DTIME:float(time),DBOPT_TIME:float(time)})
+        else:
+            silo.put_ucdvar("node_"+n,"foo", [n+"x",n+"y",n+"z"],
+                            np.asarray(f.T,order="C",dtype=np.double),
+                            LOC,  {DBOPT_CYCLE:cycle,DBOPT_DTIME:float(time),DBOPT_TIME:float(time)})
+   
+    for n,f in nodefields:
+        putvar(n,f,DB_NODECENT)
+    for n,f in edgefields:
+        putvar(n,f,DB_ZONECENT)
+
+    silo.close()
+
     
 
+def write_silo_meshfile(fname, H,X):
+    from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME
+    import numpy as np
+    silo = SiloFile(fname)
+
+    pair_edges = H.view()[0]
+    zonelist_name = "foo_zonelist"
+    nodelist = IntVector()
+    nodelist.extend( int(i) for i in pair_edges[:,0:2].flat)
+    shapetypes = IntVector()
+    shapetypes.append(DB_ZONETYPE_BEAM)
+    shapesizes = IntVector()
+    shapesizes.append(2)
+    shapecounts = IntVector()
+    shapecounts.append(len(pair_edges))
+    silo.put_zonelist_2(zonelist_name, len(pair_edges), 2, nodelist,
+                            0,0, shapetypes, shapesizes, shapecounts)
+    silo.put_ucdmesh("foo", [],
+                     np.asarray(X.T,order="C"), len(pair_edges),
+                     zonelist_name, None)
+    silo.close()
+def write_silo_datfile(fname,mname,cycle=0, time=0, nodefields=[], edgefields=[]):
+    from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM,\
+        DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME
+    from pyvisfile.silo import DBObjectType as DBOBjectType
+    import numpy as np
+    silo = SiloFile(fname)
+    silo.put_multimesh('foo', [(mname+":foo",DBOBjectType.DB_UCDMESH)])
+    def putvar(n,fo,LOC):
+        if len(f.shape)==1 or f.shape[1]==1:
+            silo.put_ucdvar1("node_"+n,"foo",
+                             np.asarray(f.T,order="C",dtype=np.double),
+                             LOC, {DBOPT_CYCLE:cycle,DBOPT_DTIME:float(time),DBOPT_TIME:float(time)})
+        elif f.shape[1]==2:
+            silo.put_ucdvar("node_"+n,"foo", [n+"x",n+"y"],
+                            np.asarray(f.T,order="C",dtype=np.double),
+                            LOC, {DBOPT_CYCLE:cycle,DBOPT_DTIME:float(time),DBOPT_TIME:float(time)})
+        else:
+            silo.put_ucdvar("node_"+n,"foo", [n+"x",n+"y",n+"z"],
+                            np.asarray(f.T,order="C",dtype=np.double),
+                            LOC,  {DBOPT_CYCLE:cycle,DBOPT_DTIME:float(time),DBOPT_TIME:float(time)})
+   
+    for n,f in nodefields:
+        putvar(n,f,DB_NODECENT)
+    for n,f in edgefields:
+        putvar(n,f,DB_ZONECENT)
+
+    silo.close()
+    
