@@ -36,16 +36,17 @@ dmap_global = Dofmap_Strided(1)
 # The lists
 # TODO: FRINGE OF DOF_GLOBAL IN ASSEM
 fields = [x,v,X,alpha,params]
-dmaps  = [dmap_vec,dmap_vec,dmap_vec,dmap_bond,dmap_bond]
+dmaps  = [dmap_vec,dmap_bond,dmap_global]
 
 ke = cflib.cvar.kern_peri
 
 
-GraphIO.write_silo_meshfile("out/foo_mesh.silo", hyper,X)
-for t in xrange(10):
-    GraphIO.write_silo_datfile("out/foo_{0}.silo".format(t),"foo_mesh.silo",cycle=t,time=t, nodefields=[("m2",m2),("x",v),("v",X),("m",m)], edgefields=[("alpha",alpha)])
-    m2[:]*=2.0
+R,KX,KV = Assemble_Targets(ke, hyper, dmaps,fields, X.size)
 
-#R,KX,KV = Assemble_Targets(ke, hyper, dmaps,fields, X.size)
+from IPython import embed
+embed()
 
-
+#GraphIO.write_silo_meshfile("out/foo_mesh.silo", hyper,X)
+#for t in xrange(10):
+#    GraphIO.write_silo_datfile("out/foo_{0}.silo".format(t),"foo_mesh.silo",cycle=t,time=t, nodefields=[("m2",m2),("x",v),("v",X),("m",m)], edgefields=[("alpha",alpha)])
+#    m2[:]*=2.0

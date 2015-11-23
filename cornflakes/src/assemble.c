@@ -6,7 +6,7 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
 	     dofmap_t ** dms, real_t ** data)
 {
   hypervertex_t V;
-  int i, j, k, fnum, maxlen;
+  int i, j, k, fnum, mnum, maxlen;
   dofmap_t * dmap;
   real_t * datum;
   real_t * ker_in_iter = ker_in;
@@ -14,21 +14,34 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
   for(i=0;i<ke->ninp;i++) {
     
     fnum = ke->inp[i].field_number;
-    printf("inp %d on %d\n",i,fnum);
-    dmap = dms[fnum];
-    printf("%lx : %d \n",dmap, dmap->U.strided.stride);
+    mnum = ke->inp[i].map_num;
+    //printf("inp %d on %d\n",i,fnum);
+    dmap = dms[mnum];
+    //printf("%lx : %d \n",dmap, dmap->U.strided.stride);
     datum = data[fnum];
     maxlen = Dofmap_Max_Len(dmap);
     int dofs[maxlen];
     int ndof;
-    for(j=ke->inp[i].v_start;j<ke->inp[i].v_end;j++) { // BUG
-      printf("j:%d\n",j);
-      V = edge[j];
-      Dofmap_Get(dmap, V, dofs,&ndof);
-      for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
-      ker_in_iter += ndof;
+
+    k_map_t * kmap = ke->maps + ke->inp[i].map_num;
+    if(kmap->v_start < 0) {
+      // Global dim
+      for(k=0; k < kmap->dim; k++) ker_in_iter[k] = datum[ k ];
+      ker_in_iter += kmap->dim;
+    } else {
+      // Variable length handling
+      int end = (kmap->v_end<0 ? l_edge : kmap->v_end);
+      // Loop over all vertices and collect dofs
+      for(j=kmap->v_start; j<end; j++) {
+	//printf("j:%d\n",j);
+	V = edge[j];
+	Dofmap_Get(dmap, V, dofs,&ndof);
+	for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
+	ker_in_iter += ndof;
+      }
     }
-  }
+    
+  } // End loop over inps
 
 }
 
@@ -67,41 +80,53 @@ real_t * place_target(assemble_target_t * att,
   }
 
 }
-void place_targets(assemble_target_t ** atts,
+void place_targets(assemble_target_t * att,
 		   kernel_t * ke,
 		   real_t * ker_out, int len_ker_out,
 		   dofmap_t ** dms,
 		   hypervertex_t * edge, int l_edge)
 {
-  int i,j,k, t,d;
+  int i,j,k, t,m;
   dofmap_t * dmap;
-  int fnum;
+  int mnum;
   hypervertex_t V;
-  real_t * ker_out_iter;
+  real_t * ker_out_iter = ker_out;
   int ndof, maxlen;
   // Loop over the targets
   for(t=0; t<ke->noutp; t++) {
     // Make the array of all of the DOFs for simplicity
-    int nalldofs = kernel_outp_len(ke->outps + t,l_edge);
+    int nalldofs = kernel_outp_ndof(ke, ke->outp + t, l_edge); // BUG, YES the segfault
     int alldofs[nalldofs]; //TODO: This should be in a routine
     int iter=0;
-    for(d=0; d<ke->outps[t].ndof; d++) {
-      fnum = ke->outps[t].dofs[d].field_number;
-      dmap = dms[fnum];
-      maxlen = Dofmap_Max_Len(dmap);
-      int dofs[maxlen];
+    for(m=0; m<ke->outp[t].nmap; m++) {
+      mnum = ke->outp[t].map_nums[m];
+      printf("t %d mnum %d\n",t,mnum);
+      k_map_t * kmap = ke->maps + mnum;
       // Loop over the vertices
-      for(j=0;j<l_edge;j++) { // BUG
-	V = edge[j];
-	Dofmap_Get(dmap, V, dofs,&ndof);
-	for(k=0;k<ndof;k++) {
-	  alldofs[iter+k] = dofs[k];
+      if( kmap->v_start < 0) {
+	// A global space
+	for(k=0;k<kmap->dim;k++) alldofs[iter+k] = k;
+	iter += kmap->dim;
+      } else {
+	// Handle variable length
+	int end = (kmap->v_end<0 ? l_edge : kmap->v_end);
+	dmap = dms[mnum];
+	maxlen = Dofmap_Max_Len(dmap);
+	int dofs[maxlen];
+	// Loop over all vertices and tabulate dofs
+	for(j=kmap->v_start; j<end; j++) { 
+	  V = edge[j];
+	  Dofmap_Get(dmap, V, dofs,&ndof);
+	  for(k=0;k<ndof;k++) {
+	    alldofs[iter+k] = dofs[k];
+	  }
+	  iter+=ndof;
 	}
-	iter+=ndof;
       }
-    }
-    // Now assemble in:
-    ker_out_iter = place_target(atts[t], alldofs,nalldofs, ker_out_iter);
+    } // end map loop
+    for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
+    // Now assemble into att[t]:
+    ker_out_iter = place_target(att+t, alldofs,nalldofs, ker_out_iter);
   } // end target loop
 }
 
@@ -115,11 +140,11 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
     /* Allocate the loca vectors for this size edge */
-    int len_ker_in = kernel_inp_len(ke, he->l_edge);
+    int len_ker_in = kernel_inps_len(ke, he->l_edge);
     int len_ker_out = kernel_outps_len(ke, he->l_edge);
     real_t ker_in[ len_ker_in];
     real_t ker_out[len_ker_out];
-    printf("B\n");
+    printf("B %d %d\n", len_ker_in, len_ker_out);
     /* Loop over the edges */
     hypervertex_t * edge;
     for(hex=0; hex<he->n_edge; hex++) {
@@ -132,7 +157,8 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
       ke->eval(he->l_edge, ker_in, ker_out);
       printf("eval\n");
       /* Push the data */
-      
+      place_targets(att, ke, ker_out,len_ker_out,
+		    dofmaps, edge, he->l_edge);
     }
   }
 

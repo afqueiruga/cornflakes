@@ -9,7 +9,7 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
     n_edges = np.sum([ he[i].n_edge for i in xrange(H.hg.n_types) ])
     
 
-    outps = cflib.outpArray_frompointer(ke.outps)
+    outps = cflib.outpArray_frompointer(ke.outp)
     forms = []
     for j in xrange(ke.noutp):
         op = outps[j]
@@ -20,7 +20,7 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
         else:
             matsize = 0
             for i in xrange(H.hg.n_types):
-                oplen = cflib.kernel_outp_len(op,he[i].l_edge)
+                oplen = cflib.kernel_outp_len(ke,op,he[i].l_edge)
                 matsize += he[i].n_edge*oplen
             forms.append((np.zeros(matsize,dtype=np.double),
                           np.zeros(matsize,dtype=np.intc),
@@ -29,11 +29,11 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
     embed()
     cflib.assemble_targets_np(forms, ke,H.hg, [ d.dm for d in dofmaps], data)
     print "poo"
-    for i,r in enumerate(ranks):
-        if r==2:
-            Kcoo = scipy.sparse.coo_matrix((forms[i][0],(forms[i][1],forms[i][2])), (ndof,ndof))
+    for j in xrange(ke.noutp):
+        if outps[j].rank==2:
+            Kcoo = scipy.sparse.coo_matrix((forms[j][0],(forms[j][1],forms[j][2])), (ndof,ndof))
             K = Kcoo.tocsr()
-            forms[i]=K
+            forms[j]=K
     return forms
 
 

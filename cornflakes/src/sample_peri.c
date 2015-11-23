@@ -73,8 +73,37 @@ out+0, out+4, out+8);
 }
 
 
+kernel_t kern_peri = {
+  .nmap = 3,
+  .maps = {
+    { .dim = 2, .v_start = 0, .v_end = 2 },
+    { .dim = 1, .v_start = 2, .v_end = 3 },
+    { .dim = 2, .v_start= -1, .v_end = -1 }
+  },
+
+  .ninp = 5,
+  .inp = {
+    { .field_number = 0, .map_num = 0, .name = "x" },
+    { .field_number = 1, .map_num = 0, .name = "v" },
+    { .field_number = 2, .map_num = 0, .name = "X" },
+    { .field_number = 3, .map_num = 1, .name = "alpha" },
+    { .field_number = 4, .map_num = 2, .name = "params" }
+  },
+
+  .noutp = 3,
+  .outp = {
+    {.rank = 1, .nmap = 1, .map_nums = { 0 }, .name = "F" },
+    {.rank = 2, .nmap = 1, .map_nums = { 0 }, .name = "KX" },
+    {.rank = 2, .nmap = 1, .map_nums = { 0 }, .name = "KV" }
+  },
+
+  .eval = peri_eval_wr,
+  .name = "peri"
+};
 
 
+
+#if 0
 kernel_t kern_peri = {
 .ninp = 5,
 .inp = {
@@ -96,3 +125,4 @@ kernel_t kern_peri = {
 .eval=peri_eval_wr,
 .name="peri"
 };
+#endif

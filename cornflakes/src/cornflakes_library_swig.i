@@ -27,7 +27,8 @@
 
 %include "carrays.i"
 %array_class(int,intArray)
-%array_class(dof_t,dofArray)
+%array_class(k_map_t,k_mapArray)
+%array_class(inp_t,inpArray)
 %array_class(outp_t,outpArray)
 %array_class(hyperedges_t,hyperedgesArray)
 
@@ -191,8 +192,8 @@
     /* Step 3: Create the dofmap list */
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
-      // FIXMEFIXMEFIXMEFIXMEFIXMEFIXMEFIXMEFIXME
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0); // TODO: IDK??
+      // BEEN FIXED
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
@@ -202,11 +203,13 @@
     assemble_targets(ke, hg,
 		     dofmaps, data_ptrs,
 		     att);
+    printf("5\n");
 
     /* Step 5: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {
       Py_DECREF(newobjs[i]);
     }
+    printf("6\n");
 
   }
 
