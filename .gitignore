@@ -4,6 +4,7 @@
 *.pyc
 *.so
 *.vtk
+*.silo
 *_wrap.c
 *.o
 
