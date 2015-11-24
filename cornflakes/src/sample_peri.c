@@ -69,7 +69,7 @@ KV[15] = alpha[0]*params[1]*pow(-x[1] + x[3], 2)/(pow(-x[0] + x[2], 2) + pow(-x[
 
 void peri_eval_wr(int ninp, real_t * in, real_t * out) {
    peri_eval(in+0, in+4, in+8, in+12, in+13, 
-out+0, out+4, out+8);
+out+0, out+4, out+20);
 }
 
 

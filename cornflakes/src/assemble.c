@@ -100,7 +100,7 @@ void place_targets(assemble_target_t * att,
     int iter=0;
     for(m=0; m<ke->outp[t].nmap; m++) {
       mnum = ke->outp[t].map_nums[m];
-      printf("t %d mnum %d\n",t,mnum);
+      //printf("t %d mnum %d\n",t,mnum);
       k_map_t * kmap = ke->maps + mnum;
       // Loop over the vertices
       if( kmap->v_start < 0) {
@@ -124,7 +124,7 @@ void place_targets(assemble_target_t * att,
 	}
       }
     } // end map loop
-    for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
+    //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
     // Now assemble into att[t]:
     ker_out_iter = place_target(att+t, alldofs,nalldofs, ker_out_iter);
   } // end target loop
@@ -136,7 +136,7 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
 {
   int i,j, hex,hx;
   hyperedges_t * he;
-  printf("A\n");
+  //printf("A\n");
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
     /* Allocate the loca vectors for this size edge */
@@ -144,18 +144,20 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
     int len_ker_out = kernel_outps_len(ke, he->l_edge);
     real_t ker_in[ len_ker_in];
     real_t ker_out[len_ker_out];
-    printf("B %d %d\n", len_ker_in, len_ker_out);
+    //printf("B %d %d\n", len_ker_in, len_ker_out);
     /* Loop over the edges */
     hypervertex_t * edge;
     for(hex=0; hex<he->n_edge; hex++) {
       edge = Hyperedges_Get_Edge(he, hex);
-      printf("e %d\n",hex);
+      //printf("e %d\n",hex);
       /* Collect the data */
       collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some overheard outside of loop
-      printf("did\n");
+      //printf("did\n");
       /* Calculate the kernel */
+      //for(i=0;i<len_ker_in;i++) printf("%lf ",ker_in[i]); printf("\n");
       ke->eval(he->l_edge, ker_in, ker_out);
-      printf("eval\n");
+      //for(i=0;i<len_ker_out;i++) printf("%lf ",ker_out[i]); printf("\n");
+      //printf("eval\n");
       /* Push the data */
       place_targets(att, ke, ker_out,len_ker_out,
 		    dofmaps, edge, he->l_edge);

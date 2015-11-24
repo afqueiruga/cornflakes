@@ -25,10 +25,9 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
             forms.append((np.zeros(matsize,dtype=np.double),
                           np.zeros(matsize,dtype=np.intc),
                           np.zeros(matsize,dtype=np.intc)))
-    from IPython import embed
-    embed()
+    
     cflib.assemble_targets_np(forms, ke,H.hg, [ d.dm for d in dofmaps], data)
-    print "poo"
+    
     for j in xrange(ke.noutp):
         if outps[j].rank==2:
             Kcoo = scipy.sparse.coo_matrix((forms[j][0],(forms[j][1],forms[j][2])), (ndof,ndof))

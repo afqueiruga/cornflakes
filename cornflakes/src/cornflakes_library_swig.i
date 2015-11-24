@@ -24,7 +24,6 @@
 %apply (int DIM1, real_t* INPLACE_ARRAY1) {(int dim_KK, real_t * array_KK)};
 %apply (int* ARGOUT_ARRAY1, int * DIM1) {(int * dofs, int *ndofs)};
 
-
 %include "carrays.i"
 %array_class(int,intArray)
 %array_class(k_map_t,k_mapArray)
@@ -65,6 +64,15 @@
     Dofmap_Get(dm,V, pay, DIM1);
     *ARGOUTVIEW_ARRAY1 = pay;
     // MEMLEAK!
+  }
+  void Dofmap_Get_List_np(dofmap_t * dm, int nvert, hypervertex_t * verts,
+		     int* DIM1, int** ARGOUTVIEW_ARRAY1) {
+    int len;
+    int *pay;
+    len = nvert * Dofmap_Max_Len(dm);
+    pay = (int*)malloc(sizeof(int)* (len));
+    Dofmap_Get_List(dm, nvert,verts, pay,DIM1);
+    *ARGOUTVIEW_ARRAY1 = pay;
   }
   /*
    * Extra wrappers for Hypergraph and Hyperedges
@@ -132,10 +140,10 @@
     PyArrayObject * newobjs[3*ntarget + ndata];
     /* Step 1: Build the target list */
     for(i=0;i<ntarget;i++) {
-      printf("Target %d ",i);
+      //printf("Target %d ",i);
       obj = PyList_GetItem(targetlist, i);
       if(PyTuple_Check(obj)) {
-	printf("Is a tuple\n");
+	//printf("Is a tuple\n");
 	att[i].rank = 2;
 	// 0: Get KK
 	subobj = PyTuple_GetItem(obj,0);
@@ -177,7 +185,7 @@
     }
     
     /* Step 2: Collect the data ptrs */
-    printf("2\n");
+    //printf("2\n");
     for(i=0;i<ndata;i++) {
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
@@ -188,7 +196,7 @@
 	nnewobj++;
       }
     }
-    printf("3\n");
+    //printf("3\n");
     /* Step 3: Create the dofmap list */
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
@@ -198,18 +206,18 @@
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
     }
-    printf("4\n");
+    //printf("4\n");
     /* Step 4: assemble! */
     assemble_targets(ke, hg,
 		     dofmaps, data_ptrs,
 		     att);
-    printf("5\n");
+    //printf("5\n");
 
     /* Step 5: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {
       Py_DECREF(newobjs[i]);
     }
-    printf("6\n");
+    //printf("6\n");
 
   }
 

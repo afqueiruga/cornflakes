@@ -11,6 +11,8 @@ class Dofmap():
         return cflib.Dofmap_Get_np(self.dm,V)
     def Max_Len(self):
         return cflib.Dofmap_Max_Len(self.dm)
+    def Get_List(self,Vs):
+        return cflib.Dofmap_Get_List_np(self.dm, Vs)
 class Dofmap_Strided(Dofmap):
     def __init__(self, stride, offset=0):
         self.dm = cflib.dofmap_t()
@@ -18,6 +20,9 @@ class Dofmap_Strided(Dofmap):
 class Dofmap_Tabled(Dofmap):
     pass # UNIMPLEMENTED
 
+
+def select_nodes(X,fil):
+    return np.asarray(np.where(map(fil,X))[0],dtype=np.intc)
 
 # DEPRECATED
 class Dofmap_dep():
@@ -81,5 +86,3 @@ def make_dofmap(h, ke, Nnode):
                 pass
     return outmap
 
-def select_nodes(X,fil):
-    return np.where(map(fil,X))

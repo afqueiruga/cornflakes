@@ -14,7 +14,17 @@ void Dofmap_Get(dofmap_t * dm, hypervertex_t V, int * dofs, int * ndofs) {
 int Dofmap_Max_Len(dofmap_t * dm) {
   return dm->vtable->Max_Len(dm);
 }
-
+void Dofmap_Get_List(dofmap_t * dm, int nvert, hypervertex_t * Vs, int * dofs, int * ndofs) {
+  int i;
+  int * dofiter = dofs;
+  *ndofs = 0;
+  int nd;
+  for(i=0; i<nvert; i++) {
+    Dofmap_Get(dm, Vs[i], dofiter, &nd);
+    dofiter += nd;
+    *ndofs += nd;
+  }
+}
 
 
 /*
