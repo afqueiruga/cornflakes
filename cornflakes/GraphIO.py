@@ -60,9 +60,9 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
 
              
 def write_silo(fname, H,X,cycle=0, time=0,nodefields=[], edgefields=[], PUTMESH=True, PUTCONN=True):
-    from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME
+    from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME, DB_CLOBBER
     import numpy as np
-    silo = SiloFile(fname)
+    silo = SiloFile(fname, mode=DB_CLOBBER)
 
     pair_edges = H.view()[0]
     zonelist_name = "foo_zonelist"
@@ -107,9 +107,9 @@ def write_silo(fname, H,X,cycle=0, time=0,nodefields=[], edgefields=[], PUTMESH=
     
 
 def write_silo_meshfile(fname, H,X):
-    from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME
+    from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME, DB_CLOBBER
     import numpy as np
-    silo = SiloFile(fname)
+    silo = SiloFile(fname, mode=DB_CLOBBER)
 
     pair_edges = H.view()[0]
     zonelist_name = "foo_zonelist"
@@ -129,10 +129,10 @@ def write_silo_meshfile(fname, H,X):
     silo.close()
 def write_silo_datfile(fname,mname,cycle=0, time=0, nodefields=[], edgefields=[]):
     from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM,\
-        DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME
+        DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME, DB_CLOBBER
     from pyvisfile.silo import DBObjectType as DBOBjectType
     import numpy as np
-    silo = SiloFile(fname)
+    silo = SiloFile(fname, mode=DB_CLOBBER)
     silo.put_multimesh('foo', [(mname+":foo",DBOBjectType.DB_UCDMESH)])
     def putvar(n,fo,LOC):
         if len(f.shape)==1 or f.shape[1]==1:

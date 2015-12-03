@@ -63,7 +63,7 @@ def DYNAMICS():
         #global R
         if tang:
             R,KX,KV =  Assemble_Targets(ke, hyper, dmaps,fields, X.size)
-            R[topdofs] += 15.0
+            #R[topdofs] += 15.0
             #R*=-1.0
             #embed()
             return R,KX,KV
@@ -74,7 +74,7 @@ def DYNAMICS():
             return R
     def bcapp_mech(K,R,t,hold=False):
         Apply_BC(botdofs, botvals, K,R)
-        #Apply_BC(topdofs, topvals, K,R)
+        Apply_BC(topdofs, topvals, K,R)
     def update():
         pass
     Mechfield = RKbase.RK_field(2,[v.ravel(),x.ravel()], scipy.sparse.eye(X.size).tocsr(),
@@ -83,7 +83,7 @@ def DYNAMICS():
     NT = 40
     h = Tmax/NT
     #v.ravel()[topdofs]= 0.01*10.0/Tmax
-    
+    v.ravel()[topdofs]= 0.01*10.0/Tmax
     #step = exRK.exRK(h, exRK.exRK_table['RK4'], [Mechfield])
     step = imRK.DIRK(h, imRK.LDIRK['BWEuler'], [Mechfield])
     output()

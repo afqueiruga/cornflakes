@@ -7,7 +7,9 @@
 #include "kernel.h"
 #include "assemble.h"
 #include "dofmap.h"
+  
 #include "sample_peri.h"
+#include "sample_state.h"
 %}
 
 %include "numpy.i"
@@ -40,7 +42,9 @@
 %include "kernel.h"
 %include "assemble.h"
 %include "dofmap.h"
+
 %include "sample_peri.h"
+%include "sample_state.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action

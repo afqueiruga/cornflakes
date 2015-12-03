@@ -127,7 +127,7 @@ typedef struct kernel_t {
   
   char name[KERNEL_NAME_MAX];
 
-  void (*eval)(int len, real_t * in, real_t * out);
+  void (*eval)(int len, const real_t * restrict in, real_t * restrict out);
 } kernel_t;
 
 int kernel_map_len(k_map_t * km, int l_edge);

@@ -154,9 +154,10 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
       collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some overheard outside of loop
       //printf("did\n");
       /* Calculate the kernel */
-      //for(i=0;i<len_ker_in;i++) printf("%lf ",ker_in[i]); printf("\n");
+      //printf("in:"); for(i=0;i<len_ker_in;i++) printf("%lf ",ker_in[i]); printf("\n");
+      for(i=0;i<len_ker_out;i++) ker_out[i] = 0.0;
       ke->eval(he->l_edge, ker_in, ker_out);
-      //for(i=0;i<len_ker_out;i++) printf("%lf ",ker_out[i]); printf("\n");
+      //printf("out:"); for(i=0;i<len_ker_out;i++) printf("%lf ",ker_out[i]); printf("\n");
       //printf("eval\n");
       /* Push the data */
       place_targets(att, ke, ker_out,len_ker_out,

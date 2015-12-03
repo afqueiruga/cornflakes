@@ -37,7 +37,7 @@ void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t
   int list[30]; // TODO: Auto allocate this list
   int Nlist=0;
   void action(int FOO, int b) {
-    if(dist(dim, x+dim*A,x+dim*b)<=cutoff) {
+    if( b!=A &&  dist(dim, x+dim*A,x+dim*b)<=cutoff) {
       list[Nlist] = b;
       Nlist++;
     }
