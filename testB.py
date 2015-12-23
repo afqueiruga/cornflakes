@@ -4,7 +4,7 @@ import scipy
 
 gdim = 2
 Rad = 1.5
-ke = cflib.cvar.kern_state
+ke = cflib.cvar.kernel_state
 
 #
 # Place the particles and build a connectivity
@@ -25,14 +25,14 @@ Npart = X.shape[0]
 
 y = X.copy()
 v = np.zeros(X.shape)
-params = np.array([Rad, 1.0, -0.5 ,1.0], dtype=np.double)
+params = np.array([Rad, 1.0, 0.0 ,-0.1], dtype=np.double)
 
 dmap_vec    = Dofmap_Strided(gdim)
 dmap_global = Dofmap_Strided(1)
 
 fields = [ y,v,X, params ]
-dmaps  = [ dmap_global, dmap_vec ]
-
+dmaps  = [ dmap_vec, dmap_global ]
+#dmaps  = [ dmap_global, dmap_vec ]
 #
 # Select DOFs for boundary conditions
 #
@@ -69,20 +69,20 @@ def DYNAMICS():
         Apply_BC(topdofs, topvals, None,R)
     def update():
         pass
-    Mechfield = RKbase.RK_field(2,[v.ravel(),y.ravel()], None,#scipy.sparse.eye(X.size).tocsr(),
+    Mechfield = RKbase.RK_field(2,[v.ravel(),y.ravel()], scipy.sparse.eye(X.size).tocsr(),#None
                            sys_mech,bcapp_mech,update)
-    Tmax = 15.0
-    NT = 1000
+    Tmax = 10.0
+    NT = 100
     h = Tmax/NT
     #v.ravel()[topdofs]= 0.01*10.0/Tmax
-    v.ravel()[topdofs]= 1.0/Tmax
-    step = exRK.exRK(h, exRK.exRK_table['RK2-mid'], [Mechfield])
-    #step = imRK.DIRK(h, imRK.LDIRK['BWEuler'], [Mechfield])
+    v.ravel()[topdofs]= -2.0/Tmax
+    #step = exRK.exRK(h, exRK.exRK_table['RK2-mid'], [Mechfield])
+    step = imRK.DIRK(h, imRK.LDIRK['BWEuler'], [Mechfield])
     output()
     for tx in xrange(NT):
         print tx
         step.march()
-        if tx % 10 ==0:
+        if tx % 1 ==0:
             output()
 outcnt=0
 def output():
@@ -93,3 +93,5 @@ def output():
     outcnt += 1
 
 DYNAMICS()
+#hyper.n_types=1
+#R,KX,KV =  Assemble_Targets(ke, hyper, dmaps,fields, X.size)

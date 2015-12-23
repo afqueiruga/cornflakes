@@ -200,7 +200,7 @@ void assemble_targets_dep(int ntarget, assemble_target_t * att,
   hypervertex_t * edge;
   for(hx=0; hx<he->n_edge; hx++) {
     edge = Hyperedges_Get_Edge(he,hx);
-    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
+    for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
 
     /* Pull data */
     collect(loc_in, ke, hx,edge,he->l_edge, data);
@@ -208,7 +208,7 @@ void assemble_targets_dep(int ntarget, assemble_target_t * att,
     //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
     /* Call the kernel */
     ke->assem( loc_in, loc_out );
-    //for(i=0;i<len_loc_out;i++) printf("%lf ",loc_out[i]); printf("\n");
+    for(i=0;i<len_loc_out;i++) printf("%lf ",loc_out[i]); printf("\n");
     real_t * iter_out = loc_out;
     for(i=0;i<ntarget;i++) {
       iter_out = push_target(att+i,len_loc_out, hx,outmap+len_loc_out*hx, iter_out);

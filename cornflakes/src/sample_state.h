@@ -10,6 +10,6 @@
 
 #include "kernel.h"
 
-extern kernel_t kern_state;
+extern kernel_t kernel_state;
 
 #endif
