@@ -22,7 +22,7 @@ endif
 SWIGINFS = cornflakes_library_swig.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 #SWIGPYS = $(SWIGINFS:.i=.py)
-KERNELS = sample_peri.c sample_state.c darcy_state.c darcy_afq_state.c darcy_support_afq_state.c darcy_afq_CG.c
+KERNELS = $(wildcard kernels/*.c)
 SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c dofmap.c $(KERNELS)
 HEADERS = $(SRCS:.c=.h)
 OBJS = $(SRCS:.c=.o)
