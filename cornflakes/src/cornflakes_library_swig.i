@@ -10,6 +10,10 @@
   
 #include "sample_peri.h"
 #include "sample_state.h"
+#include "darcy_state.h"
+#include "darcy_afq_state.h"
+#include "darcy_support_afq_state.h"
+#include "darcy_afq_CG.h"
 %}
 
 %include "numpy.i"
@@ -45,6 +49,10 @@
 
 %include "sample_peri.h"
 %include "sample_state.h"
+%include "darcy_state.h"
+%include "darcy_afq_state.h"
+%include "darcy_support_afq_state.h"
+%include "darcy_afq_CG.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action
