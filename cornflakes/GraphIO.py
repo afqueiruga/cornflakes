@@ -86,7 +86,7 @@ def write_silo(fname, H,X,cycle=0, time=0,nodefields=[], edgefields=[], PUTMESH=
     def putvar(n,fo,LOC):
         if len(f.shape)==1 or f.shape[1]==1:
             silo.put_ucdvar1("node_"+n,"foo",
-                             np.asarray(f.T,order="C",dtype=np.double),
+                             np.asarray(f,order="C",dtype=np.double),
                              LOC, {DBOPT_CYCLE:cycle,DBOPT_DTIME:float(time),DBOPT_TIME:float(time)})
         elif f.shape[1]==2:
             silo.put_ucdvar("node_"+n,"foo", [n+"x",n+"y"],
