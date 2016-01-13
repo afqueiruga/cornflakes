@@ -24,7 +24,8 @@
 
 %apply (int DIM1, int* IN_ARRAY1) {(int nvert, hypervertex_t * verts),
                                    (int l_edge, hypervertex_t * verts)};
-%apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {(int Npart, int dim, real_t * x)};
+%apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {(int Npart, int dim, real_t * x),
+                                                (int npart, int dim, real_t * x)};
 %apply (int DIM1, int* INPLACE_ARRAY1) {(int dim_II, int * array_II),
                                         (int dim_JJ, int * array_JJ)};
 %apply (int DIM1, real_t* INPLACE_ARRAY1) {(int dim_KK, real_t * array_KK)};
@@ -122,6 +123,7 @@
     Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
   }
 
+  
   /*
    * Assembly wrappers
    */
