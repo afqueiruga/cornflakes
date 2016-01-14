@@ -7,6 +7,7 @@
 #include "kernel.h"
 #include "assemble.h"
 #include "dofmap.h"
+#include "util.h"
   
   //#include "kernels/sample_peri.h"
   //#include "kernels/sample_state.h"
@@ -25,7 +26,14 @@
 %apply (int DIM1, int* IN_ARRAY1) {(int nvert, hypervertex_t * verts),
                                    (int l_edge, hypervertex_t * verts)};
 %apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {(int Npart, int dim, real_t * x),
-                                                (int npart, int dim, real_t * x)};
+     (int npart, int dim, real_t * x),
+     (int nx1, int dx1, real_t * x1),
+     (int nx2, int dx2, real_t * x2),
+     (int nu1, int du1, real_t * u1)
+     };
+%apply (int DIM1, int  DIM2, real_t * INPLACE_ARRAY2) {
+  (int nu2, int du2, real_t * u2)
+    };
 %apply (int DIM1, int* INPLACE_ARRAY1) {(int dim_II, int * array_II),
                                         (int dim_JJ, int * array_JJ)};
 %apply (int DIM1, real_t* INPLACE_ARRAY1) {(int dim_KK, real_t * array_KK)};
@@ -47,6 +55,7 @@
 %include "kernel.h"
 %include "assemble.h"
 %include "dofmap.h"
+%include "util.h"
 
  //%include "kernels/sample_peri.h"
  //%include "kernels/sample_state.h"
@@ -123,6 +132,19 @@
     Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
   }
 
+  /*
+   * Other wrappers
+   */
+  void Interpolate_np(int nu1, int du1, real_t * u1,
+		      int nx1, int dx1, real_t * x1,
+		      int nu2, int du2, real_t * u2,
+		      int nx2, int dx2, real_t * x2,
+		      real_t rad)
+  {
+    Interpolate( u1, x1, nu1,
+		 u2, x2, nu2,
+		 du1, dx1, rad);
+  }
   
   /*
    * Assembly wrappers

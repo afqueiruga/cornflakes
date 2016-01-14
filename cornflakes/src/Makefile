@@ -23,7 +23,7 @@ SWIGINFS = cornflakes_library_swig.i
 WRAPPERS = $(SWIGINFS:.i=_wrap.c)
 #SWIGPYS = $(SWIGINFS:.i=.py)
 KERNELS = $(wildcard kernels/*.c)
-SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c dofmap.c $(KERNELS)
+SRCS = hypergraph.c spatialhash.c graphers.c assemble.c kernel.c dofmap.c util.c $(KERNELS)
 HEADERS = $(SRCS:.c=.h)
 OBJS = $(SRCS:.c=.o)
 WRAPOBJS = $(WRAPPERS:.c=.o)

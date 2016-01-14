@@ -1,12 +1,5 @@
 #include "graphers.h"
 
-#include "math.h"
-double dist(int dim, real_t * x, real_t * y) {
-  int i;
-  double ac = 0.0;
-  for(i=0;i<dim;i++) ac += (x[i]-y[i])*(x[i]-y[i]);
-  return sqrt(ac);
-}
 
 void Build_Pair_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff) {
   spatialhash_t sh;
@@ -34,7 +27,7 @@ void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t
   //printf("alloc hash\n");
   Build_New_Hash(&sh, Npart,dim,x, cutoff);
   //printf("scan\n");
-  int list[30]; // TODO: Auto allocate this list
+  int list[30]; // TODO: Auto allocate this list BADBADBAD
   int Nlist=0;
   void action(int FOO, int b) {
     if( b!=A &&  dist(dim, x+dim*A,x+dim*b)<=cutoff) {
