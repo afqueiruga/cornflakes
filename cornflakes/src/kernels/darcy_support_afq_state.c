@@ -10,9 +10,45 @@ void darcy_support_afq_eval(int l_edge,
                             /*Outputs:*/
                             real_t * restrict SUP)
 {
-    /* Evaluation of SUP */
-    SUP[0] = param[6]*pow(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0], 2);
-    SUP[1] = param[2]*pow(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0], 2);
+
+    if( pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of SUP */
+        SUP[0] += 0.25*param[6]*pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2);
+        SUP[1] += 0.25*param[6]*pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2);
+    } else {
+
+    }
+
+
+
+    if( pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of SUP */
+        SUP[0] += 0.25*param[6]*pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2);
+        SUP[1] += 0.25*param[6]*pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2);
+    } else {
+
+    }
+
+
+
+    if( pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of SUP */
+        SUP[0] += 0.25*param[6]*pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0], 2);
+        SUP[1] += 0.25*param[6]*pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0], 2);
+    } else {
+
+    }
+
+
+
+    if( pow(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of SUP */
+        SUP[0] += 0.25*param[6]*pow(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2);
+        SUP[1] += 0.25*param[6]*pow(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2);
+    } else {
+
+    }
+
 }
 
 void darcy_support_afq_eval_wr(int l_edge, const real_t * restrict in, real_t * restrict out) {

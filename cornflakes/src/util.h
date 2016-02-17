@@ -12,7 +12,7 @@ void Interpolate(real_t * uold, real_t * Xold, int Nold,
 		 int udim, int xdim, real_t rad);
 
 
-void wrte_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
+void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
 	      char * names, real_t ** data, int Ndata,
 	      char * fname, ... );
 

@@ -11,15 +11,65 @@ void darcy_afq_eval(int l_edge,
                     real_t * restrict FQ,
                     real_t * restrict KQ)
 {
-    /* Evaluation of FQ */
-    FQ[0] = 2*param[1]*param[6]*(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)));
-    FQ[1] = -2*param[1]*param[2]*(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[7]*sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)));
 
-    /* Evaluation of KQ */
-    KQ[0] = -2*param[1]*param[6]*(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)));
-    KQ[1] = 2*param[1]*param[6]*(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)));
-    KQ[2] = 2*param[1]*param[2]*(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0])/(param[0]*param[7]*sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)));
-    KQ[3] = -2*param[1]*param[2]*(1.0 - sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2))/param[0])/(param[0]*param[7]*sqrt(pow(-x[0] + x[2], 2) + pow(-x[1] + x[3], 2)));
+    if( pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of FQ */
+        FQ[0] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        FQ[1] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        /* Evaluation of KQ */
+        KQ[0] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[1] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[2] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[3] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+    } else {
+
+    }
+
+
+
+    if( pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of FQ */
+        FQ[0] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        FQ[1] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        /* Evaluation of KQ */
+        KQ[0] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[1] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[2] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[3] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+    } else {
+
+    }
+
+
+
+    if( pow(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of FQ */
+        FQ[0] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2)));
+        FQ[1] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2)));
+        /* Evaluation of KQ */
+        KQ[0] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2)));
+        KQ[1] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2)));
+        KQ[2] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2)));
+        KQ[3] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2))/param[0])/(param[0]*param[3]*sqrt(pow(-0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2) + pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2)));
+    } else {
+
+    }
+
+
+
+    if( pow(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0], 2) > 0.0 ) {
+        /* Evaluation of FQ */
+        FQ[0] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        FQ[1] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])*(-p[0] + p[1])/(param[0]*param[3]*sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        /* Evaluation of KQ */
+        KQ[0] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[1] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[2] += -0.5*param[1]*param[6]*(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+        KQ[3] += 0.5*param[1]*param[6]*(1.0 - sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2))/param[0])/(param[0]*param[3]*sqrt(pow(0.288675134594813*sqrt(param[6]) - x[0] + x[2], 2) + pow(0.288675134594813*sqrt(param[6]) - x[1] + x[3], 2)));
+    } else {
+
+    }
+
 }
 
 void darcy_afq_eval_wr(int l_edge, const real_t * restrict in, real_t * restrict out) {
