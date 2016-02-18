@@ -1,4 +1,5 @@
 file(GLOB PACKAGED_KERNELS "*.c")
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 set_property(SOURCE ${PACKAGED_KERNELS} APPEND PROPERTY COMPILE_FLAGS -fPIC)
 add_library(packaged_kernels STATIC ${PACKAGED_KERNELS})
 target_link_libraries(packaged_kernels m)

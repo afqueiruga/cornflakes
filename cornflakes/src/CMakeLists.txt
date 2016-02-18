@@ -1,24 +1,27 @@
 cmake_minimum_required(VERSION 2.8.9)
 
-project( cornflakes )
+project( proj_cornflakes )
 
-
-FIND_PACKAGE(SWIG REQUIRED)
-INCLUDE(${SWIG_USE_FILE})
-
-FIND_PACKAGE(PythonLibs)
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-
+# The source files
 file(GLOB SOURCES "*.c")
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
-SET(CMAKE_SWIG_FLAGS "")
-
 # Add in kernels to be included in the distribution
 add_subdirectory(kernels)
 
 
+# Make the static library
+add_library( lib_cornflakes STATIC ${SOURCES} )
+target_link_libraries( lib_cornflakes packaged_kernels m )
+
+
 # Configure swig
+FIND_PACKAGE(SWIG REQUIRED)
+INCLUDE(${SWIG_USE_FILE})
+SET(CMAKE_SWIG_FLAGS "")
+
+FIND_PACKAGE(PythonLibs)
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET_SOURCE_FILES_PROPERTIES(cornflakes_library_swig.i PROPERTIES SWIG_FLAGS "-includeall")
 SWIG_ADD_MODULE(cornflakes_library python cornflakes_library_swig.i ${SOURCES})
 SWIG_LINK_LIBRARIES(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES})
