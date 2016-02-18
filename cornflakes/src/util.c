@@ -62,7 +62,7 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
   fprintf(fh, "# vtk DataFile Version 2.0\nGraph connectivity\nASCII\nDATASET UNSTRUCTURED_GRID\n");
 
   // Write points
-  fprintf(fh,"POINTS %d doouble\n",N);
+  fprintf(fh,"POINTS %d double\n",N);
   for(A=0; A<N; A++) {
     if(gdim==2)
       fprintf(fh,"%e %e 0\n",x[gdim*A+0],x[gdim*A+1]);
@@ -72,14 +72,15 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
 
   // Write edges
   hyperedges_t * he = hg->he+0;
-  fprintf(fh,"\nCELLS %d %d\n",he->n_edge,he->n_edge*he->l_edge);
+  fprintf(fh,"\nCELLS %d %d\n",he->n_edge,he->n_edge*(he->l_edge+1));
   for(A=0;A<he->n_edge;A++) {
-    for(i=0;i<he->l_edge;i++) fprintf(fh,"%d ",he->edges[i]);
+    fprintf(fh,"%d ",he->l_edge);
+    for(i=0;i<he->l_edge;i++) fprintf(fh,"%d ",he->edges[he->l_edge*A+i]);
     fprintf(fh,"\n");
   }
   fprintf(fh,"\nCELL_TYPES %d\n",he->n_edge);
   int hetype = 0;
-  switch(he->n_edge) { // From the manual
+  switch(he->l_edge) { // From the manual
   case 1: hetype=1; break;
   case 2: hetype=3; break;
   case 3: hetype=5; break;
@@ -91,7 +92,9 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
   for(A=0;A<he->n_edge;A++) {
     fprintf(fh,"%d\n",hetype);
   }
+  fprintf(fh,"\n\n");
 
+  fclose(fh);
   // Write point data
 }
 
