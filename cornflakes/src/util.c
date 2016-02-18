@@ -44,7 +44,7 @@ void Interpolate(real_t * uold, real_t * Xold, int Nold,
 
 
 void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
-	       char * names, real_t ** data, int Ndata,
+	       char * names, real_t ** data, int * l_data, int Ndata,
 	       char * fname, ... )
 {
   va_list args;
@@ -57,11 +57,11 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
     exit(-1);
   }
 
-  int A,i;
+  int A,i,dnum;
   
   fprintf(fh, "# vtk DataFile Version 2.0\nGraph connectivity\nASCII\nDATASET UNSTRUCTURED_GRID\n");
 
-  // Write points
+  /* Write points */
   fprintf(fh,"POINTS %d double\n",N);
   for(A=0; A<N; A++) {
     if(gdim==2)
@@ -70,7 +70,7 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
       fprintf(fh,"%e %e %e\n",x[gdim*A+0],x[gdim*A+1],x[gdim*A+2]);
   }
 
-  // Write edges
+  /* Write edges */
   hyperedges_t * he = hg->he+0;
   fprintf(fh,"\nCELLS %d %d\n",he->n_edge,he->n_edge*(he->l_edge+1));
   for(A=0;A<he->n_edge;A++) {
@@ -84,7 +84,7 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
   case 1: hetype=1; break;
   case 2: hetype=3; break;
   case 3: hetype=5; break;
-  case 4: hetype=9; break;
+  case 4: hetype=9; break; // TODO: Toggle based on gdim
     //  case 4: hetype=10; break;
   case 8: hetype=12; break;
   default: hetype=1;
@@ -94,7 +94,35 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
   }
   fprintf(fh,"\n\n");
 
+  /* Write point data */
+  if(Ndata>0) fprintf(fh,"POINT_DATA %d\n",N);
+  for(dnum=0; dnum<Ndata; dnum++) {
+    switch(l_data[dnum]) {
+    case 3: // A 3D vector
+      fprintf(fh,"VECTORS %c double\n",names[dnum]);
+      for(A=0;A<N;A++) {
+	fprintf(fh,"%e %e %e\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1],data[dnum][gdim*A+2]);
+      }
+      break;
+    case 2: // A 2D vector
+      fprintf(fh,"VECTORS %c double\n",names[dnum]);
+      for(A=0;A<N;A++) {
+	fprintf(fh,"%e %e 0\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1]);
+      }
+      break;
+    case 9: // A 3D tensor
+    case 4: // A 2D tensor
+      // TODO: fill in
+    case 1: // A scalar
+    default: // The default case is scalar field of the first component
+      fprintf(fh,"SCALARS %c double\nLOOKUP_TABLE default\n",names[dnum]);
+      for(A=0;A<N;A++) {
+	fprintf(fh,"%e\n", data[dnum][l_data[dnum]*A]);
+      }
+    } // end switch
+  } // end for dnum
+  /* Write cell data */
+  
   fclose(fh);
-  // Write point data
 }
 
