@@ -1,5 +1,6 @@
 #include "assemble.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 
 void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
@@ -128,6 +129,47 @@ void place_targets(assemble_target_t * att,
     // Now assemble into att[t]:
     ker_out_iter = place_target(att+t, alldofs,nalldofs, ker_out_iter);
   } // end target loop
+}
+
+
+void setup_targets(kernel_t * ke, assemble_target_t * att, hypergraph_t * hg, int ndof) {
+  int j,i, matsize, oplen;
+  for(j=0;j<ke->noutp;j++) {
+    switch(ke->outp[j].rank) {
+    case 0:
+      att[j].rank = 0;
+      att[j].V = malloc( sizeof(double) );
+      break;
+    case 1:
+      att[j].rank = 1;
+      att[j].V = malloc( ndof*sizeof(double) );
+      break;
+    case 2:
+      matsize = 0;
+      for( i=0; i<hg->n_types; i++ ) {
+	oplen = kernel_outp_len(ke,ke->outp+j,hg->he[i].l_edge);
+	matsize += hg->he[i].n_edge * oplen;
+      }
+      att[j].rank = 2;
+      att[j].V = malloc( matsize * sizeof(double) );
+      att[j].II = malloc( matsize * sizeof(int) );
+      att[j].JJ = malloc( matsize * sizeof(int) );
+      
+      break;
+    default:
+      printf("Cannot handle higher rank\n!");
+    }
+  }
+}
+void destroy_targets(kernel_t * ke, assemble_target_t * att) {
+  int j;
+  for(j=0;j<ke->noutp;j++) {
+    free(att[j].V);
+    if(att[j].rank>=2) {
+      free(att[j].II);
+      free(att[j].JJ);
+    }
+  }
 }
 
 void assemble_targets(kernel_t * ke, hypergraph_t * hg,

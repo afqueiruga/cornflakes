@@ -17,6 +17,8 @@ typedef struct assemble_target_t {
 } assemble_target_t;
 
 
+void setup_targets(kernel_t * ke, assemble_target_t * att, hypergraph_t * hg, int ndof);
+void destroy_targets(kernel_t * ke, assemble_target_t * att);
 
 void assemble_targets(kernel_t * ke, hypergraph_t * hg,
 		      dofmap_t ** dofmaps, real_t ** data,
