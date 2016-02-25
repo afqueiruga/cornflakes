@@ -178,7 +178,14 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
 {
   int i,j, hex,hx;
   hyperedges_t * he;
-  //printf("A\n");
+  /* Reset the iterators */
+  for(i=0;i<ke->noutp;i++) {
+    if(att[i].rank>=2) {
+      att[i].Viter = att[i].V;
+      att[i].IIiter = att[i].II;
+      att[i].JJiter = att[i].JJ;
+    }
+  }
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
     /* Allocate the loca vectors for this size edge */
