@@ -1,5 +1,6 @@
 #include "graphers.h"
 
+#include "stdlib.h"
 
 void Build_Pair_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff) {
   spatialhash_t sh;
@@ -27,10 +28,16 @@ void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t
   //printf("alloc hash\n");
   Build_New_Hash(&sh, Npart,dim,x, cutoff);
   //printf("scan\n");
-  int list[30]; // TODO: Auto allocate this list BADBADBAD
+
+  int listbuf = 20;
+  int * list = malloc(sizeof(int)*listbuf); 
   int Nlist=0;
   void action(int FOO, int b) {
     if( b!=A &&  dist(dim, x+dim*A,x+dim*b)<=cutoff) {
+      if (Nlist >= listbuf) {
+	listbuf *= 2;
+	list = realloc(list,sizeof(int)*listbuf);
+      }
       list[Nlist] = b;
       Nlist++;
     }
@@ -42,6 +49,7 @@ void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t
     SpatialHash_ScanPt(&sh, x+dim*A, action);
     Hypergraph_Push_Edge(hg,Nlist,list);
   }
+  free(list);
   //SpatialHash_Scanall(&sh,x,action);
   //printf("destroy hash\n");
   SpatialHash_destroy(&sh);
