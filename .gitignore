@@ -1,3 +1,11 @@
 *~
+*#
 
+*.pyc
+*.so
+*.vtk
+*.silo
+*_wrap.c
 *.o
+
+cornflakes_library.py

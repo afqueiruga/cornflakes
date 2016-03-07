@@ -1,0 +1,58 @@
+* Current state:<2015-11-09 Mon>
+Right now it's all in a sub-sub-subfolder. Need to:
+** DONE Restructure directory to segregate scripts
+** DONE Better build system to segregate .o's etc
+** TODO Top level library
+** TODO Consolidate DOFMAP data structure
+   Do I want a C-struct dofmap? Or should I keep it as just arrays.
+   I want it to stay super-simple.
+   What would even go in a struct?
+   
+   -- ALso, I said graphs are un-oredered, but how do I associate output DOFMAPS??
+   -- Might just have to order it...
+   -- The output should be unassociated from the edge, since you can reuse an edge
+   -- for multiple kernels. The kernel implies the output DOFMAP. even though 
+   -- I didn't want kerngen to specifically think about hypergraphs. Should it?
+   -- 
+
+** TODO _kerngen_ needs to auto-make the data structure. 
+   - kernel.h should be part of kerngen
+** TODO Write _Husker_ to auto-wrap the kernels. 
+
+* Roadmap:
+* TODO Peridynamic states
+We want to be able to handle $\nu \neq \nicefrac{1}{4}$. The library
+shouldn't need too much more structure.
+** DONE New graph structure:
+   - (1) -> 2,3,4,5
+   - One way directed (only matters that Hu's on first)
+   - variable length hyperedge
+** TODO Kerngen needs a syntax for variable-length inputs
+** TODO Reading up on that Silling 2007 paper
+** TODO Unit tests!
+*** TODO Uniaxial extension, Biaxial, shear w/no damage
+*** TODO Notched crack growth
+*** TODO Plate w/ circle crack nucleation
+
+* TODO Implement SPH Model
+** TODO Implement shape function routines
+** TODO Start with lid-driven cavity and coutte flow
+** TODO Coupling with solid models: handling of multiple graphs and node-types
+
+* TODO Microstructure model
+** TODO Generation of rock microstruture
+** TODO Fast and loose: Make a vornoi tessalation with scipy, assign material properties
+   - If a bond crosses one of them, it gets a cementous strength
+asdf
+
+* TODO Import meshes from TOUGH
+
+* Curret State <2015-11-20 Fri>
+-- Hypergraphs can store edges of variable length
+-- New data structures for variable sized computation edges
+-- Helper routines for assign vertices to unordered edges that need a cell-DOF
+-- Kernel data structure will be reshuffled to have a list of DOFs, a list
+    of inputs, and a list of outputs
+-- Added Silo files (only pair-bonds, but that's easy to fix)
+   Support for storing a single mesh for multiple time series (implemented for TOUGH)
+
