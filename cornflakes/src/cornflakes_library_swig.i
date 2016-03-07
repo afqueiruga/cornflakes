@@ -176,10 +176,8 @@
     PyArrayObject * newobjs[3*ntarget + ndata];
     /* Step 1: Build the target list */
     for(i=0;i<ntarget;i++) {
-      //printf("Target %d ",i);
       obj = PyList_GetItem(targetlist, i);
       if(PyTuple_Check(obj)) {
-	//printf("Is a tuple\n");
 	att[i].rank = 2;
 	// 0: Get KK
 	subobj = PyTuple_GetItem(obj,0);
@@ -201,7 +199,6 @@
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
       }
       else { //  obj is (BETTER BE) a ndarray
-	//printf("Is an ndarray\n");
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
 	att[i].V = array_data(arrobj);
@@ -221,7 +218,6 @@
     }
     
     /* Step 2: Collect the data ptrs */
-    //printf("2\n");
     for(i=0;i<ndata;i++) {
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
@@ -232,7 +228,7 @@
 	nnewobj++;
       }
     }
-    //printf("3\n");
+
     /* Step 3: Create the dofmap list */
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
@@ -242,208 +238,15 @@
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
     }
-    //printf("4\n");
     /* Step 4: assemble! */
     assemble_targets(ke, hg,
 		     dofmaps, data_ptrs,
 		     att);
-    //printf("5\n");
 
     /* Step 5: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {
       Py_DECREF(newobjs[i]);
     }
-    //printf("6\n");
-
-  }
-
-  
-  void assemble_targets_dep_np(PyObject * targetlist,
-			   kernel_t * ke, hyperedges_t * he,
-			   int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
-			   PyObject * datalist)
-  {
-    int i=0, isnewobj=0;
-    PyObject *obj, *subobj;
-    PyArrayObject * arrobj;
-    /* Step 0: Check data types and build a list of possible object allocations */
-    if(!PyList_Check(targetlist)) return;
-    if(!PyList_Check(datalist)) return;
-    int ntarget = PyList_Size(targetlist);
-    int ndata = PyList_Size(datalist);
-    int nnewobj = 0;
-    PyArrayObject * newobjs[3*ntarget + ndata];
     
-    /* Step 1: Build the target list */
-    assemble_target_t att[ntarget];
-    for(i=0;i<ntarget;i++) {
-      //printf("Target %d ",i);
-      obj = PyList_GetItem(targetlist, i);
-      if(PyTuple_Check(obj)) {
-	//printf("Is a tuple\n");
-	att[i].rank = 2;
-	// 0: Get KK
-	subobj = PyTuple_GetItem(obj,0);
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_DOUBLE,&isnewobj);
-	att[i].V = array_data(arrobj);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	// 1: Get II
-	subobj = PyTuple_GetItem(obj,1);
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	att[i].II = array_data(arrobj);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	// 2: Get JJ
-	subobj = PyTuple_GetItem(obj,2);
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	att[i].JJ = array_data(arrobj);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-      }
-      else { //  obj is (BETTER BE) a ndarray
-	//printf("Is an ndarray\n");
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-	att[i].V = array_data(arrobj);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	if(array_size(arrobj,0)>1) {
-	  att[i].rank=1;
-	} else {
-	  att[i].rank=0;
-	}
-	att[i].II = NULL;
-	att[i].JJ = NULL;
-      }
-    }
-
-    //printf("Here\n");
-    /* Step 2: Collect the data ptrs */
-    real_t * data_ptrs[ndata];
-    for(i=0;i<ndata;i++) {
-      obj = PyList_GetItem(datalist,i );
-      isnewobj = 0;
-      arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      data_ptrs[i] = array_data(arrobj);
-      if(isnewobj) {
-	newobjs[nnewobj] = arrobj;
-	nnewobj++;
-      }
-    }
-    //printf("Assembling\n");
-    /* Step 3: Assemble */
-    assemble_targets_dep(ntarget, att,
-		     ke, he,
-		     INPLACE_ARRAY_FLAT,
-		     data_ptrs);
-
-    //printf("Recreasing references of %d objects\n",nnewobj);
-    /* Step 4: Decrease reference counts */
-    for(i=0;i<nnewobj;i++) {
-      Py_DECREF(newobjs[i]);
-    }
-    
-    /* Step 5: Profit! */
-  }
-
-  void assemble_vector_np(int DIM1, real_t * INPLACE_ARRAY1,
-			  kernel_t * ke, hyperedges_t * he,
-			  int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
-			  PyObject * datalist)
-  {
-    if(PyList_Check(datalist)) {
-      int ndata = PyList_Size(datalist);
-      
-      real_t *data_ptrs[ndata];
-      PyArrayObject * nda[ndata];
-      int isnewobj[ndata];
-      int i;
-      for(i=0;i<ndata;i++) {
-	PyObject * obj = NULL;
-	nda[i] = NULL;
-	obj = PyList_GetItem(datalist, i);
-	isnewobj[i] = 0;
-	nda[i] = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,isnewobj+i);
-	data_ptrs[i] = array_data(nda[i]);
-      }
-      
-
-      // Call the assembler
-      assemble_vector(INPLACE_ARRAY1, ke,he, INPLACE_ARRAY_FLAT, data_ptrs);
-      
-      // Tell python we don't want those arrays anymore, if we actually made any
-      for(i=0;i<ndata;i++) {
-	if(isnewobj[i]) Py_DECREF( nda[i] );
-      }
-    }
-  }
-
-  void assemble_matrix_np(int dim_II, int * array_II,
-			  int dim_JJ, int * array_JJ,
-			  int dim_KK, real_t * array_KK,
-			  kernel_t * ke, hyperedges_t * he,
-			  int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
-			  PyObject * datalist)
-  {
-    if(PyList_Check(datalist)) {
-      int ndata = PyList_Size(datalist);
-      
-      real_t *data_ptrs[ndata];
-      PyArrayObject * nda[ndata];
-      int isnewobj[ndata];
-      int i;
-      for(i=0;i<ndata;i++) {
-	PyObject * obj = NULL;
-	nda[i] = NULL;
-	obj = PyList_GetItem(datalist, i);
-	isnewobj[i] = 0;
-	nda[i] = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,isnewobj+i);
-	data_ptrs[i] = array_data(nda[i]);
-      }
-      
-
-      // Call the assembler
-      assemble_matrix(array_II,array_JJ,array_KK, ke,he, INPLACE_ARRAY_FLAT, data_ptrs);
-      
-      // Tell python we don't want those arrays anymore, if we actually made any
-      for(i=0;i<ndata;i++) {
-	if(isnewobj[i]) Py_DECREF( nda[i] );
-      }
-    }
-  }
-
-  void assemble_vector_matrix_np(int DIM1, real_t * INPLACE_ARRAY1,
-				 int dim_II, int * array_II,
-				 int dim_JJ, int * array_JJ,
-				 int dim_KK, real_t * array_KK,
-				 kernel_t * ke, hyperedges_t * he,
-				 int * INPLACE_ARRAY_FLAT, int DIM_FLAT,
-				 PyObject * datalist)
-  {
-    if(PyList_Check(datalist)) {
-      int ndata = PyList_Size(datalist);
-      
-      real_t *data_ptrs[ndata];
-      PyArrayObject * nda[ndata];
-      int isnewobj[ndata];
-      int i;
-      for(i=0;i<ndata;i++) {
-	PyObject * obj = NULL;
-	nda[i] = NULL;
-	obj = PyList_GetItem(datalist, i);
-	isnewobj[i] = 0;
-	nda[i] = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,isnewobj+i);
-	data_ptrs[i] = array_data(nda[i]);
-      }
-      
-
-      // Call the assembler
-      assemble_vector_matrix(INPLACE_ARRAY1,array_II,array_JJ,array_KK, ke,he, INPLACE_ARRAY_FLAT, data_ptrs);
-      
-      // Tell python we don't want those arrays anymore, if we actually made any
-      for(i=0;i<ndata;i++) {
-	if(isnewobj[i]) Py_DECREF( nda[i] );
-      }
-    }
   }
 %}
