@@ -11,10 +11,10 @@
   
   //#include "kernels/sample_peri.h"
   //#include "kernels/sample_state.h"
-#include "kernels/darcy_state.h"
-#include "kernels/darcy_afq_state.h"
-#include "kernels/darcy_support_afq_state.h"
-#include "kernels/darcy_afq_CG.h"
+  //#include "kernels/darcy_state.h"
+  //#include "kernels/darcy_afq_state.h"
+  //#include "kernels/darcy_support_afq_state.h"
+  //#include "kernels/darcy_afq_CG.h"
 %}
 
 %include "numpy.i"
@@ -59,10 +59,10 @@
 
  //%include "kernels/sample_peri.h"
  //%include "kernels/sample_state.h"
-%include "kernels/darcy_state.h"
-%include "kernels/darcy_afq_state.h"
-%include "kernels/darcy_support_afq_state.h"
-%include "kernels/darcy_afq_CG.h"
+ //%include "kernels/darcy_state.h"
+ //%include "kernels/darcy_afq_state.h"
+ //%include "kernels/darcy_support_afq_state.h"
+ //%include "kernels/darcy_afq_CG.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action

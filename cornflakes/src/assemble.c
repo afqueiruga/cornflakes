@@ -11,7 +11,10 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
   dofmap_t * dmap;
   real_t * datum;
   real_t * ker_in_iter = ker_in;
-  // TODO: Fringe case of global and variable length data.
+  
+  hypervertex_t select[l_edge];
+  int nselect, dim;
+  
   for(i=0;i<ke->ninp;i++) {
     
     fnum = ke->inp[i].field_number;
@@ -24,22 +27,14 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
     int dofs[maxlen];
     int ndof;
 
-    k_map_t * kmap = ke->maps + ke->inp[i].map_num;
-    if(kmap->v_start < 0) {
-      // Global dim
-      for(k=0; k < kmap->dim; k++) ker_in_iter[k] = datum[ k ];
-      ker_in_iter += kmap->dim;
-    } else {
-      // Variable length handling
-      int end = (kmap->v_end<0 ? l_edge : kmap->v_end);
-      // Loop over all vertices and collect dofs
-      for(j=kmap->v_start; j<end; j++) {
-	//printf("j:%d\n",j);
-	V = edge[j];
+    k_map_t  kmap = ke->maps[ mnum ];
+    kmap(edge,l_edge, select,&nselect, &dim);
+    
+    for(j=0; j<nselect; j++) {
+      V = edge[j];
 	Dofmap_Get(dmap, V, dofs,&ndof);
 	for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
 	ker_in_iter += ndof;
-      }
     }
     
   } // End loop over inps
@@ -93,6 +88,10 @@ void place_targets(assemble_target_t * att,
   hypervertex_t V;
   real_t * ker_out_iter = ker_out;
   int ndof, maxlen;
+
+  hypervertex_t select[l_edge];
+  int nselect, dim;
+  
   // Loop over the targets
   for(t=0; t<ke->noutp; t++) {
     // Make the array of all of the DOFs for simplicity
@@ -102,27 +101,20 @@ void place_targets(assemble_target_t * att,
     for(m=0; m<ke->outp[t].nmap; m++) {
       mnum = ke->outp[t].map_nums[m];
       //printf("t %d mnum %d\n",t,mnum);
-      k_map_t * kmap = ke->maps + mnum;
-      // Loop over the vertices
-      if( kmap->v_start < 0) {
-	// A global space
-	for(k=0;k<kmap->dim;k++) alldofs[iter+k] = k;
-	iter += kmap->dim;
-      } else {
-	// Handle variable length
-	int end = (kmap->v_end<0 ? l_edge : kmap->v_end);
-	dmap = dms[mnum];
-	maxlen = Dofmap_Max_Len(dmap);
-	int dofs[maxlen];
-	// Loop over all vertices and tabulate dofs
-	for(j=kmap->v_start; j<end; j++) { 
-	  V = edge[j];
-	  Dofmap_Get(dmap, V, dofs,&ndof);
-	  for(k=0;k<ndof;k++) {
+      k_map_t kmap = ke->maps[ mnum ];
+      kmap(edge,l_edge, select,&nselect, &dim);
+      
+      dmap = dms[mnum];
+      maxlen = Dofmap_Max_Len(dmap);
+      int dofs[maxlen];
+
+      for(j=0; j<nselect; j++) { 
+	V = edge[j];
+	Dofmap_Get(dmap, V, dofs,&ndof);
+	for(k=0;k<ndof;k++) {
 	    alldofs[iter+k] = dofs[k];
-	  }
-	  iter+=ndof;
 	}
+	iter+=ndof;
       }
     } // end map loop
     //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
