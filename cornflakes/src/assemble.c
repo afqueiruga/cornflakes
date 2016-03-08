@@ -29,9 +29,9 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
 
     k_map_t  kmap = ke->maps[ mnum ];
     kmap(edge,l_edge, select,&nselect, &dim);
-    
+    printf("map: "); for(j=0;j<nselect;j++) printf("%d ",select[j]); printf("\n");
     for(j=0; j<nselect; j++) {
-      V = edge[j];
+      V = select[j];
 	Dofmap_Get(dmap, V, dofs,&ndof);
 	for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
 	ker_in_iter += ndof;
@@ -109,7 +109,7 @@ void place_targets(assemble_target_t * att,
       int dofs[maxlen];
 
       for(j=0; j<nselect; j++) { 
-	V = edge[j];
+	V = select[j];
 	Dofmap_Get(dmap, V, dofs,&ndof);
 	for(k=0;k<ndof;k++) {
 	    alldofs[iter+k] = dofs[k];
