@@ -249,4 +249,57 @@
     }
     
   }
+
+  void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
+			  hypergraph_t * mesh,
+			  kernel_t * ke_circum,
+			  kernel_t * ke_centroid,
+			  kernel_t * ke_inside,
+			  PyObject * dofmaplist,
+			  PyObject * datalist,
+			  int Npart, int dim, real_t * x)
+  {
+    int i=0, isnewobj=0, nnewobj=0;
+    PyObject *obj;
+    PyArrayObject *arrobj;
+    if(!PyList_Check(datalist)) return;
+    if(!PyList_Check(dofmaplist)) return;
+    int ndata = PyList_Size(datalist);
+    int ndofmap = PyList_Size(dofmaplist);
+    
+    dofmap_t * dofmaps[ndofmap];
+    real_t * data_ptrs[ndata];
+
+    /* Step 2: Collect the data ptrs */
+    PyArrayObject * newobjs[ndata];
+    for(i=0;i<ndata;i++) {
+      obj = PyList_GetItem(datalist,i );
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
+      data_ptrs[i] = array_data(arrobj);
+      if(isnewobj) {
+	newobjs[nnewobj] = arrobj;
+	nnewobj++;
+      }
+    }
+
+    /* Step 3: Create the dofmap list */
+    for(i=0;i<ndofmap;i++) {
+      obj = PyList_GetItem(dofmaplist,i);
+      // BEEN FIXED
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      //if (!SWIG_IsOK(res)) {
+      //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
+      //}
+    }
+
+    Tie_Cells_and_Particles(hgnew,mesh,
+			    ke_circum,ke_centroid,ke_inside,
+			    dofmaps,data_ptrs,
+			    Npart,dim,x);
+    /* Step 5: Decrease reference counts */
+    for(i=0;i<nnewobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
+  }
 %}

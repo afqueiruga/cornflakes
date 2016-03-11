@@ -29,7 +29,7 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
 
     k_map_t  kmap = ke->maps[ mnum ];
     kmap(edge,l_edge, select,&nselect, &dim);
-    printf("map: "); for(j=0;j<nselect;j++) printf("%d ",select[j]); printf("\n");
+    //printf("map: "); for(j=0;j<nselect;j++) printf("%d ",select[j]); printf("\n");
     for(j=0; j<nselect; j++) {
       V = select[j];
 	Dofmap_Get(dmap, V, dofs,&ndof);

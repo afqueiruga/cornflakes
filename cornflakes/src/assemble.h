@@ -16,6 +16,8 @@ typedef struct assemble_target_t {
   int * JJiter;
 } assemble_target_t;
 
+void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
+	     dofmap_t ** dms, real_t ** data);
 
 void setup_targets(kernel_t * ke, assemble_target_t * att, hypergraph_t * hg, int ndof);
 void destroy_targets(kernel_t * ke, assemble_target_t * att);
