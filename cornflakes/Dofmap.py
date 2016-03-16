@@ -13,13 +13,16 @@ class Dofmap():
         return cflib.Dofmap_Max_Len(self.dm)
     def Get_List(self,Vs):
         return cflib.Dofmap_Get_List_np(self.dm, Vs)
+    def __del__(self):
+        cflib.Dofmap_Destroy(self.dm)
 class Dofmap_Strided(Dofmap):
     def __init__(self, stride, offset=0):
         self.dm = cflib.dofmap_t()
         cflib.Dofmap_Strided(self.dm, stride,offset)
 class Dofmap_Tabled(Dofmap):
-    pass # UNIMPLEMENTED
-
+    def __init__(self, stride, table):
+        self.dm = cflib.dofmap_t()
+        cflib.Dofmap_Tabled(self.dm, table.reshape((stride,))
 
 def select_nodes(X,fil):
     return np.asarray(np.where(map(fil,X))[0],dtype=np.intc)
