@@ -3,10 +3,10 @@
 
 typedef double real_t;
 
-#define KERNEL_MAP_MAX 5
-#define KERNEL_INP_MAX 5
-#define KERNEL_OUTP_MAX 5
-#define KERNEL_OUT_MAP_MAX 5
+#define KERNEL_MAP_MAX 10
+#define KERNEL_INP_MAX 10
+#define KERNEL_OUTP_MAX 10
+#define KERNEL_OUT_MAP_MAX 10
 // User only gets 31 characters to name
 #define KERNEL_NAME_MAX 32
 
