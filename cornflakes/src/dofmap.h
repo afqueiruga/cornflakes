@@ -24,12 +24,13 @@ typedef struct dofmap_t {
 
 /* Constructors */
 void Dofmap_Strided(dofmap_t * dm, int stride, int offset);
-void Dofmap_Tabled(dofmap_t * dm, int stride, int * table);
+void Dofmap_Tabled(dofmap_t * dm, int Nentry, int stride, int * table);
 /* Methods */
 void Dofmap_Get_List(dofmap_t * dm, int nvert, hypervertex_t * Vs, int * dofs, int * ndofs);
 /* Methods in the vtable */
 void Dofmap_Get(dofmap_t * dm, hypervertex_t V, int * dofs, int * ndofs);
 int  Dofmap_Max_Len(dofmap_t * dm);
+void Dofmap_Destroy(dofmap_t * dm);
 
 
 #endif

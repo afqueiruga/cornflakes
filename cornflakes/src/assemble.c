@@ -11,7 +11,10 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
   dofmap_t * dmap;
   real_t * datum;
   real_t * ker_in_iter = ker_in;
-  // TODO: Fringe case of global and variable length data.
+  
+  hypervertex_t select[l_edge];
+  int nselect, dim;
+  
   for(i=0;i<ke->ninp;i++) {
     
     fnum = ke->inp[i].field_number;
@@ -24,22 +27,14 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
     int dofs[maxlen];
     int ndof;
 
-    k_map_t * kmap = ke->maps + ke->inp[i].map_num;
-    if(kmap->v_start < 0) {
-      // Global dim
-      for(k=0; k < kmap->dim; k++) ker_in_iter[k] = datum[ k ];
-      ker_in_iter += kmap->dim;
-    } else {
-      // Variable length handling
-      int end = (kmap->v_end<0 ? l_edge : kmap->v_end);
-      // Loop over all vertices and collect dofs
-      for(j=kmap->v_start; j<end; j++) {
-	//printf("j:%d\n",j);
-	V = edge[j];
+    k_map_t  kmap = ke->maps[ mnum ];
+    kmap(edge,l_edge, select,&nselect, &dim);
+    //printf("map: "); for(j=0;j<nselect;j++) printf("%d ",select[j]); printf("\n");
+    for(j=0; j<nselect; j++) {
+      V = select[j];
 	Dofmap_Get(dmap, V, dofs,&ndof);
 	for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
 	ker_in_iter += ndof;
-      }
     }
     
   } // End loop over inps
@@ -93,6 +88,10 @@ void place_targets(assemble_target_t * att,
   hypervertex_t V;
   real_t * ker_out_iter = ker_out;
   int ndof, maxlen;
+
+  hypervertex_t select[l_edge];
+  int nselect, dim;
+  
   // Loop over the targets
   for(t=0; t<ke->noutp; t++) {
     // Make the array of all of the DOFs for simplicity
@@ -102,27 +101,20 @@ void place_targets(assemble_target_t * att,
     for(m=0; m<ke->outp[t].nmap; m++) {
       mnum = ke->outp[t].map_nums[m];
       //printf("t %d mnum %d\n",t,mnum);
-      k_map_t * kmap = ke->maps + mnum;
-      // Loop over the vertices
-      if( kmap->v_start < 0) {
-	// A global space
-	for(k=0;k<kmap->dim;k++) alldofs[iter+k] = k;
-	iter += kmap->dim;
-      } else {
-	// Handle variable length
-	int end = (kmap->v_end<0 ? l_edge : kmap->v_end);
-	dmap = dms[mnum];
-	maxlen = Dofmap_Max_Len(dmap);
-	int dofs[maxlen];
-	// Loop over all vertices and tabulate dofs
-	for(j=kmap->v_start; j<end; j++) { 
-	  V = edge[j];
-	  Dofmap_Get(dmap, V, dofs,&ndof);
-	  for(k=0;k<ndof;k++) {
+      k_map_t kmap = ke->maps[ mnum ];
+      kmap(edge,l_edge, select,&nselect, &dim);
+      
+      dmap = dms[mnum];
+      maxlen = Dofmap_Max_Len(dmap);
+      int dofs[maxlen];
+
+      for(j=0; j<nselect; j++) { 
+	V = select[j];
+	Dofmap_Get(dmap, V, dofs,&ndof);
+	for(k=0;k<ndof;k++) {
 	    alldofs[iter+k] = dofs[k];
-	  }
-	  iter+=ndof;
 	}
+	iter+=ndof;
       }
     } // end map loop
     //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
@@ -216,195 +208,3 @@ void assemble_targets(kernel_t * ke, hypergraph_t * hg,
 
   
 }
-
-
-
-
-void assemble_targets_dep(int ntarget, assemble_target_t * att,
-			  kernel_t * ke, hyperedges_t * hg,
-			  int * outmap, real_t ** data)
-{
-  #if 0
-  int i,j,hx;
-  /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
-  /*
-   * Allocate local vectors
-   */
-  int len_loc_in = kernel_inp_len(ke, he->l_edge);
-  int len_loc_out = kernel_outp_len(ke, he->l_edge);
-  real_t loc_in[len_loc_in];
-  int out_alloc = 0; // THE KERNEL SHOULD ENCODE THIS INFORMATION....
-  for(i=0;i<ntarget;i++) {
-    switch(att[i].rank) {
-    case 0: out_alloc += 1; break;
-    case 1: out_alloc += len_loc_out; break;
-    case 2: out_alloc += len_loc_out*len_loc_out; break; // FOR NOW: ONLY SQUARE MATRICES
-    }
-  }
-  real_t loc_out[out_alloc];
-
-  /*
-   * Loop over the edges in the graph
-   */
-  hypervertex_t * edge;
-  for(hx=0; hx<he->n_edge; hx++) {
-    edge = Hyperedges_Get_Edge(he,hx);
-    for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
-
-    /* Pull data */
-    collect(loc_in, ke, hx,edge,he->l_edge, data);
-
-    //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
-    /* Call the kernel */
-    ke->assem( loc_in, loc_out );
-    for(i=0;i<len_loc_out;i++) printf("%lf ",loc_out[i]); printf("\n");
-    real_t * iter_out = loc_out;
-    for(i=0;i<ntarget;i++) {
-      iter_out = push_target(att+i,len_loc_out, hx,outmap+len_loc_out*hx, iter_out);
-    }
-  }
-  #endif
-}
-
-
-
-
-/************************************
- ***         DEPRECATED:          ***
- ************************************/
-
-
-void assemble_vector(real_t * R, kernel_t * ke,hyperedges_t * he, int * outmap, real_t ** data)
-{
-#if 0
-  int hx,i,j,A;
-  /*
-   * R will be accumalated onto!
-   */
-
-  /*
-   * Allocate local vectors
-   */
-  int len_loc_in = kernel_inp_len(ke, he->l_edge);
-  int len_loc_out = kernel_outp_len(ke, he->l_edge);
-  real_t loc_in[len_loc_in]; 
-  real_t loc_out[len_loc_out];
-
-  //printf("local sizes are %d %d\n",len_loc_in,len_loc_out);
-
-  //printf("%lf %lf\n", data[0][10],data[1][10]);
-  /*
-   * Loop over the edges in the graph
-   */
-  int * edge;
-  for(hx=0; hx<he->n_edge; hx++) {
-    edge = Hyperedges_Get_Edge(he,hx);
-    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
-
-    /* Pull data */
-    collect(loc_in, ke, hx,edge,he->l_edge, data);
-
-    //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
-    /* Call the kernel */
-    ke->assem( loc_in, loc_out );
-    
-    /* Push the data */
-    for(i=0;i<len_loc_out;i++) {
-      R[ outmap[len_loc_out*hx + i] ] += loc_out[i];
-    }
-  }
-  #endif
-}
-
-
-void assemble_matrix(int * II, int * JJ, real_t * KK,
-		     kernel_t * ke, hyperedges_t * he,
-		     int * outmap, real_t ** data)
-{
-  #if 0
-  int i,j,hx;
-  /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
-  /*
-   * Allocate local vectors
-   */
-  int len_loc_in = kernel_inp_len(ke, he->l_edge);
-  int len_loc_out = kernel_outp_len(ke, he->l_edge);
-  real_t loc_in[len_loc_in]; 
-  // Don't need this guy, we just plop it into KK
-  //real_t loc_out[len_loc_out*len_loc_out]; // FOR NOW: ONLY SQUARE MATRICES
-
-  /*
-   * Loop over the edges in the graph
-   */
-  hypervertex_t * edge;
-  
-  for(hx=0; hx<he->n_edge; hx++) {
-    edge = Hyperedges_Get_Edge(he,hx);
-    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
-
-    /* Pull data */
-    collect(loc_in, ke, hx,edge,he->l_edge, data);
-
-    //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
-    /* Call the kernel */
-    ke->assem( loc_in, KK+len_loc_out*len_loc_out*hx );
-    
-    /* Push the II,JJ indices */
-    for(i=0;i<len_loc_out;i++) {
-      for(j=0;j<len_loc_out;j++) {
-	II[ len_loc_out*len_loc_out*hx + len_loc_out*i + j] = outmap[len_loc_out*hx + i ];
-	JJ[ len_loc_out*len_loc_out*hx + len_loc_out*i + j] = outmap[len_loc_out*hx + j ];
-      }
-    }
-  }
-
- #endif 
-}
-
-
-void assemble_vector_matrix(real_t * R,
-			    int * II, int * JJ, real_t * KK,
-			    kernel_t * ke, hyperedges_t * he,
-			    int * outmap, real_t ** data)
-{
-  #if 0
-    int i,j,hx;
-  /* II,JJ,KK better have size len_loc_out^2 * he->n_edge */
-  /*
-   * Allocate local vectors
-   */
-  int len_loc_in = kernel_inp_len(ke, he->l_edge);
-  int len_loc_out = kernel_outp_len(ke, he->l_edge);
-  real_t loc_in[len_loc_in]; 
-  real_t loc_out[len_loc_out + len_loc_out*len_loc_out]; // FOR NOW: ONLY SQUARE MATRICES
-
-  /*
-   * Loop over the edges in the graph
-   */
-  hypervertex_t * edge;
-  
-  for(hx=0; hx<he->n_edge; hx++) {
-    edge = Hyperedges_Get_Edge(he,hx);
-    //for(i=0;i<he->l_edge;i++) printf("%d ",edge[i]); printf("\n");
-
-    /* Pull data */
-    collect(loc_in, ke, hx,edge,he->l_edge, data);
-
-    //for(i=0;i<len_loc_in;i++) printf("%lf ",loc_in[i]); printf("\n");
-    /* Call the kernel */
-    ke->assem( loc_in, loc_out );
-    
-    /* Push the II,JJ indices */
-    for(i=0;i<len_loc_out;i++) {
-      for(j=0;j<len_loc_out;j++) {
-	II[ len_loc_out*len_loc_out*hx + len_loc_out*i + j] = outmap[len_loc_out*hx + i ];
-	JJ[ len_loc_out*len_loc_out*hx + len_loc_out*i + j] = outmap[len_loc_out*hx + j ];
-	KK[len_loc_out*len_loc_out*hx + len_loc_out*i + j] = loc_out[len_loc_out + len_loc_out*i + j];
-      }
-      R[outmap[len_loc_out*hx + i]] += loc_out[i];
-    }
-    
-  }
-#endif
-}
-

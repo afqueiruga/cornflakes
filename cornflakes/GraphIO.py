@@ -15,7 +15,7 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
         2:"{0} {1} 0.0\n",
         3:"{0} {1} {2}\n"
         }
-    elems = H.view()
+    elems = H.view()[0]
     vecfmt = vecformatdict[X.shape[1]]
     
     fh = open(fname,"w")
@@ -42,20 +42,29 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
     for el in elems:
         fh.write("{0}\n".format(celltypekey[elems.shape[1]]))
 
-    if nodefields:
-        fh.write("POINT_DATA {0}\n".format(X.shape[0]))
-        for n,f in nodefields.iteritems():
-            fh.write("VECTORS {0} double\n".format(n))
-            #fh.write("LOOKUP_TABLE default\n")
-            for l in f:
-                fh.write(vecfmt.format(*l))
-    if edgefields:
-        fh.write("CELL_DATA {0}\n".format(H.hg.n_edge))
-        for n,f in edgefields.iteritems():
+    # Macro to write a data block
+    def PUTFIELD(n,f):
+        if len(f.shape)==1 or f.shape[1]==1:
             fh.write("SCALARS {0} double\n".format(n))
             fh.write("LOOKUP_TABLE default\n")
             for l in f:
-                fh.write("{0}\n".format(l))
+                fh.write(str(l)+"\n")
+        else:
+            fh.write("VECTORS {0} double\n".format(n))
+            for l in f:
+                fh.write(vecfmt.format(*l))
+    
+    # Dump all of the node fields
+    if nodefields:
+        fh.write("POINT_DATA {0}\n".format(X.shape[0]))
+        for n,f in nodefields:
+            PUTFIELD(n,f)
+    # Cell fields now
+    if edgefields:
+        fh.write("CELL_DATA {0}\n".format(elems.shape[0]))
+        for n,f in edgefields:
+            PUTFIELD(n,f)
+            
     fh.close()
 
              
