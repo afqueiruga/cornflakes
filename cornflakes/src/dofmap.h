@@ -30,6 +30,7 @@ void Dofmap_Get_List(dofmap_t * dm, int nvert, hypervertex_t * Vs, int * dofs, i
 /* Methods in the vtable */
 void Dofmap_Get(dofmap_t * dm, hypervertex_t V, int * dofs, int * ndofs);
 int  Dofmap_Max_Len(dofmap_t * dm);
+void Dofmap_Destroy(dofmap_t * dm);
 
 
 #endif

@@ -28,6 +28,9 @@ void Dofmap_Get_List(dofmap_t * dm, int nvert, hypervertex_t * Vs, int * dofs, i
     *ndofs += nd;
   }
 }
+void Dofmap_Destroy(dofmap_t * dm) {
+  dm->vtable->Destroy(dm);
+}
 
 
 /*
