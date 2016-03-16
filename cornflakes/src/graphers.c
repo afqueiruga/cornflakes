@@ -99,7 +99,8 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
 			     kernel_t * ke_inside,
 			     dofmap_t ** dofmaps,
 			     real_t ** data,
-			     int Npart, int dim, real_t * x)
+			     int Npart, int dim, real_t * x,
+			     hypervertex_t * PV)
 {
   int i, j;
   int n_cells = mesh->he[0].n_edge; // TODO: BUG. Hypergraph needs a total_edge_count method
@@ -175,14 +176,16 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
       for(i=0;i<l_edge;i++) newedge[i] = edge[i];
       for(i=0;i<Nlist;i++) {
 	if (testeval[i]>0 && found[list[i]]==0) {
-	  newedge[l_edge+Naccept] = list[i];
+	  newedge[l_edge+Naccept] = (PV? PV[list[i]] : list[i]);
 	  found[list[i]]=1;
 	  Naccept++;
 	}
       }
 
       //printf("Naccept %d\n",Naccept);
-      Hypergraph_Push_Edge(hgnew,  l_edge+Naccept, newedge);
+      if(Naccept > 0) {
+	Hypergraph_Push_Edge(hgnew,  l_edge+Naccept, newedge);
+      }
     } // end edge loop
   } // end subgraph loop
   free(list);

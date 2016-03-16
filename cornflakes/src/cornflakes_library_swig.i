@@ -251,13 +251,15 @@
   }
 
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
-			  hypergraph_t * mesh,
-			  kernel_t * ke_circum,
-			  kernel_t * ke_centroid,
-			  kernel_t * ke_inside,
-			  PyObject * dofmaplist,
-			  PyObject * datalist,
-			  int Npart, int dim, real_t * x)
+				  hypergraph_t * mesh,
+				  kernel_t * ke_circum,
+				  kernel_t * ke_centroid,
+				  kernel_t * ke_inside,
+				  PyObject * dofmaplist,
+				  PyObject * datalist,
+				  int Npart, int dim, real_t * x,
+				  int nvert, hypervertex_t * verts
+				  )
   {
     int i=0, isnewobj=0, nnewobj=0;
     PyObject *obj;
@@ -293,10 +295,14 @@
       //}
     }
 
+    if(nvert != Npart) {
+      verts = NULL;
+    }
     Tie_Cells_and_Particles(hgnew,mesh,
 			    ke_circum,ke_centroid,ke_inside,
 			    dofmaps,data_ptrs,
-			    Npart,dim,x);
+			    Npart,dim,x,
+			    verts);
     /* Step 5: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {
       Py_DECREF(newobjs[i]);
