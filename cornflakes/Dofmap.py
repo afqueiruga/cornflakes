@@ -20,9 +20,9 @@ class Dofmap_Strided(Dofmap):
         self.dm = cflib.dofmap_t()
         cflib.Dofmap_Strided(self.dm, stride,offset)
 class Dofmap_Tabled(Dofmap):
-    def __init__(self, stride, table):
+    def __init__(self, stride, table, offset=0):
         self.dm = cflib.dofmap_t()
-        cflib.Dofmap_Tabled(self.dm, table.reshape((stride,)) )
+        cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), int(offset) )
 
 def select_nodes(X,fil):
     return np.asarray(np.where(map(fil,X))[0],dtype=np.intc)

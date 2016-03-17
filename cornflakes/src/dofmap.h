@@ -17,6 +17,7 @@ typedef struct dofmap_t {
     struct tabled_t{
       int stride;
       int * table;
+      int offset;
     } tabled;
   } U;
   const _DOFMAP_VTABLE_t * vtable;
@@ -24,7 +25,7 @@ typedef struct dofmap_t {
 
 /* Constructors */
 void Dofmap_Strided(dofmap_t * dm, int stride, int offset);
-void Dofmap_Tabled(dofmap_t * dm, int Nentry, int stride, int * table);
+void Dofmap_Tabled(dofmap_t * dm, int Nentry, int stride, int * table, int offset);
 /* Methods */
 void Dofmap_Get_List(dofmap_t * dm, int nvert, hypervertex_t * Vs, int * dofs, int * ndofs);
 /* Methods in the vtable */

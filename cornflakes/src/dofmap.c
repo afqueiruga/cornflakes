@@ -71,7 +71,7 @@ void Dofmap_Tabled_Get(dofmap_t * dm, hypervertex_t V, int * dofs, int *ndofs) {
   *ndofs = dm->U.tabled.stride;
   int i;
   for(i=0;i<dm->U.tabled.stride; i++) {
-    dofs[i] = dm->U.tabled.table[dm->U.tabled.stride*( (int)V ) + i];
+    dofs[i] = dm->U.tabled.table[dm->U.tabled.stride*( (int)V + dm->U.tabled.offset ) + i];
   }
 }
 void Dofmap_Tabled_Destroy(dofmap_t * dm) {
@@ -82,9 +82,10 @@ const _DOFMAP_VTABLE_t Dofmap_Tabled_vtable = {
   .Get = Dofmap_Tabled_Get,
   .Destroy = Dofmap_Tabled_Destroy
 };
-void Dofmap_Tabled(dofmap_t * dm, int Nentry, int stride, int * table) {
+void Dofmap_Tabled(dofmap_t * dm, int Nentry, int stride, int * table,   int offset) {
   dm->vtable = &Dofmap_Tabled_vtable;
   dm->U.tabled.stride = stride;
+  dm->U.tabled.offset = offset;
   dm->U.tabled.table = malloc( sizeof(int) * Nentry * stride );
   int i;
   for(i=0;i<Nentry*stride;i++) dm->U.tabled.table[i] = table[i];

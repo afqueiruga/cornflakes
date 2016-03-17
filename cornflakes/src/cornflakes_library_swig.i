@@ -38,6 +38,7 @@
                                         (int dim_JJ, int * array_JJ)};
 %apply (int DIM1, real_t* INPLACE_ARRAY1) {(int dim_KK, real_t * array_KK)};
 %apply (int* ARGOUT_ARRAY1, int * DIM1) {(int * dofs, int *ndofs)};
+%apply (int DIM1, int DIM2, int * IN_ARRAY2) { (int Nentry, int stride, int * table) };
 
 %include "carrays.i"
 %array_class(int,intArray)
