@@ -7,6 +7,7 @@ file(GLOB SOURCES "*.c")
 # Add in kernels to be included in the distribution
 add_subdirectory(kernels)
 
+set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")
 
 # Make the static library
 add_library( lib_cornflakes STATIC ${SOURCES} )
