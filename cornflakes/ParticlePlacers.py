@@ -32,7 +32,12 @@ def init_cube(Nx,Ny,Nz, start,e1,e2,e3, dev=0.0):
 
 def sphere_test(cen,rad):
     return lambda x: ((x-cen).dot(x-cen)<rad)
-
+def rotated_rect_test(cen,theta, W,H):
+    def test(x):
+        xR=np.array([[np.cos(theta),np.sin(theta)],[-np.sin(theta),np.cos(theta)]]).dot(x-cen)
+        #print x,xR
+        return ( xR[0]<=W and xR[0]>=-W and xR[1]<=H and xR[1]>=-H )
+    return test
 def select_nodes(X,fil):
     return np.asarray(np.where(map(fil,X))[0],dtype=np.intc)
 
