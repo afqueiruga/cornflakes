@@ -33,6 +33,10 @@ def init_cube(Nx,Ny,Nz, start,e1,e2,e3, dev=0.0):
 def sphere_test(cen,rad):
     return lambda x: ((x-cen).dot(x-cen)<rad)
 
+def select_nodes(X,fil):
+    return np.asarray(np.where(map(fil,X))[0],dtype=np.intc)
+
+
 def delete_particles(X, conditions):
     marked = np.ones(X.shape[0],dtype=np.bool)
     for i,a in enumerate(X):

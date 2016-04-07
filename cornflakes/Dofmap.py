@@ -24,8 +24,6 @@ class Dofmap_Tabled(Dofmap):
         self.dm = cflib.dofmap_t()
         cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), int(offset) )
 
-def select_nodes(X,fil):
-    return np.asarray(np.where(map(fil,X))[0],dtype=np.intc)
 
 # DEPRECATED
 class Dofmap_dep():
