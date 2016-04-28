@@ -119,7 +119,7 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
   //printf("hmax: %lf\n",hmax);
   /* Build a hash using this circumradius and fill it with the particles */
   spatialhash_t sh;
-  Build_New_Hash(&sh, Npart,dim,x, hmax);
+  Build_New_Hash(&sh, Npart,dim,x, hmax); // There's a crash here
   int * found = calloc( sizeof(int),Npart);
   
   /* Now loop against the cells */
