@@ -74,10 +74,12 @@ real_t * Target_Default_Place(target_t * self,
   }
 }
 void Target_Default_Destroy(target_t * self) {
-  free(data(self)->V);
-  if(self->rank >= 2) {
-    free(data(self)->II);
-    free(data(self)->JJ);
+  if(data(self)->own) {
+    free(data(self)->V);
+    if(self->rank >= 2) {
+      free(data(self)->II);
+      free(data(self)->JJ);
+    }
   }
   free(data(self));
 }
@@ -113,6 +115,7 @@ void Target_Default_New(target_t * self, int onum,
 
   self->rank = ke->outp[onum].rank;
   self->N = ndof;
+  data(self)->own = 1;
   switch(self->rank) {
   case 0:
     data(self)->V = malloc( sizeof(real_t) );
@@ -134,5 +137,24 @@ void Target_Default_New(target_t * self, int onum,
   default:
     printf("Cannot handle higher rank\n!");
   }
+  // For good measure:
+  Target_Default_Wipe(self);
+}
+void Target_Default_From_Array(target_t * self, int rank, int ndof,
+			       real_t * V, int * II, int * JJ) {
+  self->vtable = &Table_Default_vtable;
+  self->data = malloc(sizeof(struct Target_Default_data_t));
+
+  self->rank = rank;
+  self->N = ndof;
+
+  data(self)->own = 0;
+  
+  data(self)->V = V;
+  if(self->rank > 1) {
+    data(self)->II = II;
+    data(self)->JJ = JJ;
+  }
+  Target_Default_Wipe(self);
 }
 #undef data

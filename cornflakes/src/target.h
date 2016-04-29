@@ -18,9 +18,13 @@ typedef struct target_t {
  * The constructor for the built in type, meant to be used with 
  * Scipy in python-cornflakes
  */
-void Target_New_Default(target_t * self, int rank, int N);
+void Target_Default_New(target_t * self, int onum,
+			kernel_t * ke, hypergraph_t * hg, int ndof);
+void Target_Default_From_Array(target_t * self, int rank, int ndof,
+			       real_t * V, int * II, int * JJ);
 typedef struct Target_Default_data_t {
   int nalloc;
+  int own;
   real_t * V;
   int * II;
   int * JJ;
@@ -29,6 +33,11 @@ typedef struct Target_Default_data_t {
   int * IIiter;
   int * JJiter;
 } Target_Default_data_t;
+
+/* The helper constructor */
+void Target_New(target_t * self, int onum,
+		kernel_t * ke, hypergraph_t * hg, int ndof,
+		char * backend);
 
 /* The member methods */
 real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals);
