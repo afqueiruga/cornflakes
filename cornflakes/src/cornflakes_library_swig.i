@@ -8,7 +8,7 @@
 #include "assemble.h"
 #include "dofmap.h"
 #include "util.h"
-  
+#include "target.h"
   //#include "kernels/sample_peri.h"
   //#include "kernels/sample_state.h"
   //#include "kernels/darcy_state.h"
@@ -57,7 +57,7 @@
 %include "assemble.h"
 %include "dofmap.h"
 %include "util.h"
-
+%include "target.h"
  //%include "kernels/sample_peri.h"
  //%include "kernels/sample_state.h"
  //%include "kernels/darcy_state.h"
@@ -234,9 +234,7 @@
       //}
     }
     /* Step 4: assemble! */
-    assemble(ke, hg,
-		     dofmaps, data_ptrs,
-		     att);
+    assemble(ke, hg, dofmaps, data_ptrs, att);
 
     /* Step 5: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {

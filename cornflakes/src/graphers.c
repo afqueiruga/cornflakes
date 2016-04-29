@@ -111,7 +111,7 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
   //setup_targets(ke_circum,att, mesh,n_cells);
   
   /* Calculate the maximum circum radius */
-  assemble_targets(ke_circum,mesh, dofmaps,data, att);
+  assemble(ke_circum,mesh, dofmaps,data, att);
   real_t hmax = 0.0;
   for(int i=0; i<n_cells; i++) {
     if(Target_Default_Data(att+0)->V[i] > hmax) {
