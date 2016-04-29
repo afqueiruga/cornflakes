@@ -39,7 +39,7 @@ void Target_New(target_t * self, int onum,
 /*
  * The default implementation
  */
-#define data(x) ((Target_Default_data_t*)(self->data))
+#define data(x) Target_Default_Data(x)
 real_t * Target_Default_Place(target_t * self,
 			      int n, int * dofs, real_t * ker_out) {
   int i,j;
@@ -157,4 +157,3 @@ void Target_Default_From_Array(target_t * self, int rank, int ndof,
   }
   Target_Default_Wipe(self);
 }
-#undef data

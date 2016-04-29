@@ -33,11 +33,13 @@ typedef struct Target_Default_data_t {
   int * IIiter;
   int * JJiter;
 } Target_Default_data_t;
+#define Target_Default_Data(x) ((Target_Default_data_t*)((x)->data))
 
 /* The helper constructor */
 void Target_New(target_t * self, int onum,
 		kernel_t * ke, hypergraph_t * hg, int ndof,
 		char * backend);
+
 
 /* The member methods */
 real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals);

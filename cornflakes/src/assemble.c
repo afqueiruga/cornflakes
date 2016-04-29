@@ -84,7 +84,7 @@ void place_targets(target_t * att,
     //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
     // Now assemble into att[t]:
     //ker_out_iter = place_target(att+t, alldofs,nalldofs, ker_out_iter);
-    ker_out_iter = Target_Place(att+t, alldofs,nalldofs,ker_out_iter);
+    ker_out_iter = Target_Place(att+t, nalldofs,alldofs, ker_out_iter);
   } // end target loop
 }
 

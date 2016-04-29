@@ -106,14 +106,17 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
   int n_cells = mesh->he[0].n_edge; // TODO: BUG. Hypergraph needs a total_edge_count method
 
   /* Setup storage for the results */
-  assemble_target_t att[1];
-  setup_targets(ke_circum,att, mesh,n_cells);
+  target_t att[1];
+  Target_Default_New(att+0,0, ke_circum,mesh,n_cells);
+  //setup_targets(ke_circum,att, mesh,n_cells);
   
   /* Calculate the maximum circum radius */
   assemble_targets(ke_circum,mesh, dofmaps,data, att);
   real_t hmax = 0.0;
   for(int i=0; i<n_cells; i++) {
-    if(att[0].V[i] > hmax) hmax = att[0].V[i];
+    if(Target_Default_Data(att+0)->V[i] > hmax) {
+      hmax = Target_Default_Data(att+0)->V[i];
+    }
   }
   hmax = sqrt(hmax);
   //printf("hmax: %lf\n",hmax);
@@ -192,6 +195,6 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
 
   /* Clean up */
   SpatialHash_destroy(&sh);
-  destroy_targets(ke_circum,att);
+  Target_Destroy(att+0);
   free(found);
 }
