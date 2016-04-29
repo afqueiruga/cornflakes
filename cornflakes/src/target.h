@@ -2,6 +2,7 @@
 #define __TARGET_H
 
 #include "kernel.h"
+#include "hypergraph.h"
 
 /* A polymorphic class for targets with different backends */
 typedef struct _TARGET_VTABLE_t _TARGET_VTABLE_t;
@@ -30,7 +31,7 @@ typedef struct Target_Default_data_t {
 } Target_Default_data_t;
 
 /* The member methods */
-void Target_Place(target_t * self, int n, int * dofs, real_t * vals);
+real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals);
 void Target_Destroy(target_t * self);
 void Target_Wipe(target_t * self);
 
