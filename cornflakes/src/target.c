@@ -22,6 +22,19 @@ void Target_Wipe(target_t * self) {
   self->vtable->Wipe(self);
 }
 
+/*
+ * Helper method for making a target with a specific backend
+ */
+void Target_New(target_t * self, int onum,
+		kernel_t * ke, hypergraph_t * hg, int ndof,
+		char * backend) {
+  switch(backend[0]) {
+  case 'd':
+  default:
+    Target_Default_New(self,onum,ke,hg,ndof);
+  }
+}
+	
 
 /*
  * The default implementation
