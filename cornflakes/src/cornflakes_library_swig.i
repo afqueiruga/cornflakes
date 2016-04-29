@@ -150,11 +150,10 @@
   /*
    * Assembly wrappers
    */
-
   void assemble_targets_np(PyObject * targetlist,
-			   kernel_t * ke, hypergraph_t * hg,
-			   PyObject * dofmaplist,
-			   PyObject * datalist)
+		   kernel_t * ke, hypergraph_t * hg,
+		   PyObject * dofmaplist,
+		   PyObject * datalist)
   {
     int i=0, isnewobj=0;
     PyObject *obj, *subobj;
@@ -170,7 +169,7 @@
 
     
     dofmap_t * dofmaps[ndofmap];
-    assemble_target_t att[ntarget];
+    target_t att[ntarget];
     real_t * data_ptrs[ndata];
     
     int nnewobj = 0;
@@ -179,43 +178,38 @@
     for(i=0;i<ntarget;i++) {
       obj = PyList_GetItem(targetlist, i);
       if(PyTuple_Check(obj)) {
-	att[i].rank = 2;
+	real_t *VV;
+	int *II,*JJ;
 	// 0: Get KK
 	subobj = PyTuple_GetItem(obj,0);
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_DOUBLE,&isnewobj);
-	att[i].V = array_data(arrobj);
+        VV = array_data(arrobj);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
 	// 1: Get II
 	subobj = PyTuple_GetItem(obj,1);
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	att[i].II = array_data(arrobj);
+	II = array_data(arrobj);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
 	// 2: Get JJ
 	subobj = PyTuple_GetItem(obj,2);
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	att[i].JJ = array_data(arrobj);
+	JJ = array_data(arrobj);
+	Target_Default_From_Array(att+i,2,-1/*don't know N!*/, VV,II,JJ);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
       }
       else { //  obj is (BETTER BE) a ndarray
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-	att[i].V = array_data(arrobj);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	if(array_size(arrobj,0)>1) {
-	  att[i].rank=1;
-	} else {
-	  att[i].rank=0;
-	}
-	att[i].II = NULL;
-	att[i].JJ = NULL;
+	Target_Default_From_Array(att+i,(array_size(arrobj,0)>1 ? 1 : 0), array_size(arrobj,0),
+				  array_data(arrobj), NULL,NULL);
+
+
       }
-      // Set the iterators just 'cuz
-      att[i].IIiter = att[i].II;
-      att[i].JJiter = att[i].JJ;
-      att[i].Viter  = att[i].V;
+
     }
     
     /* Step 2: Collect the data ptrs */
@@ -240,7 +234,7 @@
       //}
     }
     /* Step 4: assemble! */
-    assemble_targets(ke, hg,
+    assemble(ke, hg,
 		     dofmaps, data_ptrs,
 		     att);
 
@@ -248,7 +242,10 @@
     for(i=0;i<nnewobj;i++) {
       Py_DECREF(newobjs[i]);
     }
-    
+    /* Step 6: Free the target data structures */
+    for(i=0;i<ntarget;i++) {
+      Target_Destroy(att+i);
+    }
   }
 
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
