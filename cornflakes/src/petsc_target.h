@@ -7,7 +7,8 @@
 #include <petscmat.h>
 
 void Target_PETSc_New(target_t * self, int onum,
-		      kernel_t * ke, hypergraph_t * hg, int ndof);
+		      kernel_t * ke, hypergraph_t * hg, int ndof,
+		      MPI_Comm comm, Vec * like);
 void Target_PETSc_From_Obj(target_t * self, int rank, void * obj);
 typedef struct Target_PETSc_data_t {
   int own;
