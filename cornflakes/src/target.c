@@ -3,11 +3,6 @@
 #include "stdlib.h"
 #include "stdio.h"
 
-struct _TARGET_VTABLE_t {
-  real_t * (*Place)(target_t * self, int n, int * dofs, real_t * vals);
-  void (*Destroy)(target_t * self);
-  void (*Wipe)(target_t * self);
-};
 
 /*
  * Class interface
