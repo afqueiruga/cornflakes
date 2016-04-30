@@ -7,6 +7,15 @@ file(GLOB SOURCES "*.c")
 # Add in kernels to be included in the distribution
 add_subdirectory(kernels)
 
+option(USE_PETSC "Enable PETSc backend for assembly" ON)
+if(USE_PETSC)
+  add_definitions(-DUSE_PETSC)
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+  find_package(PETSc REQUIRED)
+  INCLUDE_DIRECTORIES(${PETSC_INCLUDES})
+  ADD_DEFINITIONS(${PETSC_DEFINITIONS})
+endif(USE_PETSC)
+
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")
 
 # Make the static library
