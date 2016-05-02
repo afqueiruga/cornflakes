@@ -8,18 +8,25 @@ file(GLOB SOURCES "*.c")
 add_subdirectory(kernels)
 
 option(USE_PETSC "Enable PETSc backend for assembly" ON)
+
+# Make the static library
+add_library( lib_cornflakes STATIC ${SOURCES} )
+
+
 if(USE_PETSC)
-  add_definitions(-DUSE_PETSC)
+  set(PETSC_DIR /home/afq/Downloads/petsc)
+  set(PETSC_ARCH arch-linux2-c-debug )
+  target_compile_definitions(lib_cornflakes PRIVATE -DUSE_PETSC)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
   find_package(PETSc REQUIRED)
   INCLUDE_DIRECTORIES(${PETSC_INCLUDES})
   ADD_DEFINITIONS(${PETSC_DEFINITIONS})
+  
+  target_link_libraries(lib_cornflakes ${PPETSC_LIBRARIES})
 endif(USE_PETSC)
 
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")
 
-# Make the static library
-add_library( lib_cornflakes STATIC ${SOURCES} )
 target_link_libraries( lib_cornflakes packaged_kernels m )
 
 
@@ -34,9 +41,15 @@ INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET_SOURCE_FILES_PROPERTIES(cornflakes_library_swig.i PROPERTIES SWIG_FLAGS "-includeall")
 SWIG_ADD_MODULE(cornflakes_library python cornflakes_library_swig.i ${SOURCES})
+
+if(USE_PETSC)
+  #SWIG_LINK_LIBRARIES(cornflakes_library ${PETSC_LIBRARIES})
+endif(USE_PETSC)
 SWIG_LINK_LIBRARIES(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES})
+
+
 
 
 # Put the swig files up a level into the python library
 install(TARGETS ${SWIG_MODULE_cornflakes_library_REAL_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/..)
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PROJECT_SOURCE_DIR}/..)
+install( FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PROJECT_SOURCE_DIR}/..)
