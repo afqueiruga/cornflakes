@@ -106,16 +106,17 @@ void load_gmsh(real_t ** x, int * N, int gdim,
   printf("There are %d elements\n",ne);
   for(A=0; A<ne; A++) {
     int eid, etype,ntag, groupnum;
-    fgets(buf,1024, fh);
-    sscanf(buf,"%d %d %d ", &eid,&etype,&ntag);
-    sscanf(buf,"%d ",&groupnum);
-    for(i=0;i<ntag-1;i++) sscanf(buf,"%*d ");
+    //fgets(buf,1024, fh);
+    fscanf(fh,"%d %d %d ", &eid,&etype,&ntag);
+    fscanf(fh,"%d ",&groupnum);
+    for(i=0;i<ntag-1;i++) fscanf(fh,"%*d ");
     int ledge = etype;//Hack: Need a lookup table
     hypervertex_t egg[ledge]; 
     for(i=0;i<ledge;i++) {
-      sscanf(buf,"%d",egg+i);
+      fscanf(fh, "%d ",egg+i);
       egg[i]--;
     }
+    fscanf(fh,"\n");
     Hypergraph_Push_Edge(hg[0],ledge,egg);
   }
   fgets(buf,1024,fh);
