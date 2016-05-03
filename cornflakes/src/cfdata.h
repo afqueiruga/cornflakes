@@ -13,11 +13,11 @@ struct _CFDATA_VTABLE_t {
 };
 
 void CFData_Get(cfdata_t * self, int ndof,int * dofs, real_t * vals);
-void CFData_Default_Set(cfdata_t * self, real_t * payload);
+void CFData_Default_New(cfdata_t * self, real_t * payload);
 
 #ifdef USE_PETSC
 #include <petscvec.h>
-void CFData_PETSc_Set(cfdata_t * self, Vec pvec);
+void CFData_PETSc_New(cfdata_t * self, Vec pvec);
 #endif
 
 #endif

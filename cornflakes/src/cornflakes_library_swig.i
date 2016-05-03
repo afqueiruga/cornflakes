@@ -9,6 +9,7 @@
 #include "dofmap.h"
 #include "util.h"
 #include "target.h"
+#include "cfdata.h"
   //#include "kernels/sample_peri.h"
   //#include "kernels/sample_state.h"
   //#include "kernels/darcy_state.h"
@@ -170,7 +171,7 @@
     
     dofmap_t * dofmaps[ndofmap];
     target_t att[ntarget];
-    real_t * data_ptrs[ndata];
+    cfdata_t data_ptrs[ndata];
     
     int nnewobj = 0;
     PyArrayObject * newobjs[3*ntarget + ndata];
@@ -217,7 +218,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      data_ptrs[i] = array_data(arrobj);
+      CFData_Default_New(data_ptrs+i,  array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;
@@ -266,7 +267,7 @@
     int ndofmap = PyList_Size(dofmaplist);
     
     dofmap_t * dofmaps[ndofmap];
-    real_t * data_ptrs[ndata];
+    cfdata_t data_ptrs[ndata];
 
     /* Step 2: Collect the data ptrs */
     PyArrayObject * newobjs[ndata];
@@ -274,7 +275,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      data_ptrs[i] = array_data(arrobj);
+      CFData_Default_New(data_ptrs+i, array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;
