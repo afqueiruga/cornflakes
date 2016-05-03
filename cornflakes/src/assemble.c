@@ -4,12 +4,12 @@
 #include <stdio.h>
 
 void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
-	     dofmap_t ** dms, real_t ** data)
+	     dofmap_t ** dms, cfdata_t ** data)
 {
   hypervertex_t V;
   int i, j, k, fnum, mnum, maxlen;
   dofmap_t * dmap;
-  real_t * datum;
+  cfdata_t * datum;
   real_t * ker_in_iter = ker_in;
   
   hypervertex_t select[l_edge];
@@ -33,7 +33,8 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
     for(j=0; j<nselect; j++) {
       V = select[j];
 	Dofmap_Get(dmap, V, dofs,&ndof);
-	for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
+	CFData_Get(datum, ndof,dofs, ker_in_iter);
+	//for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
 	ker_in_iter += ndof;
     }
     
@@ -83,27 +84,17 @@ void place_targets(target_t * att,
     } // end map loop
     //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
     // Now assemble into att[t]:
-    //ker_out_iter = place_target(att+t, alldofs,nalldofs, ker_out_iter);
     ker_out_iter = Target_Place(att+t, nalldofs,alldofs, ker_out_iter);
   } // end target loop
 }
 
 
 void assemble(kernel_t * ke, hypergraph_t * hg,
-	      dofmap_t ** dofmaps, real_t ** data,
+	      dofmap_t ** dofmaps, cfdata_t ** data,
 	      target_t * att)
 {
   int i,j, hex,hx;
   hyperedges_t * he;
-  /* Reset the iterators */
-  /*
-  for(i=0;i<ke->noutp;i++) {
-    if(att[i].rank>=2) {
-      att[i].Viter = att[i].V;
-      att[i].IIiter = att[i].II;
-      att[i].JJiter = att[i].JJ;
-    }
-    }*/
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
     /* Allocate the loca vectors for this size edge */
@@ -135,86 +126,3 @@ void assemble(kernel_t * ke, hypergraph_t * hg,
   
 }
 
-
-
-
-
-
-/*
-real_t * place_target(assemble_target_t * att,
-		      int * dofs, int n,
-		      real_t * ker_out) {
-  int i,j;
-  switch(att->rank) {
-  case 2:
-    // Fill this block
-    for(i=0;i<n;i++) {
-      for(j=0;j<n;j++) {
-	att->IIiter[n*i + j ] = dofs[i];
-	att->JJiter[n*i + j ] = dofs[j];
-	att->Viter [n*i + j ] = ker_out[ n*i + j];
-      }
-    }
-    // Advance our iterators.
-    att->IIiter += n*n;
-    att->JJiter += n*n;
-    att->Viter += n*n;
-    return ker_out + n*n;
-    break;
-  case 1:
-    for(i=0;i<n;i++) {
-      att->V[dofs[i]] += ker_out[i];
-    }
-    return ker_out + n;
-    break;
-  default:
-    for(i=0;i<n;i++) {
-      att->V[0] += ker_out[i];
-    }
-    return ker_out + 1;
-    break;
-  }
-  
-  }*/
-
-/*
-void setup_targets(kernel_t * ke,assemble_target_t * att, hypergraph_t * hg, int ndof) {
-  int j,i, matsize, oplen;
-  for(j=0;j<ke->noutp;j++) {
-    switch(ke->outp[j].rank) {
-    case 0:
-      att[j].rank = 0;
-      att[j].V = malloc( sizeof(double) );
-      break;
-    case 1:
-      att[j].rank = 1;
-      att[j].V = malloc( ndof*sizeof(double) );
-      break;
-    case 2:
-      matsize = 0;
-      for( i=0; i<hg->n_types; i++ ) {
-	oplen = kernel_outp_len(ke,ke->outp+j,hg->he[i].l_edge);
-	matsize += hg->he[i].n_edge * oplen;
-      }
-      att[j].rank = 2;
-      att[j].V = malloc( matsize * sizeof(double) );
-      att[j].II = malloc( matsize * sizeof(int) );
-      att[j].JJ = malloc( matsize * sizeof(int) );
-      
-      break;
-    default:
-      printf("Cannot handle higher rank\n!");
-    }
-  }
-}
-void destroy_targets(kernel_t * ke, assemble_target_t * att) {
-  int j;
-  for(j=0;j<ke->noutp;j++) {
-    free(att[j].V);
-    if(att[j].rank>=2) {
-      free(att[j].II);
-      free(att[j].JJ);
-    }
-  }
-}
-*/
