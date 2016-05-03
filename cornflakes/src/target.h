@@ -16,6 +16,7 @@ struct _TARGET_VTABLE_t {
   real_t * (*Place)(target_t * self, int n, int * dofs, real_t * vals);
   void (*Destroy)(target_t * self);
   void (*Wipe)(target_t * self);
+  void (*Finalize)(target_t * self);
 };
 /* The helper constructor */
 void Target_New(target_t * self, int onum,
@@ -25,6 +26,7 @@ void Target_New(target_t * self, int onum,
 real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals);
 void Target_Destroy(target_t * self);
 void Target_Wipe(target_t * self);
+void Target_Finalize(target_t * self);
 
 
 /*

@@ -16,7 +16,9 @@ void Target_Destroy(target_t * self) {
 void Target_Wipe(target_t * self) {
   self->vtable->Wipe(self);
 }
-
+void Target_Finalize(target_t * self) {
+  self->vtable->Finalize(self);
+}
 /*
  * Helper method for making a target with a specific backend
  */
@@ -95,11 +97,15 @@ void Target_Default_Wipe(target_t * self) {
     data(self)->JJiter = data(self)->JJ;
   }
 }
+void Target_Default_Finalize(target_t * self) {
+  //pass
+}
 
 const _TARGET_VTABLE_t Table_Default_vtable = {
   .Place = &Target_Default_Place,
   .Destroy = &Target_Default_Destroy,
-  .Wipe = &Target_Default_Wipe
+  .Wipe = &Target_Default_Wipe,
+  .Finalize = &Target_Default_Finalize
 };
 void Target_Default_New(target_t * self, int onum,
 			kernel_t * ke, hypergraph_t * hg, int ndof) {
