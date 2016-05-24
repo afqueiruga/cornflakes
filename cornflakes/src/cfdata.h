@@ -19,5 +19,9 @@ void CFData_Default_New(cfdata_t * self, real_t * payload);
 #include <petscvec.h>
 void CFData_PETSc_New(cfdata_t * self, Vec pvec);
 #endif
+#ifdef USE_LIS
+#include <lis.h>
+void CFData_LIS_New(cfdata_t * self, LIS_VECTOR lvec);
+#endif
 
 #endif

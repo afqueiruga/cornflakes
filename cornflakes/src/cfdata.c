@@ -35,3 +35,21 @@ void CFData_PETSc_New(cfdata_t * self, Vec pvec) {
   self->data = pvec;
 }
 #endif
+
+#ifdef USE_LIS
+#include <lis.h>
+void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
+{
+  int i;
+  for(i=0;i<ndof;i++) {
+    lis_vector_get_value((LIS_VECTOR)self->data, dofs[i], vals+i);
+  }
+}
+const _CFDATA_VTABLE_t cfdata_lis_vtable = {
+  .Get_Values = CFData_LIS_Get_Values
+};
+void CFData_LIS_New(cfdata_t * self, LIS_VECTOR lvec) {
+  self->vtable = &cfdata_lis_vtable;
+  self->data = lvec;
+}
+#endif

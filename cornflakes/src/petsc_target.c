@@ -73,11 +73,12 @@ const _TARGET_VTABLE_t Table_PETSc_vtable = {
 void Target_PETSc_New(target_t * self, int onum,
 		      kernel_t * ke, hypergraph_t * hg, int ndof,
 		      MPI_Comm comm, Vec like) {
-  int j,i, matsize, oplen;
+  int i, matsize, oplen;
   self->rank = ke->outp[onum].rank;
   self->data = malloc(sizeof(struct Target_PETSc_data_t));
+  self->vtable = &Table_PETSc_vtable;
   data(self)->own = 1;
-  switch(ke->outp[j].rank) {
+  switch(self->rank) {
     case 0:
       VecCreate(comm,&(data(self)->R));
       VecSetSizes(data(self)->R, PETSC_DECIDE, 1);
@@ -93,7 +94,7 @@ void Target_PETSc_New(target_t * self, int onum,
     case 2:
       matsize = 0;
       for( i=0; i<hg->n_types; i++ ) {
-	oplen = kernel_outp_len(ke,ke->outp+j,hg->he[i].l_edge);
+	oplen = kernel_outp_len(ke,ke->outp+onum,hg->he[i].l_edge);
 	matsize += hg->he[i].n_edge * oplen;
       }
       // Fill in with matsize nnz
