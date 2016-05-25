@@ -3,8 +3,8 @@
 void CFData_Get_Values(cfdata_t * self, int ndof,int * dofs, real_t * vals) {
   self->vtable->Get_Values(self,ndof,dofs,vals);
 }
-void CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals) {
-  self->vtable->Place(self,n,dofs,vals);
+real_t * CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals) {
+  return self->vtable->Place(self,n,dofs,vals);
 }
 void CFData_Wipe(cfdata_t * self) {
   self->vtable->Wipe(self);
@@ -18,7 +18,7 @@ void CFData_Destroy(cfdata_t * self) {
 
 
 
-
+#if 0
 #ifdef USE_PETSC
 
 void CFData_PETSc_Get_Values(cfdata_t * self, int ndof,int *dofs, real_t * vals)
@@ -52,4 +52,5 @@ void CFData_LIS_New(cfdata_t * self, LIS_VECTOR lvec) {
   self->vtable = &cfdata_lis_vtable;
   self->data = lvec;
 }
+#endif
 #endif

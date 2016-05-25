@@ -1,5 +1,7 @@
 #include "cfdata_default.h"
 
+#include <stdlib.h>
+
 #define data(x) CFData_Default_Data(x)
 /* Member methods */
 real_t * CFData_Default_Place(cfdata_t * self,
@@ -24,8 +26,7 @@ void CFData_Default_Wipe(cfdata_t * self) {
 void CFData_Default_Finalize(cfdata_t * self) {
   //pass
 }
-void CFData_Default_Get_Values(cfdata_t * self, int ndof,int *dofs, real_t * vals)
-{
+void CFData_Default_Get_Values(cfdata_t * self, int ndof,int *dofs, real_t * vals) {
   int k;
   for(k=0;k<ndof;k++) vals[k] = ((real_t*)self->data)[ dofs[k] ];
 }
@@ -48,8 +49,8 @@ void CFData_Default_New_From_Ptr(cfdata_t * self, int N, real_t * payload) {
 }
 void CFData_Default_New(cfdata_t * self, int N) {
   self->vtable = &cfdata_default_vtable;
-  self->data = malloc( ndof*sizeof(real_t) );
+  self->data = malloc( N*sizeof(real_t) );
   self->own = 1;
   self->N = N;
 }
-}
+
