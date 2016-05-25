@@ -17,5 +17,6 @@ typedef struct CFMat_Default_data_t {
 
 void CFMat_Default_New(cfmat_t * self, int onum,
 			kernel_t * ke, hypergraph_t * hg, int ndof);
-
+void CFMat_Default_From_Array(cfmat_t * self, int ndof,
+			      real_t * V, int * II, int * JJ);
 #endif

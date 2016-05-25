@@ -17,7 +17,7 @@ real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals) {
   }
 }
 void Target_Destroy(target_t * self) {
-    switch(self->rank) {
+  switch(self->rank) {
   case 2:
     return CFMat_Destroy(self->K);
     break;
@@ -43,6 +43,18 @@ void Target_Finalize(target_t * self) {
     CFData_Finalize(self->R);
   }
 }
+
+void Target_New_From_Ptr(target_t * self, int rank,  void * payload) {
+  self->rank = rank;
+  switch(self->rank) {
+  case 2:
+    self->K = payload;
+    break;
+  case 1:
+    self->R = payload;
+  }
+}
+
 #if 0
 
 /*

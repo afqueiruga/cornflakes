@@ -22,6 +22,7 @@ void Target_Destroy(target_t * self);
 void Target_Wipe(target_t * self);
 void Target_Finalize(target_t * self);
 
+void Target_New_From_Ptr(target_t * self, int rank,  void * payload);
 #if 0
 /*
  * The constructor for the built in type, meant to be used with 

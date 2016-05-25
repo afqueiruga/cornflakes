@@ -10,6 +10,9 @@
 #include "util.h"
 #include "target.h"
 #include "cfdata.h"
+#include "cfmat.h"
+#include "cfdata_default.h"
+#include "cfmat_default.h"
   //#include "kernels/sample_peri.h"
   //#include "kernels/sample_state.h"
   //#include "kernels/darcy_state.h"
@@ -198,15 +201,19 @@
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
 	JJ = array_data(arrobj);
-	Target_Default_From_Array(att+i,2,-1/*don't know N!*/, VV,II,JJ);
+
+	cfmat_t * mat = malloc(sizeof(cfmat_t));
+	CFMat_Default_From_Array(mat,-1/*don't know N!*/, VV,II,JJ);
+	Target_New_From_Ptr(att+i,2,mat);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
       }
       else { //  obj is (BETTER BE) a ndarray
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	Target_Default_From_Array(att+i,(array_size(arrobj,0)>1 ? 1 : 0), array_size(arrobj,0),
-				  array_data(arrobj), NULL,NULL);
+	cfdata_t * dat = malloc(sizeof(cfdata_t));
+	CFData_Default_New_From_Ptr(dat, array_size(arrobj,0), array_data(arrobj) );
+	Target_New_From_Ptr(att+i,1,dat);
 
 
       }
@@ -218,7 +225,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      CFData_Default_New(data_ptrs+i,  array_data(arrobj));
+      CFData_Default_New_From_Ptr(data_ptrs+i, array_size(arrobj,0),  array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;
@@ -243,7 +250,12 @@
     }
     /* Step 6: Free the target data structures */
     for(i=0;i<ntarget;i++) {
-      Target_Destroy(att+i);
+      //Target_Destroy(att+i);
+      if(att[i].rank==2) {
+	free(att[i].K);
+      } else {
+	free(att[i].R);
+      }
     }
   }
 
@@ -275,7 +287,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      CFData_Default_New(data_ptrs+i, array_data(arrobj));
+      CFData_Default_New_From_Ptr(data_ptrs+i, array_size(arrobj,0),array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;

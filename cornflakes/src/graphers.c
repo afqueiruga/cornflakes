@@ -92,6 +92,7 @@ void Add_Edge_Vertex(hypergraph_t * hgnew, hypergraph_t * hgold, int offset) {
  * close enough), and tests wether or not a list of points is inside of it.
  * They all need to have the same dofmap call signatures.
  */
+#include "cfdata_default.h"
 void Tie_Cells_and_Particles(hypergraph_t * hgnew,
 			     hypergraph_t * mesh,
 			     kernel_t * ke_circum,
@@ -107,15 +108,17 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
 
   /* Setup storage for the results */
   target_t att[1];
-  Target_Default_New(att+0,0, ke_circum,mesh,n_cells);
+  cfdata_t hs;
+  CFData_Default_New(&hs, n_cells);
+  Target_New_From_Ptr(att+0, 1,&hs);
   //setup_targets(ke_circum,att, mesh,n_cells);
   
   /* Calculate the maximum circum radius */
   assemble(ke_circum,mesh, dofmaps,data, att);
   real_t hmax = 0.0;
   for(int i=0; i<n_cells; i++) {
-    if(Target_Default_Data(att+0)->V[i] > hmax) {
-      hmax = Target_Default_Data(att+0)->V[i];
+    if(CFData_Default_Data(&hs)[i] > hmax) {
+      hmax = CFData_Default_Data(&hs)[i];
     }
   }
   hmax = sqrt(hmax);
