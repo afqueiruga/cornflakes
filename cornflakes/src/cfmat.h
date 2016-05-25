@@ -6,21 +6,21 @@
 
 typedef struct _CFMAT_VTABLE_t _CFMAT_VTABLE_t;
 typedef struct cfmat_t {
-  int rank;
   int N;
+  int own;
   void * data;
   const _CFMAT_VTABLE_t * vtable;
 } cfmat_t;
-struct _TARGET_VTABLE_t {
-  real_t * (*Place)(target_t * self, int n, int * dofs, real_t * vals);
-  void (*Destroy)(target_t * self);
-  void (*Wipe)(target_t * self);
-  void (*Finalize)(target_t * self);
+struct _CFMAT_VTABLE_t {
+  real_t * (*Place)(cfmat_t * self, int n, int * dofs, real_t * vals);
+  void (*Destroy)(cfmat_t * self);
+  void (*Wipe)(cfmat_t * self);
+  void (*Finalize)(cfmat_t * self);
 };
 
-real_t * CFMat_Place(cfmat_t * selfint n, int * dofs, real_t * vals);
-void CFMat_Destroy(target_t * self);
-void CFMat_Wipe(target_t * self);
-void CFMat_Finalize(target_t * self);
+real_t * CFMat_Place(cfmat_t * self,int n, int * dofs, real_t * vals);
+void CFMat_Destroy(cfmat_t * self);
+void CFMat_Wipe(cfmat_t * self);
+void CFMat_Finalize(cfmat_t * self);
 
 #endif

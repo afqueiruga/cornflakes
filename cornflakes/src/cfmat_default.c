@@ -1,10 +1,12 @@
+#include "cfmat_default.h"
+
+#include <stdlib.h>
 
 #define data(x) CFMat_Default_Data(x)
 real_t * CFMat_Default_Place(cfmat_t * self,
 			      int n, int * dofs, real_t * ker_out) {
   int i,j;
-  switch(self->rank) {
-  case 2:
+
     // Fill this block
     for(i=0;i<n;i++) {
       for(j=0;j<n;j++) {
@@ -18,23 +20,10 @@ real_t * CFMat_Default_Place(cfmat_t * self,
     data(self)->JJiter += n*n;
     data(self)->Viter += n*n;
     return ker_out + n*n;
-    break;
-  case 1:
-    for(i=0;i<n;i++) {
-      data(self)->V[dofs[i]] += ker_out[i];
-    }
-    return ker_out + n;
-    break;
-  default:
-    for(i=0;i<n;i++) {
-      data(self)->V[0] += ker_out[i];
-    }
-    return ker_out + 1;
-    break;
-  }
+
 }
 void CFMat_Default_Destroy(cfmat_t * self) {
-  if(data(self)->own) {
+  if(self->own) {
     free(data(self)->V);
     free(data(self)->II);
     free(data(self)->JJ);
@@ -65,6 +54,13 @@ void CFMat_Default_New(cfmat_t * self, int onum,
 			kernel_t * ke, hypergraph_t * hg, int ndof) {
   int matsize, oplen;
   int i;
+
+  self->vtable = &CFMat_Default_vtable;
+  self->own = 1;
+  self->N = ndof;
+  
+  self->data = malloc(sizeof(struct CFMat_Default_data_t));
+  
   matsize = 0;
   for( i=0; i<hg->n_types; i++ ) {
     oplen = kernel_outp_len(ke,ke->outp+onum,hg->he[i].l_edge);
@@ -76,7 +72,18 @@ void CFMat_Default_New(cfmat_t * self, int onum,
   // For good measure:
   CFMat_Default_Wipe(self); 
 }
-void CFMat_Default_From_Array(target_t * self, int rank, int ndof,
+void CFMat_Default_From_Array(cfmat_t * self, int ndof,
 			       real_t * V, int * II, int * JJ) {
+  self->vtable = &CFMat_Default_vtable;
+  self->data = malloc(sizeof(struct CFMat_Default_data_t));
 
+  self->N = ndof;
+
+  self->own = 0;
+  
+  data(self)->V = V;
+  data(self)->II = II;
+  data(self)->JJ = JJ;
+  
+  CFMat_Default_Wipe(self);
 }

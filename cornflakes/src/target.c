@@ -8,17 +8,43 @@
  * Class interface
  */
 real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals) {
-  return self->vtable->Place(self,n,dofs,vals);
+  switch(self->rank) {
+  case 2:
+    return CFMat_Place(self->K,n,dofs,vals);
+    break;
+  default: //0,1
+    return CFData_Place(self->R,n,dofs,vals);
+  }
 }
 void Target_Destroy(target_t * self) {
-  self->vtable->Destroy(self);
+    switch(self->rank) {
+  case 2:
+    return CFMat_Destroy(self->K);
+    break;
+  default: //0,1
+    return CFData_Destroy(self->R);
+  }
 }
 void Target_Wipe(target_t * self) {
-  self->vtable->Wipe(self);
+  switch(self->rank) {
+  case 2:
+    CFMat_Wipe(self->K);
+    break;
+  default: //0,1
+    CFData_Wipe(self->R);
+  }
 }
 void Target_Finalize(target_t * self) {
-  self->vtable->Finalize(self);
+  switch(self->rank) {
+  case 2:
+    CFMat_Finalize(self->K);
+    break;
+  default: //0,1
+    CFData_Finalize(self->R);
+  }
 }
+#if 0
+
 /*
  * Helper method for making a target with a specific backend
  */
@@ -31,7 +57,6 @@ void Target_New(target_t * self, int onum,
     Target_Default_New(self,onum,ke,hg,ndof);
   }
 }
-	
 
 /*
  * The default implementation
@@ -94,3 +119,4 @@ void Target_Default_From_Array(target_t * self, int rank, int ndof,
   }
   Target_Default_Wipe(self);
 }
+#endif
