@@ -50,12 +50,12 @@ include_directories(${PYTHON_INCLUDE_PATH})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set_source_files_properties(cornflakes_library_swig.i PROPERTIES SWIG_FLAGS "-includeall")
-SWIG_ADD_MODULE(cornflakes_library python cornflakes_library_swig.i ${SOURCES})
+swig_add_module(cornflakes_library python cornflakes_library_swig.i ${SOURCES})
 
 if(USE_PETSC)
   #SWIG_LINK_LIBRARIES(cornflakes_library ${PETSC_LIBRARIES})
 endif(USE_PETSC)
-SWIG_LINK_LIBRARIES(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES})
+swig_link_libraries(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES})
 if(USE_LIS)
   #set_source_files_properties( ${swig_generated_file_fullname}
   #    PROPERTIES COMPILE_FLAGS "-DUSE_LIS")
