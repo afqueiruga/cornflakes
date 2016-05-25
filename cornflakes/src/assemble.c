@@ -33,8 +33,8 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
     for(j=0; j<nselect; j++) {
       V = select[j];
       Dofmap_Get(dmap, V, dofs,&ndof);
-      CFData_Get(datum, ndof,dofs, ker_in_iter);
-      //for(k=0;k<ndof;k++) ker_in_iter[k] = datum[ dofs[k] ];
+      CFData_Get_Values(datum, ndof,dofs, ker_in_iter);
+      //for(k=0;k<ndof;k++) printf("%d ",dofs[k]);//ker_in_iter[k] = datum[ dofs[k] ];
       ker_in_iter += ndof;
     }
     
