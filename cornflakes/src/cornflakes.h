@@ -5,4 +5,13 @@
 #include "assemble.h"
 #include "dofmap.h"
 #include "util.h"
+#include "target.h"
 #include "cfdata.h"
+#include "cfmat.h"
+
+#include "cfdata_default.h"
+#include "cfmat_default.h"
+#include "cfdata_petsc.h"
+#include "cfmat_petsc.h"
+#include "cfdata_lish"
+#include "cfmat_lis.h"

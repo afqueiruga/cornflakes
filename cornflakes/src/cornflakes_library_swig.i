@@ -1,24 +1,7 @@
 %module cornflakes_library
 %{
 #define SWIG_FILE_WITH_INIT
-#include "hypergraph.h"
-#include "spatialhash.h"
-#include "graphers.h"
-#include "kernel.h"
-#include "assemble.h"
-#include "dofmap.h"
-#include "util.h"
-#include "target.h"
-#include "cfdata.h"
-#include "cfmat.h"
-#include "cfdata_default.h"
-#include "cfmat_default.h"
-  //#include "kernels/sample_peri.h"
-  //#include "kernels/sample_state.h"
-  //#include "kernels/darcy_state.h"
-  //#include "kernels/darcy_afq_state.h"
-  //#include "kernels/darcy_support_afq_state.h"
-  //#include "kernels/darcy_afq_CG.h"
+#include cornflakes.h
 %}
 
 %include "numpy.i"
@@ -62,12 +45,6 @@
 %include "dofmap.h"
 %include "util.h"
 %include "target.h"
- //%include "kernels/sample_peri.h"
- //%include "kernels/sample_state.h"
- //%include "kernels/darcy_state.h"
- //%include "kernels/darcy_afq_state.h"
- //%include "kernels/darcy_support_afq_state.h"
- //%include "kernels/darcy_afq_CG.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action
