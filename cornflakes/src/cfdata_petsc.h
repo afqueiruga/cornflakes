@@ -2,6 +2,7 @@
 #ifndef __CFDATA_PETSC_H
 #define __CFDATA_PETSC_H
 
+#include "cfdata.h"
 #include <petsc.h>
 
 #define CFData_PETSc_Data(x) ( (Vec)(x)->data )
