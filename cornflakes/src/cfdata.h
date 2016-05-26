@@ -23,14 +23,3 @@ real_t * CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals);
 void CFData_Wipe(cfdata_t * self);
 void CFData_Finalize(cfdata_t * self);
 void CFData_Destroy(cfdata_t * self);
-#if 0
-#ifdef USE_PETSC
-#include <petscvec.h>
-void CFData_PETSc_New(cfdata_t * self, Vec pvec);
-#endif
-#ifdef USE_LIS
-#include <lis.h>
-void CFData_LIS_New(cfdata_t * self, LIS_VECTOR lvec);
-#endif
-#endif
-#endif

@@ -3,7 +3,25 @@ cmake_minimum_required(VERSION 2.8.9)
 project( proj_cornflakes )
 
 # The source files
-file(GLOB SOURCES "*.c")
+#file(GLOB SOURCES "*.c")
+set(SOURCES
+  kernel.c
+  dofmap.c
+  cfdata.c
+  cfmat.c
+  target.c
+  
+  cfdata_default.c
+  cfmat_default.c
+  cfdata_petsc.c
+  #cfmat_petsc.c
+  
+  hypergraph.c
+  assemble.c
+  spatialhash.c
+  graphers.c
+  util.c
+  )
 # Add in kernels to be included in the distribution
 add_subdirectory(kernels)
 
