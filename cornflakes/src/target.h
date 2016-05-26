@@ -16,13 +16,14 @@ typedef struct target_t {
 void Target_New(target_t * self, int onum,
 		kernel_t * ke, hypergraph_t * hg, int ndof,
 		char * backend);
+void Target_New_From_Ptr(target_t * self, int rank,  void * payload);
 /* The member methods */
 real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals);
 void Target_Destroy(target_t * self);
 void Target_Wipe(target_t * self);
 void Target_Finalize(target_t * self);
 
-void Target_New_From_Ptr(target_t * self, int rank,  void * payload);
+
 #if 0
 /*
  * The constructor for the built in type, meant to be used with 

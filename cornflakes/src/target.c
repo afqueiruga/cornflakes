@@ -44,6 +44,12 @@ void Target_Finalize(target_t * self) {
   }
 }
 
+
+void Target_New(target_t * self, int onum,
+		kernel_t * ke, hypergraph_t * hg, int ndof,
+		char * backend) {
+  /* unimplemented */
+}
 void Target_New_From_Ptr(target_t * self, int rank,  void * payload) {
   self->rank = rank;
   switch(self->rank) {
