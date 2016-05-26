@@ -22,9 +22,11 @@ void CFMat_LIS_Destroy(cfmat_t * self) {
 }
 void CFMat_LIS_Wipe(cfmat_t * self) {
   // TODO
+  // I Don't think LIS Does this???
+  // What about LIS Matrix Scale?
 }
 void CFMat_LIS_Finalize(cfmat_t * self) {
-  // TODO
+  lis_matrix_assemble(data(self));
 }
 
 const _CFMAT_VTABLE_t CFMat_LIS_vtable = {
@@ -37,8 +39,10 @@ void CFMat_LIS_New(cfmat_t * self, int N) {
   self->vtable = &CFMat_LIS_vtable;
   self->N = N;
   self->own = 1;
-
   // TODO
+  lis_matrix_create(/*MPI_COMM_WORLD*/0, (LIS_MATRIX*)&self->data);
+  lis_matrix_set_size(data(self), 0,N);
+  lis_matrix_set_type(data(self), LIS_MATRIX_CSR);
 }
 void CFMat_LIS_New_From_Ptr(cfmat_t * self, int N, void* payload) {
   self->vtable = &CFMat_LIS_vtable;

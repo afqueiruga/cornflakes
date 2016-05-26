@@ -13,10 +13,10 @@ void CFData_LIS_Destroy(cfdata_t * self) {
   if(self->own) lis_vector_destroy(data(self)); 
 }
 void CFData_LIS_Wipe(cfdata_t * self) {
-  //TODO
+  lis_vector_set_all( 0.0, data(self));
 }
 void CFData_LIS_Finalize(cfdata_t * self) {
-  //TODO
+  // Does it not need to?
 }
 
 void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
@@ -39,7 +39,9 @@ void CFData_LIS_New(cfdata_t * self, int N) {
   self->vtable = &cfdata_lis_vtable;
   self->N = N;
   self->own = 1;
-  //  TODO
+  // TODO: MPI
+  lis_vector_create(/*MPI_COMM_WORLD*/ 0,(LIS_VECTOR*)&self->data);
+  lis_vector_set_size(data(self), 0,N);
 }
 void CFData_LIS_New_From_Ptr(cfdata_t * self, int N, LIS_VECTOR lvec) {
   self->vtable = &cfdata_lis_vtable;
