@@ -13,10 +13,10 @@ void CFData_LIS_Destroy(cfdata_t * self) {
   if(self->own) lis_vector_destroy(data(self)); 
 }
 void CFData_LIS_Wipe(cfdata_t * self) {
-
+  //TODO
 }
 void CFData_LIS_Finalize(cfdata_t * self) {
-
+  //TODO
 }
 
 void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
@@ -28,7 +28,7 @@ void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
 }
 
 const _CFDATA_VTABLE_t cfdata_lis_vtable = {
-  .Get_Values = CFData_LIS_Get_Values
+  .Get_Values = CFData_LIS_Get_Values,
   .Place = &CFData_LIS_Place,
   .Destroy = &CFData_LIS_Destroy,
   .Wipe = &CFData_LIS_Wipe,

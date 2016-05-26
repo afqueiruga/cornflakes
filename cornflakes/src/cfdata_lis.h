@@ -6,7 +6,7 @@
 
 #include <lis.h>
 
-#define CFData_LIS_Data(x) ((LIS_VECTOR)((x)->data)
+#define CFData_LIS_Data(x) ((LIS_VECTOR)((x)->data))
 void CFData_LIS_New_From_Ptr(cfdata_t * self, int N, LIS_VECTOR lvec);
 void CFData_LIS_New(cfdata_t * self, int N);
 #endif

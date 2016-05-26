@@ -8,7 +8,7 @@ real_t * CFMat_LIS_Place(cfmat_t * self,
 			   int n, int * dofs, real_t * ker_out) {
   for(int i=0;i<n;i++) {
       for(int j=0;j<n;j++) {
-	lis_matrix_set_value(LIS_ADD_VALUE, dofs[i],dofs[j], ker_out[n*i+j], data(self)->K);
+	lis_matrix_set_value(LIS_ADD_VALUE, dofs[i],dofs[j], ker_out[n*i+j], data(self));
       }
     }
     return ker_out + n*n;
