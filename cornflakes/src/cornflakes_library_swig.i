@@ -1,7 +1,7 @@
 %module cornflakes_library
 %{
 #define SWIG_FILE_WITH_INIT
-#include cornflakes.h
+#include "cornflakes.h"
 %}
 
 %include "numpy.i"
