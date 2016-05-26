@@ -15,6 +15,8 @@ set(SOURCES
   cfmat_default.c
   cfdata_petsc.c
   cfmat_petsc.c
+  cfdata_lis.c
+  cfmat_lis.c
   
   hypergraph.c
   assemble.c
