@@ -44,4 +44,15 @@ void CFData_PETSc_New(cfdata_t * self, int N) {
   VecCreate(MPI_COMM_WORLD,(Vec*)&self->data);
   VecSetSizes(data(self), PETSC_DECIDE, N);
 }
+void CFData_PETSc_New_Full(cfdata_t * self, int N, MPI_Comm comm, Vec like) {
+  self->vtable = &cfdata_petsc_vtable;
+  self->own = 1;
+  self->N = N;
+  if(like) {
+    VecDuplicate(like,(Vec*)&self->data);
+  } else {
+    VecCreate(comm,(Vec*)&self->data);
+    VecSetSizes(data(self), PETSC_DECIDE, N);
+  }
+}
 #endif
