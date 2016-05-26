@@ -23,3 +23,5 @@ real_t * CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals);
 void CFData_Wipe(cfdata_t * self);
 void CFData_Finalize(cfdata_t * self);
 void CFData_Destroy(cfdata_t * self);
+
+#endif
