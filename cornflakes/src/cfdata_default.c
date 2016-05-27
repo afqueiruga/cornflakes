@@ -1,6 +1,7 @@
 #include "cfdata_default.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #define data(x) CFData_Default_Data(x)
 /* Member methods */
@@ -11,6 +12,9 @@ real_t * CFData_Default_Place(cfdata_t * self,
     data(self)[dofs[i]] += ker_out[i];
   }
   return ker_out + n;
+}
+void CFData_Default_Scatter(cfdata_t * self, real_t * src) {
+  memcpy(data(self), src, self->N*sizeof(real_t));
 }
 void CFData_Default_Destroy(cfdata_t * self) {
   if(self->own) {
@@ -40,11 +44,12 @@ void CFData_Default_Release_Ptr(cfdata_t * self, real_t **ptr) {
 /* vtable */
 const _CFDATA_VTABLE_t cfdata_default_vtable = {
   .Get_Values = CFData_Default_Get_Values,
+  .Scatter = &CFData_Default_Scatter,
   .Place = &CFData_Default_Place,
   .Destroy = &CFData_Default_Destroy,
   .Wipe = &CFData_Default_Wipe,
   .Finalize = &CFData_Default_Finalize,
-    .Get_Ptr = &CFData_Default_Get_Ptr,
+  .Get_Ptr = &CFData_Default_Get_Ptr,
   .Release_Ptr = &CFData_Default_Release_Ptr
 };
 

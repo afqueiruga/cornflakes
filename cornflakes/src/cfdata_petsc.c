@@ -9,6 +9,16 @@ real_t * CFData_PETSc_Place(cfdata_t * self,
   VecSetValues(data(self), n,dofs, ker_out, ADD_VALUES);
   return ker_out + n;
 }
+void CFData_PETSc_Scatter(cfdata_t * self, real_t * src) {
+  // Broadcast the positions
+  int i,istart, iend;
+  VecGetOwnershipRange(data(self), &istart, &iend);
+  for(i=istart;i<iend;i++) {
+    VecSetValue(data(self), i, src[i], INSERT_VALUES);
+  }
+  VecAssemblyBegin(data(self));
+  VecAssemblyEnd(data(self));
+}
 void CFData_PETSc_Destroy(cfdata_t * self) {
   if(self->own) VecDestroy((Vec*)&(self->data));
 }
@@ -33,6 +43,7 @@ void CFData_PETSc_Release_Ptr(cfdata_t * self, real_t **ptr) {
 /* vtable */
 const _CFDATA_VTABLE_t cfdata_petsc_vtable = {
   .Get_Values = CFData_PETSc_Get_Values,
+  .Scatter = CFData_PETSc_Scatter,
   .Place = &CFData_PETSc_Place,
   .Destroy = &CFData_PETSc_Destroy,
   .Wipe = &CFData_PETSc_Wipe,

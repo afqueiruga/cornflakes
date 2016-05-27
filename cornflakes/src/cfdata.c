@@ -6,6 +6,9 @@ void CFData_Get_Values(cfdata_t * self, int ndof,int * dofs, real_t * vals) {
 real_t * CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals) {
   return self->vtable->Place(self,n,dofs,vals);
 }
+void CFData_Scatter(cfdata_t * self, real_t * src) {
+  self->vtable->Scatter(self,src);
+}
 void CFData_Wipe(cfdata_t * self) {
   self->vtable->Wipe(self);
 }
