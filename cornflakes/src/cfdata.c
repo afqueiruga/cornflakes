@@ -15,3 +15,9 @@ void CFData_Finalize(cfdata_t * self) {
 void CFData_Destroy(cfdata_t * self) {
   self->vtable->Destroy(self);
 }
+void CFData_Get_Ptr(cfdata_t * self, real_t **dat) {
+  self->vtable->Get_Ptr(self,dat);
+}
+void CFData_Release_Ptr(cfdata_t * self, real_t **dat) {
+  self->vtable->Get_Ptr(self,dat);
+}

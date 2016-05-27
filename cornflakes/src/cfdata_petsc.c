@@ -22,14 +22,26 @@ void CFData_PETSc_Finalize(cfdata_t * self) {
 void CFData_PETSc_Get_Values(cfdata_t * self, int ndof,int *dofs, real_t * vals) {
   VecGetValues((Vec)self->data, ndof,dofs,  vals);
 }
+void CFData_PETSc_Get_Ptr(cfdata_t * self, real_t **ptr) {
+  VecGetArray(data(self), ptr);
+}
+void CFData_PETSc_Release_Ptr(cfdata_t * self, real_t **ptr) {
+  VecRestoreArray(data(self),ptr);
+}
+
+
 /* vtable */
 const _CFDATA_VTABLE_t cfdata_petsc_vtable = {
   .Get_Values = CFData_PETSc_Get_Values,
   .Place = &CFData_PETSc_Place,
   .Destroy = &CFData_PETSc_Destroy,
   .Wipe = &CFData_PETSc_Wipe,
-  .Finalize = &CFData_PETSc_Finalize
+  .Finalize = &CFData_PETSc_Finalize,
+  .Get_Ptr = &CFData_PETSc_Get_Ptr,
+  .Release_Ptr = &CFData_PETSc_Release_Ptr
 };
+
+
 /* Constructors */
 void CFData_PETSc_New_From_Ptr(cfdata_t * self, int N, Vec payload) {
   self->vtable = &cfdata_petsc_vtable;

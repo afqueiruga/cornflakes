@@ -26,13 +26,21 @@ void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
     lis_vector_get_value((LIS_VECTOR)self->data, dofs[i], vals+i);
   }
 }
-
+void CFData_LIS_Get_Ptr(cfdata_t * self, real_t **ptr) {
+  // TODO
+}
+void CFData_LIS_Release_Ptr(cfdata_t * self, real_t **ptr) {
+  // TODO
+  *ptr = NULL;
+}
 const _CFDATA_VTABLE_t cfdata_lis_vtable = {
   .Get_Values = CFData_LIS_Get_Values,
   .Place = &CFData_LIS_Place,
   .Destroy = &CFData_LIS_Destroy,
   .Wipe = &CFData_LIS_Wipe,
-  .Finalize = &CFData_LIS_Finalize
+  .Finalize = &CFData_LIS_Finalize,
+  .Get_Ptr = &CFData_LIS_Get_Ptr,
+  .Release_Ptr = &CFData_LIS_Release_Ptr
 };
 
 void CFData_LIS_New(cfdata_t * self, int N) {
