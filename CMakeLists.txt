@@ -115,9 +115,9 @@ endif(USE_LIS)
 
 
 
-# Put the swig files up a level into the python library
-set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/cornflakes)
+install(TARGETS cornflakes DESTINATION ${CMAKE_INSTALL_PREFIX})
 
+set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/cornflakes)
 install(TARGETS ${SWIG_MODULE_cornflakes_library_REAL_NAME} DESTINATION ${PY_INSTALL_DIR} )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PY_INSTALL_DIR} )
 install(FILES ${PY_FILES} DESTINATION ${PY_INSTALL_DIR})
