@@ -92,13 +92,14 @@ void Add_Edge_Vertex(hypergraph_t * hgnew, hypergraph_t * hgold, int offset) {
  * close enough), and tests wether or not a list of points is inside of it.
  * They all need to have the same dofmap call signatures.
  */
+#include "cfdata_default.h"
 void Tie_Cells_and_Particles(hypergraph_t * hgnew,
 			     hypergraph_t * mesh,
 			     kernel_t * ke_circum,
 			     kernel_t * ke_centroid,
 			     kernel_t * ke_inside,
 			     dofmap_t ** dofmaps,
-			     real_t ** data,
+			     cfdata_t * data,
 			     int Npart, int dim, real_t * x,
 			     hypervertex_t * PV)
 {
@@ -106,14 +107,19 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
   int n_cells = mesh->he[0].n_edge; // TODO: BUG. Hypergraph needs a total_edge_count method
 
   /* Setup storage for the results */
-  assemble_target_t att[1];
-  setup_targets(ke_circum,att, mesh,n_cells);
+  target_t att[1];
+  cfdata_t hs;
+  CFData_Default_New(&hs, n_cells);
+  Target_New_From_Ptr(att+0, 1,&hs);
+  //setup_targets(ke_circum,att, mesh,n_cells);
   
   /* Calculate the maximum circum radius */
-  assemble_targets(ke_circum,mesh, dofmaps,data, att);
+  assemble(ke_circum,mesh, dofmaps,data, att);
   real_t hmax = 0.0;
   for(int i=0; i<n_cells; i++) {
-    if(att[0].V[i] > hmax) hmax = att[0].V[i];
+    if(CFData_Default_Data(&hs)[i] > hmax) {
+      hmax = CFData_Default_Data(&hs)[i];
+    }
   }
   hmax = sqrt(hmax);
   //printf("hmax: %lf\n",hmax);
@@ -192,6 +198,6 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
 
   /* Clean up */
   SpatialHash_destroy(&sh);
-  destroy_targets(ke_circum,att);
+  Target_Destroy(att+0);
   free(found);
 }

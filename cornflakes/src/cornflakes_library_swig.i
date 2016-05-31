@@ -1,20 +1,7 @@
 %module cornflakes_library
 %{
 #define SWIG_FILE_WITH_INIT
-#include "hypergraph.h"
-#include "spatialhash.h"
-#include "graphers.h"
-#include "kernel.h"
-#include "assemble.h"
-#include "dofmap.h"
-#include "util.h"
-  
-  //#include "kernels/sample_peri.h"
-  //#include "kernels/sample_state.h"
-  //#include "kernels/darcy_state.h"
-  //#include "kernels/darcy_afq_state.h"
-  //#include "kernels/darcy_support_afq_state.h"
-  //#include "kernels/darcy_afq_CG.h"
+#include "cornflakes.h"
 %}
 
 %include "numpy.i"
@@ -57,13 +44,7 @@
 %include "assemble.h"
 %include "dofmap.h"
 %include "util.h"
-
- //%include "kernels/sample_peri.h"
- //%include "kernels/sample_state.h"
- //%include "kernels/darcy_state.h"
- //%include "kernels/darcy_afq_state.h"
- //%include "kernels/darcy_support_afq_state.h"
- //%include "kernels/darcy_afq_CG.h"
+%include "target.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action
@@ -150,11 +131,10 @@
   /*
    * Assembly wrappers
    */
-
   void assemble_targets_np(PyObject * targetlist,
-			   kernel_t * ke, hypergraph_t * hg,
-			   PyObject * dofmaplist,
-			   PyObject * datalist)
+		   kernel_t * ke, hypergraph_t * hg,
+		   PyObject * dofmaplist,
+		   PyObject * datalist)
   {
     int i=0, isnewobj=0;
     PyObject *obj, *subobj;
@@ -170,8 +150,8 @@
 
     
     dofmap_t * dofmaps[ndofmap];
-    assemble_target_t att[ntarget];
-    real_t * data_ptrs[ndata];
+    target_t att[ntarget];
+    cfdata_t data_ptrs[ndata];
     
     int nnewobj = 0;
     PyArrayObject * newobjs[3*ntarget + ndata];
@@ -179,43 +159,42 @@
     for(i=0;i<ntarget;i++) {
       obj = PyList_GetItem(targetlist, i);
       if(PyTuple_Check(obj)) {
-	att[i].rank = 2;
+	real_t *VV;
+	int *II,*JJ;
 	// 0: Get KK
 	subobj = PyTuple_GetItem(obj,0);
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_DOUBLE,&isnewobj);
-	att[i].V = array_data(arrobj);
+        VV = array_data(arrobj);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
 	// 1: Get II
 	subobj = PyTuple_GetItem(obj,1);
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	att[i].II = array_data(arrobj);
+	II = array_data(arrobj);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
 	// 2: Get JJ
 	subobj = PyTuple_GetItem(obj,2);
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	att[i].JJ = array_data(arrobj);
+	JJ = array_data(arrobj);
+
+	cfmat_t * mat = malloc(sizeof(cfmat_t));
+	CFMat_Default_From_Array(mat,-1/*don't know N!*/, VV,II,JJ);
+	Target_New_From_Ptr(att+i,2,mat);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
       }
       else { //  obj is (BETTER BE) a ndarray
 	isnewobj = 0;
 	arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-	att[i].V = array_data(arrobj);
 	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	if(array_size(arrobj,0)>1) {
-	  att[i].rank=1;
-	} else {
-	  att[i].rank=0;
-	}
-	att[i].II = NULL;
-	att[i].JJ = NULL;
+	cfdata_t * dat = malloc(sizeof(cfdata_t));
+	CFData_Default_New_From_Ptr(dat, array_size(arrobj,0), array_data(arrobj) );
+	Target_New_From_Ptr(att+i,1,dat);
+
+
       }
-      // Set the iterators just 'cuz
-      att[i].IIiter = att[i].II;
-      att[i].JJiter = att[i].JJ;
-      att[i].Viter  = att[i].V;
+
     }
     
     /* Step 2: Collect the data ptrs */
@@ -223,7 +202,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      data_ptrs[i] = array_data(arrobj);
+      CFData_Default_New_From_Ptr(data_ptrs+i, array_size(arrobj,0),  array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;
@@ -240,15 +219,21 @@
       //}
     }
     /* Step 4: assemble! */
-    assemble_targets(ke, hg,
-		     dofmaps, data_ptrs,
-		     att);
+    assemble(ke, hg, dofmaps, data_ptrs, att);
 
     /* Step 5: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {
       Py_DECREF(newobjs[i]);
     }
-    
+    /* Step 6: Free the target data structures */
+    for(i=0;i<ntarget;i++) {
+      //Target_Destroy(att+i);
+      if(att[i].rank==2) {
+	free(att[i].K);
+      } else {
+	free(att[i].R);
+      }
+    }
   }
 
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
@@ -271,7 +256,7 @@
     int ndofmap = PyList_Size(dofmaplist);
     
     dofmap_t * dofmaps[ndofmap];
-    real_t * data_ptrs[ndata];
+    cfdata_t data_ptrs[ndata];
 
     /* Step 2: Collect the data ptrs */
     PyArrayObject * newobjs[ndata];
@@ -279,7 +264,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      data_ptrs[i] = array_data(arrobj);
+      CFData_Default_New_From_Ptr(data_ptrs+i, array_size(arrobj,0),array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;

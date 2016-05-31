@@ -4,7 +4,18 @@
 #include "kernel.h"
 #include "hypergraph.h"
 #include "dofmap.h"
+#include "target.h"
+#include "cfdata.h"
 
+void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
+	     dofmap_t ** dms, cfdata_t * data);
+
+void assemble(kernel_t * ke, hypergraph_t * hg,
+	      dofmap_t ** dofmaps, cfdata_t * data,
+	      target_t * att);
+
+
+/*
 typedef struct assemble_target_t {
   int rank;
   real_t * V;
@@ -15,16 +26,9 @@ typedef struct assemble_target_t {
   int * IIiter;
   int * JJiter;
 } assemble_target_t;
+*/
 
-void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
-	     dofmap_t ** dms, real_t ** data);
-
-void setup_targets(kernel_t * ke, assemble_target_t * att, hypergraph_t * hg, int ndof);
-void destroy_targets(kernel_t * ke, assemble_target_t * att);
-
-void assemble_targets(kernel_t * ke, hypergraph_t * hg,
-		      dofmap_t ** dofmaps, real_t ** data,
-		      assemble_target_t * att);
-
+//void setup_targets(kernel_t * ketarget_t * att, hypergraph_t * hg, int ndof);
+//void destroy_targets(kernel_t * ke, target_t * att);
 
 #endif

@@ -41,7 +41,90 @@ void Interpolate(real_t * uold, real_t * Xold, int Nold,
   SpatialHash_destroy(&sh);
 }
 
+void load_gmsh(real_t ** x, int * N, int gdim,
+	       hypergraph_t ** hg,
+	       char * fname, ...)
+{
+  va_list args;
+  va_start( args, fname );
+  char buf[1024];
+  vsprintf(buf,fname,args);
+  FILE * fh = fopen(buf,"r");
+  if(fh==NULL) {
+    printf("ERROR: UNABLE TO OPEN INPUT FILE %s\n",buf);
+    exit(-1);
+  }
+  
+  /* Open a gmsh msh file and return the vertices and the loaded hypergraphs.
+     Each group is given its own hypergraph */
+  int nn, ne, i,k,A;
+  /* Read in the header */
+  fgets( buf,1024,fh);
+  printf("%s",buf);
+  fgets(buf,1024,fh);
+  printf("%s",buf);
+  fgets(buf,1024,fh);
+  printf("%s",buf);
 
+  /* The nodes block */
+  fgets(buf,1024,fh);
+  printf("%s",buf);
+  fgets(buf,1024,fh);
+  printf("%s",buf);
+
+  sscanf(buf,"%d\n",&nn);
+  printf("There are %d nodes\n",nn);
+  *N = nn;
+  *x = malloc(sizeof(real_t)*gdim* *N);
+  #define IX(A,i) (gdim*(A)+(i))
+  for(A=0;A<nn;A++) {
+    fgets(buf,1024,fh);
+    switch(gdim) {
+    case 1:
+      sscanf(buf,"%*d %lf %*f %*f\n", &(*x)[IX(A,0)] );
+      break;
+    case 2:
+      sscanf(buf,"%*d %lf %lf %*f\n", &(*x)[IX(A,0)], &(*x)[IX(A,1)] );
+      break;
+    case 3:
+      sscanf(buf,"%*d %lf %lf %lf\n", &(*x)[IX(A,0)], &(*x)[IX(A,1)], &(*x)[IX(A,2)] );
+      break;
+    }
+  }
+  fgets(buf,1024,fh);
+  /* End nodes block */
+
+  /* The element block */
+  Hypergraph_Alloc(hg[0],1);
+  
+  fgets(buf,1024,fh);
+  printf("%s",buf);
+  fgets(buf,1024,fh);
+  printf("%s",buf);
+
+  sscanf(buf,"%d\n",&ne);
+  printf("There are %d elements\n",ne);
+  for(A=0; A<ne; A++) {
+    int eid, etype,ntag, groupnum;
+    //fgets(buf,1024, fh);
+    fscanf(fh,"%d %d %d ", &eid,&etype,&ntag);
+    fscanf(fh,"%d ",&groupnum);
+    for(i=0;i<ntag-1;i++) fscanf(fh,"%*d ");
+    int ledge = etype;//Hack: Need a lookup table
+    hypervertex_t egg[ledge]; 
+    for(i=0;i<ledge;i++) {
+      fscanf(fh, "%d ",egg+i);
+      egg[i]--;
+    }
+    fscanf(fh,"\n");
+    Hypergraph_Push_Edge(hg[0],ledge,egg);
+  }
+  fgets(buf,1024,fh);
+
+  /* End element block */
+  
+  fclose(fh);
+}
 
 void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
 	       char * names, real_t ** data, int * l_data, int Ndata,
