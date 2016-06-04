@@ -259,7 +259,8 @@
     int ndofmap = PyList_Size(dofmaplist);
     
     dofmap_t * dofmaps[ndofmap];
-    cfdata_t data_ptrs[ndata];
+    cfdata_t data[ndata];
+    cfdata_t *data_ptrs[ndata];
 
     /* Step 2: Collect the data ptrs */
     PyArrayObject * newobjs[ndata];
@@ -267,7 +268,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      CFData_Default_New_From_Ptr(data_ptrs+i, array_size(arrobj,0),array_data(arrobj));
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0),array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;
@@ -287,6 +288,8 @@
     if(nvert != Npart) {
       verts = NULL;
     }
+    /* Fill up the ptr array */
+    for(i=0;i<ndata;i++) data_ptrs[i] = data+i;
     Tie_Cells_and_Particles(hgnew,mesh,
 			    ke_circum,ke_centroid,ke_inside,
 			    dofmaps,data_ptrs,

@@ -16,7 +16,7 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
 			     kernel_t * ke_centroid,
 			     kernel_t * ke_inside,
 			     dofmap_t ** dofmaps,
-			     cfdata_t * data,
+			     cfdata_t ** data,
 			     int Npart, int dim, real_t * x,
 			     hypervertex_t * PV);
 #endif
