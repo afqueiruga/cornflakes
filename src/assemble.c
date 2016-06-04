@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
-	     dofmap_t ** dms, cfdata_t * data)
+	     dofmap_t ** dms, cfdata_t ** data)
 {
   hypervertex_t V;
   int i, j, k, fnum, mnum, maxlen;
@@ -22,7 +22,7 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
     //printf("inp %d on %d\n",i,fnum);
     dmap = dms[mnum];
     //printf("%lx : %d \n",dmap, dmap->U.strided.stride);
-    datum = data+fnum;
+    datum = data[fnum];
     maxlen = Dofmap_Max_Len(dmap);
     int dofs[maxlen];
     int ndof;
@@ -90,7 +90,7 @@ void place_targets(target_t * att,
 
 
 void assemble(kernel_t * ke, hypergraph_t * hg,
-	      dofmap_t ** dofmaps, cfdata_t * data,
+	      dofmap_t ** dofmaps, cfdata_t ** data,
 	      target_t * att)
 {
   int i,j, hex,hx;

@@ -150,9 +150,9 @@
 
     
     dofmap_t * dofmaps[ndofmap];
-    target_t att[ntarget];
-    cfdata_t data_ptrs[ndata];
-    
+    target_t  att[ntarget];
+    cfdata_t  data[ndata];
+    cfdata_t* data_ptrs[ndata];
     int nnewobj = 0;
     PyArrayObject * newobjs[3*ntarget + ndata];
     /* Step 1: Build the target list */
@@ -202,7 +202,7 @@
       obj = PyList_GetItem(datalist,i );
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-      CFData_Default_New_From_Ptr(data_ptrs+i, array_size(arrobj,0),  array_data(arrobj));
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0),  array_data(arrobj));
       if(isnewobj) {
 	newobjs[nnewobj] = arrobj;
 	nnewobj++;
@@ -218,6 +218,9 @@
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
     }
+
+    /* Fill up the ptr array */
+    for(i=0;i<ndata;i++) data_ptrs[i] = data+i;
     /* Step 4: assemble! */
     assemble(ke, hg, dofmaps, data_ptrs, att);
 
