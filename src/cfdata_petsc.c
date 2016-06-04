@@ -66,6 +66,7 @@ void CFData_PETSc_New(cfdata_t * self, int N) {
   self->N = N;
   VecCreate(MPI_COMM_WORLD,(Vec*)&self->data);
   VecSetSizes(data(self), PETSC_DECIDE, N);
+  VecSetFromOptions(data(self));
 }
 void CFData_PETSc_New_Full(cfdata_t * self, int N, MPI_Comm comm, Vec like) {
   self->vtable = &cfdata_petsc_vtable;
