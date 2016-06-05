@@ -49,6 +49,7 @@ set( PY_FILES
   cornflakes/Assemble.py
   cornflakes/Dofmap.py
   cornflakes/GraphIO.py
+  cornflakes/Hypergraph.py
   cornflakes/ParticlePlacers.py
   cornflakes/SpatialHash.py
   )
@@ -118,8 +119,8 @@ endif(USE_LIS)
 install(TARGETS cornflakes DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/cornflakes)
-install(TARGETS ${SWIG_MODULE_cornflakes_library_REAL_NAME} DESTINATION ${PY_INSTALL_DIR} )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PY_INSTALL_DIR} )
+install(TARGETS ${SWIG_MODULE_cornflakes_library_REAL_NAME} DESTINATION ${PY_INSTALL_DIR} OPTIONAL)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PY_INSTALL_DIR} OPTIONAL)
 install(FILES ${PY_FILES} DESTINATION ${PY_INSTALL_DIR})
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
