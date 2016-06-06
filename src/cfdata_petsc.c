@@ -38,6 +38,9 @@ void CFData_PETSc_Get_Ptr(cfdata_t * self, real_t **ptr) {
 void CFData_PETSc_Release_Ptr(cfdata_t * self, real_t **ptr) {
   VecRestoreArray(data(self),ptr);
 }
+void CFData_PETSc_Print(cfdata_t * self) {
+  VecView(data(self), PETSC_VIEWER_STDOUT_WORLD);
+}
 
 
 /* vtable */
@@ -49,7 +52,8 @@ const _CFDATA_VTABLE_t cfdata_petsc_vtable = {
   .Wipe = &CFData_PETSc_Wipe,
   .Finalize = &CFData_PETSc_Finalize,
   .Get_Ptr = &CFData_PETSc_Get_Ptr,
-  .Release_Ptr = &CFData_PETSc_Release_Ptr
+  .Release_Ptr = &CFData_PETSc_Release_Ptr,
+  .Print = CFData_PETSc_Print
 };
 
 

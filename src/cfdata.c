@@ -24,3 +24,6 @@ void CFData_Get_Ptr(cfdata_t * self, real_t **dat) {
 void CFData_Release_Ptr(cfdata_t * self, real_t **dat) {
   self->vtable->Get_Ptr(self,dat);
 }
+void CFData_Print(cfdata_t * self) {
+  self->vtable->Print(self);
+}

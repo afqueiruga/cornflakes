@@ -97,7 +97,7 @@ void assemble(kernel_t * ke, hypergraph_t * hg,
   hyperedges_t * he;
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
-    /* Allocate the loca vectors for this size edge */
+    /* Allocate the local vectors for this size edge */
     int len_ker_in = kernel_inps_len(ke, he->l_edge);
     int len_ker_out = kernel_outps_len(ke, he->l_edge);
     real_t ker_in[ len_ker_in];
