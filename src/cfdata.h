@@ -19,6 +19,7 @@ struct _CFDATA_VTABLE_t {
   void (*Destroy)(cfdata_t * self);
   void (*Get_Ptr)(cfdata_t *  self, real_t **ptr);
   void (*Release_Ptr)(cfdata_t * self, real_t **ptr);
+  void (*Print)(cfdata_t * self);
 };
 
 void CFData_Get_Values(cfdata_t * self, int ndof,int * dofs, real_t * vals);
@@ -29,5 +30,6 @@ void CFData_Finalize(cfdata_t * self);
 void CFData_Destroy(cfdata_t * self);
 void CFData_Get_Ptr(cfdata_t * self, real_t **ptr);
 void CFData_Release_Ptr(cfdata_t * self, real_t **ptr);
+void CFData_Print(cfdata_t * self);
 
 #endif

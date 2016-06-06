@@ -16,6 +16,8 @@ void load_gmsh(real_t ** x, int * N, int gdim,
 	       char * fname, ...);
 void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
 	       char * names, real_t ** data, int * l_data, int Ndata,
+	       char * cnames, real_t **cdata, int * l_cdata, int Ncdata,
+
 	      char * fname, ... );
 
 #endif

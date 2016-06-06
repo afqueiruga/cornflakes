@@ -128,6 +128,7 @@ void load_gmsh(real_t ** x, int * N, int gdim,
 
 void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
 	       char * names, real_t ** data, int * l_data, int Ndata,
+	       char * cnames, real_t **cdata, int * l_cdata, int Ncdata,
 	       char * fname, ... )
 {
   va_list args;
@@ -178,6 +179,8 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
   fprintf(fh,"\n\n");
 
   /* Write point data */
+  // TODO: Using gdim as the stride instead of l_data should be a bug.
+  // HOWEVER: The vectors will match gdim (l_data == gdim for a vector)
   if(Ndata>0) fprintf(fh,"POINT_DATA %d\n",N);
   for(dnum=0; dnum<Ndata; dnum++) {
     switch(l_data[dnum]) {
@@ -204,7 +207,35 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
       }
     } // end switch
   } // end for dnum
+  
   /* Write cell data */
+  int Nelem = he->n_edge;
+  if(Ncdata>0) fprintf(fh,"CELL_DATA %d\n",Nelem);
+  for(dnum=0; dnum<Ncdata; dnum++) {
+    switch(l_cdata[dnum]) {
+    case 3: // A 3D vector
+      fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
+      for(A=0;A<Nelem;A++) {
+	fprintf(fh,"%e %e %e\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1],cdata[dnum][gdim*A+2]);
+      }
+      break;
+    case 2: // A 2D vector
+      fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
+      for(A=0;A<Nelem;A++) {
+	fprintf(fh,"%e %e 0\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1]);
+      }
+      break;
+    case 9: // A 3D tensor
+    case 4: // A 2D tensor
+      // TODO: fill in
+    case 1: // A scalar
+    default: // The default case is scalar field of the first component
+      fprintf(fh,"SCALARS %c double\nLOOKUP_TABLE default\n",cnames[dnum]);
+      for(A=0;A<Nelem;A++) {
+	fprintf(fh,"%e\n", cdata[dnum][l_cdata[dnum]*A]);
+      }
+    } // end switch
+  } // end for dnum
   
   fclose(fh);
 }
