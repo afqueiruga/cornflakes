@@ -15,7 +15,7 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
         2:"{0} {1} 0.0\n",
         3:"{0} {1} {2}\n"
         }
-    elems = H.view()
+    elems = H.view()[0]
     vecfmt = vecformatdict[X.shape[1]]
     
     fh = open(fname,"w")
@@ -42,20 +42,29 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
     for el in elems:
         fh.write("{0}\n".format(celltypekey[elems.shape[1]]))
 
-    if nodefields:
-        fh.write("POINT_DATA {0}\n".format(X.shape[0]))
-        for n,f in nodefields.iteritems():
-            fh.write("VECTORS {0} double\n".format(n))
-            #fh.write("LOOKUP_TABLE default\n")
-            for l in f:
-                fh.write(vecfmt.format(*l))
-    if edgefields:
-        fh.write("CELL_DATA {0}\n".format(H.hg.n_edge))
-        for n,f in edgefields.iteritems():
+    # Macro to write a data block
+    def PUTFIELD(n,f):
+        if len(f.shape)==1 or f.shape[1]==1:
             fh.write("SCALARS {0} double\n".format(n))
             fh.write("LOOKUP_TABLE default\n")
             for l in f:
-                fh.write("{0}\n".format(l))
+                fh.write(str(l)+"\n")
+        else:
+            fh.write("VECTORS {0} double\n".format(n))
+            for l in f:
+                fh.write(vecfmt.format(*l))
+    
+    # Dump all of the node fields
+    if nodefields:
+        fh.write("POINT_DATA {0}\n".format(X.shape[0]))
+        for n,f in nodefields:
+            PUTFIELD(n,f)
+    # Cell fields now
+    if edgefields:
+        fh.write("CELL_DATA {0}\n".format(elems.shape[0]))
+        for n,f in edgefields:
+            PUTFIELD(n,f)
+            
     fh.close()
 
              
@@ -155,3 +164,32 @@ def write_silo_datfile(fname,mname,cycle=0, time=0, nodefields=[], edgefields=[]
 
     silo.close()
     
+
+
+def write_gmsh_file(fname, H,X):
+    nodeformatdict = {
+        1:"{0} {1} 0.0 0.0\n",
+        2:"{0} {1} {2} 0.0\n",
+        3:"{0} {1} {2} {3}\n"
+    }
+    vecfmt = nodeformatdict[X.shape[1]]
+    
+    fh = open(fname,"w")
+    fh.write("$MeshFormat\n2.2 0 8\n&EndMeshFormat\n")
+
+    fh.write("$Nodes\n")
+    fh.write("{0}\n".format(X.shape[0]))
+    for i,l in enumerate(X):
+      fh.write(vecfmt.format(1+i,*l))
+    fh.write("$EndNodes\n")
+
+    etype = 4
+    elems = H.view()[0]
+    fh.write("$Elements\n")
+    fh.write("{0}\n".format(elems.shape[0]))
+    for i,e in enumerate(elems):
+        fh.write("{0} {1} 2 0 0".format(i+1,etype))
+        for v in e: fh.write(" {0}".format(v+1))
+        fh.write("\n")
+    fh.write("$EndElements\n")
+    fh.close()

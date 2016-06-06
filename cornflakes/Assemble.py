@@ -69,7 +69,7 @@ def Assemble_Targets_dep(ranks, ke,hg, dofmap,ndof, data):
 def Apply_BC(dofs,vals, K=None,R=None):
     if K!=None:
         for i in dofs:
-            K[i,:] = 0.0
+            K.data[K.indptr[i]:K.indptr[i+1]] = 0.0
             K[i,i] = 1.0
     if R!=None:
         R[dofs]=vals
