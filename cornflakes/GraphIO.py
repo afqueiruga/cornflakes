@@ -183,7 +183,12 @@ def write_gmsh_file(fname, H,X):
       fh.write(vecfmt.format(1+i,*l))
     fh.write("$EndNodes\n")
 
-    etype = 4
+    etype = 3 # TODO:
+    # 1 = 2-node lines
+    # 2 = 3-node triangle
+    # 3 = 4-node quad
+    # 4 = 4-node tet
+    # 6 = 8-node hex
     elems = H.view()[0]
     fh.write("$Elements\n")
     fh.write("{0}\n".format(elems.shape[0]))
