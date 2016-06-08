@@ -13,18 +13,17 @@ real_t dist(int dim, real_t * x, real_t * y) {
 }
 
 real_t smoother(real_t r, real_t rad) {
-  return 1.0;
+  return ( r<rad ? 1.0 - r/rad : 0.0);
 }
 void Interpolate(real_t * uold, real_t * Xold, int Nold,
 		 real_t * unew, real_t * Xnew, int Nnew,
 		 int udim, int xdim, real_t rad)
 {
   spatialhash_t sh;
-  Build_New_Hash(&sh, Nold,xdim,Xold, rad);
-
+  Build_New_Hash(&sh, Nold,xdim,Xold, 2.0*rad);
   int A, i;
-  real_t weight;
   
+  real_t weight;
   void action(int FOO, int b) {
     real_t w = smoother( dist(xdim, Xnew+xdim*A,Xold+xdim*b), rad);
     weight += w;
@@ -40,6 +39,36 @@ void Interpolate(real_t * uold, real_t * Xold, int Nold,
 
   SpatialHash_destroy(&sh);
 }
+
+void Interpolate_Closest(real_t * uold, real_t * Xold, int Nold,
+		 real_t * unew, real_t * Xnew, int Nnew,
+		 int udim, int xdim, real_t rad)
+{
+  spatialhash_t sh;
+  Build_New_Hash(&sh, Nold,xdim,Xold, 2.0*rad);
+  int A, i;
+  
+  real_t mindist, minu[udim];
+  void action(int FOO, int b) {
+    real_t w =  dist(xdim, Xnew+xdim*A,Xold+xdim*b);
+    if(w < mindist) {
+      mindist = w;
+      for(i=0;i<udim;i++) minu[i] =  uold[udim*b+i];
+    }
+  }
+
+  for(A=0; A<Nnew; A++) {
+    mindist = 2.0*rad;
+    SpatialHash_ScanPt(&sh, Xnew+xdim*A, action);
+    //printf("%lf\n",weight);
+    for(i=0;i<udim;i++) unew[udim*A+i] = minu[i];
+    //for(i=0; i<udim; i++) unew[udim*A+i] /= weight;
+  }
+
+  SpatialHash_destroy(&sh);
+}
+
+
 
 void load_gmsh(real_t ** x, int * N, int gdim,
 	       hypergraph_t ** hg,
