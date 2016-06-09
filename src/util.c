@@ -139,7 +139,19 @@ void load_gmsh(real_t ** x, int * N, int gdim,
     fscanf(fh,"%d %d %d ", &eid,&etype,&ntag);
     fscanf(fh,"%d ",&groupnum);
     for(i=0;i<ntag-1;i++) fscanf(fh,"%*d ");
-    int ledge = etype;//Hack: Need a lookup table
+
+    int ledge;
+    switch(etype) {
+    case 1: // Line
+      ledge=2; break;
+    case 2: // Tri  2D
+      ledge=3; break;
+    case 3: // Quad 2D
+    case 4: // Tet  3D
+      ledge=4; break;
+    default:
+      ledge=4;
+    }
     hypervertex_t egg[ledge]; 
     for(i=0;i<ledge;i++) {
       fscanf(fh, "%d ",egg+i);
