@@ -19,6 +19,9 @@ void CFData_PETSc_Scatter(cfdata_t * self, real_t * src) {
   VecAssemblyBegin(data(self));
   VecAssemblyEnd(data(self));
 }
+void CFData_PETSc_Copy(cfdata_t *self, cfdata_t * src) {
+  VecCopy( data(self), data(src) );
+}
 void CFData_PETSc_Destroy(cfdata_t * self) {
   if(self->own) VecDestroy((Vec*)&(self->data));
 }
@@ -47,6 +50,7 @@ void CFData_PETSc_Print(cfdata_t * self) {
 const _CFDATA_VTABLE_t cfdata_petsc_vtable = {
   .Get_Values = CFData_PETSc_Get_Values,
   .Scatter = CFData_PETSc_Scatter,
+  .Copy = CFData_PETSc_Copy,
   .Place = &CFData_PETSc_Place,
   .Destroy = &CFData_PETSc_Destroy,
   .Wipe = &CFData_PETSc_Wipe,

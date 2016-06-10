@@ -9,6 +9,10 @@ real_t * CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals) {
 void CFData_Scatter(cfdata_t * self, real_t * src) {
   self->vtable->Scatter(self,src);
 }
+void CFData_Copy(cfdata_t * self, cfdata_t * src) {
+  self->vtable->Copy(self,src);
+}
+
 void CFData_Wipe(cfdata_t * self) {
   self->vtable->Wipe(self);
 }
