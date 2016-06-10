@@ -38,8 +38,7 @@ void IndexMap_New(indexmap_t * self,
 	b++;
       }
     } else {
-      self->map[i-istart] = i-b;
-      //b++;
+      self->map[i-istart] = i-b+N_duplicates;
     }
   }
   /*
