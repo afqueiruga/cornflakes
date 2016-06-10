@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "assemble.h"
 #include "dofmap.h"
+#include "indexmap.h"
 #include "util.h"
 #include "target.h"
 #include "cfdata.h"
