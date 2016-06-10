@@ -198,3 +198,11 @@ def write_gmsh_file(fname, H,X):
         fh.write("\n")
     fh.write("$EndElements\n")
     fh.close()
+
+
+
+def Load_gmsh(fname,gdim=3):
+    H = Hypergraph()
+    cflib.Hypergraph_Destroy(H.hg)
+    X = cflib.load_gmsh_np(2, H.hg, fname)
+    return X,H

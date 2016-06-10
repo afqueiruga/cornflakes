@@ -300,4 +300,24 @@
       Py_DECREF(newobjs[i]);
     }
   }
+
+
+  /* Call the C version. No vargs supported, and only one hg will be read */
+  PyObject* load_gmsh_np(int gdim_set,
+		    hypergraph_t * hg,
+		    char * fname)
+  {
+    real_t *xc;
+    int nc;
+    load_gmsh(&xc, &nc, gdim_set,
+	      &hg, fname);
+
+    npy_intp dims[2] = { nc, gdim_set };
+    PyObject* x_wrap = PyArray_SimpleNewFromData(2,dims, NPY_DOUBLE, xc);
+    PyObject * x_np = PyArray_SimpleNew(2,dims, NPY_DOUBLE);
+    PyArray_CopyInto((PyArrayObject*)x_np,(PyArrayObject*)x_wrap);
+    Py_DECREF(x_wrap);
+    free(xc);
+    return x_np;
+  }
 %}
