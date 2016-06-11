@@ -11,7 +11,8 @@ set(SOURCES
   src/cfdata.c
   src/cfmat.c
   src/target.c
- 
+
+  src/cfmat_bc.c
   src/cfdata_default.c
   src/cfmat_default.c
   src/cfdata_petsc.c
