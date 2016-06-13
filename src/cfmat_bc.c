@@ -14,7 +14,7 @@ real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
   int n_sub = 0, n_bc=0;
   for(i=0;i<n;i++) {
     mapped[i] = IndexMap_Get(data(self)->map, dofs[i]);
-    printf("%d ",mapped[i]);
+    /* printf("%d ",mapped[i]); */
     if(mapped[i]>=0) {
       dofs_sub[n_sub] = mapped[i];
       i_sub[n_sub] = i;
@@ -24,9 +24,9 @@ real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
       n_bc++;
     }
   }
-  printf("\n");
-  for(i=0;i<n_sub;i++) printf("%d ",dofs_sub[i]); printf("\n");
-  for(i=0;i<n_bc;i++) printf("%d ",i_bc[i]); printf("\n");
+  /* printf("\n"); */
+  /* for(i=0;i<n_sub;i++) printf("%d ",dofs_sub[i]); printf("\n"); */
+  /* for(i=0;i<n_bc;i++) printf("%d ",i_bc[i]); printf("\n"); */
   if(n_sub==n) {
     // No BCs in this block. Nothing happens to R
     data(self)->K->vtable->Place(data(self)->K, n, dofs, vals);    
@@ -48,7 +48,7 @@ real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
 	R_vals[i] += vals[i*n + i_bc[j]] * ubar[j] ;
       }
     }
-    for(i=0;i<n_sub;i++) printf("%lf ",R_vals[i]); printf("\n");
+    /* for(i=0;i<n_sub;i++) printf("%lf ",R_vals[i]); printf("\n"); */
     data(self)->R->vtable->Place(data(self)->R, n_sub,dofs_sub,R_vals);
 
 

@@ -12,6 +12,7 @@ set(SOURCES
   src/cfmat.c
   src/target.c
 
+  src/cfdata_bc.c
   src/cfmat_bc.c
   src/cfdata_default.c
   src/cfmat_default.c
@@ -34,7 +35,9 @@ set( HEADERS
   src/cfdata.h
   src/cfmat.h
   src/target.h
-  
+
+  src/cfdata_bc.h
+  src/cfmat_bc.h
   src/cfdata_default.h
   src/cfmat_default.h
   src/cfdata_petsc.h
