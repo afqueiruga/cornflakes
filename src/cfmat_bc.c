@@ -8,30 +8,58 @@ real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
   int i,j;
   // I need to extract the square block to call CFMat_Place on the sub mat
   // and then add the rectangular contribution to R
-  int mapped[n];
-  int n_sub = 0;
+  index_t mapped[n];
+  index_t dofs_sub[n];
+  index_t i_sub[n], i_bc[n];
+  int n_sub = 0, n_bc=0;
   for(i=0;i<n;i++) {
-    mapped[i] = IndexMap_Get(data(self)->map, i);
-    if(mapped[i]>=0) n_sub++;
+    mapped[i] = IndexMap_Get(data(self)->map, dofs[i]);
+    printf("%d ",mapped[i]);
+    if(mapped[i]>=0) {
+      dofs_sub[n_sub] = mapped[i];
+      i_sub[n_sub] = i;
+      n_sub++;
+    } else {
+      i_bc[n_bc] = i;
+      n_bc++;
+    }
   }
+  printf("\n");
+  for(i=0;i<n_sub;i++) printf("%d ",dofs_sub[i]); printf("\n");
+  for(i=0;i<n_bc;i++) printf("%d ",i_bc[i]); printf("\n");
   if(n_sub==n) {
     // No BCs in this block. Nothing happens to R
     data(self)->K->vtable->Place(data(self)->K, n, dofs, vals);    
   } else {
     // Need to trim
+    // Fill up trimmed dofs
+    /* index_t dofs_sub[n_sub]; */
+    
     // Ri += Kij uj
-    /* int nR = n-n_sub; */
+    /* Calculate Ri += Kij uj */
     real_t R_vals[n_sub];
-    index_t dofs_sub[n_sub];
+    real_t ubar[n_bc];
+    int bcdof[n_bc];
+    for(i=0;i<n_bc;i++) bcdof[i] = dofs[i_bc[i]];
+    CFData_Get_Values(data(self)->u, n_bc, bcdof ,ubar);
     for(i=0;i<n_sub;i++) {
       R_vals[i] = 0;
-      /* for(j=0;j< */
+      for(j=0;j<n_bc;j++) {
+	R_vals[i] += vals[i*n + i_bc[j]] * ubar[j] ;
+      }
     }
+    for(i=0;i<n_sub;i++) printf("%lf ",R_vals[i]); printf("\n");
     data(self)->R->vtable->Place(data(self)->R, n_sub,dofs_sub,R_vals);
 
+
+    /* Copy up K to shrink it */
     // K += K_sub
     real_t vals_sub[n_sub*n_sub];
-    
+    for(i=0;i<n_sub;i++) {
+      for(j=0;j<n_sub;j++) {
+	vals_sub[i*n_sub+j] = vals[i_sub[i]*n+i_sub[j]];
+      }
+    }
     data(self)->K->vtable->Place(data(self)->K, n_sub, dofs_sub, vals_sub);
   }
   return vals + n*n;

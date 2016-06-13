@@ -19,9 +19,18 @@ int main(int argc, char **argv) {
   CFMat_PETSc_New(&K,N - NBC);
   CFData_PETSc_New(&R,N - NBC);
   CFData_PETSc_New(&u,N);
-  
+  VecSet(CFData_PETSc_Data(&u), 1.0);
   CFMat_BC_New(&KBC, &K,&R,&u, &imap);
-  
+
+  int dofs[3] = {1,2,5};
+  printf("%d\n",IndexMap_Get(&imap, 1));
+  real_t vals[9] = {1.0,2.0,3.0,
+		    4.0,5.0,6.0,
+		    7.0,8.0,9.0};
+  CFMat_Place(&KBC, 3,dofs,vals);
+  CFMat_Finalize(&KBC);
+  MatView(CFMat_PETSc_Data(&K),PETSC_VIEWER_STDOUT_SELF);
+  VecView(CFData_PETSc_Data(&R),PETSC_VIEWER_STDOUT_SELF);
   CFMat_Destroy(&K);
   CFData_Destroy(&R);
   
