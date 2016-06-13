@@ -7,7 +7,8 @@
  */
 typedef int index_t ;
 typedef struct indexmap_str {
-  int start,end;
+  int start,end; // Of the inputs
+  int Nsys; // Of the output
   int * map;
 } indexmap_t;
 void IndexMap_New(indexmap_t * self,

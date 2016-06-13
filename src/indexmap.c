@@ -41,6 +41,7 @@ void IndexMap_New(indexmap_t * self,
       self->map[i-istart] = i-b+N_duplicates;
     }
   }
+  self->Nsys = self->map[iend-istart-1] + 1;
   /*
   // Check that it all added up
   printf("%d %d %d\n",b,NBC,N_duplicates);
