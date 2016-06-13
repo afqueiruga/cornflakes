@@ -10,7 +10,10 @@ real_t * CFData_LIS_Place(cfdata_t * self,
   return ker_out + n;
 }
 void CFData_LIS_Scatter(cfdata_t * self, real_t * src) {
-  // TODO I know how to do this
+  lis_vector_scatter(src,data(self));
+}
+void CFData_LIS_Copy(cfdata_t * self, cfdata_t * dest) {
+  lis_vector_copy( data(self), data(dest) );
 }
 void CFData_LIS_Destroy(cfdata_t * self) {
   if(self->own) lis_vector_destroy(data(self)); 
@@ -31,20 +34,26 @@ void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
 }
 void CFData_LIS_Get_Ptr(cfdata_t * self, real_t **ptr) {
   // TODO
+  lis_vector_gather(data(self),*ptr); //NO
 }
 void CFData_LIS_Release_Ptr(cfdata_t * self, real_t **ptr) {
   // TODO
   *ptr = NULL;
 }
+void CFData_LIS_Print(cfdata_t * self) {
+  lis_vector_print(data(self));
+}
 const _CFDATA_VTABLE_t cfdata_lis_vtable = {
   .Get_Values = CFData_LIS_Get_Values,
-  .Scatter = &CFData_LIS_Scatter,
-  .Place = &CFData_LIS_Place,
-  .Destroy = &CFData_LIS_Destroy,
-  .Wipe = &CFData_LIS_Wipe,
-  .Finalize = &CFData_LIS_Finalize,
-  .Get_Ptr = &CFData_LIS_Get_Ptr,
-  .Release_Ptr = &CFData_LIS_Release_Ptr
+  .Scatter = CFData_LIS_Scatter,
+  .Copy = CFData_LIS_Copy,
+  .Place = CFData_LIS_Place,
+  .Destroy = CFData_LIS_Destroy,
+  .Wipe = CFData_LIS_Wipe,
+  .Finalize = CFData_LIS_Finalize,
+  .Get_Ptr = CFData_LIS_Get_Ptr,
+  .Release_Ptr = CFData_LIS_Release_Ptr,
+  .Print = CFData_LIS_Print
 };
 
 void CFData_LIS_New(cfdata_t * self, int N) {
