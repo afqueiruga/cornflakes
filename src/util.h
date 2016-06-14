@@ -7,9 +7,14 @@
 
 real_t dist(int dim, real_t * x, real_t * y);
 
+
 void Interpolate(real_t * uold, real_t * Xold, int Nold,
 		 real_t * unew, real_t * Xnew, int Nnew,
 		 int udim, int xdim, real_t rad);
+
+void Interpolate_Closest(real_t * uold, real_t * Xold, int Nold,
+			 real_t * unew, real_t * Xnew, int Nnew,
+			 int udim, int xdim, real_t rad);
 
 void load_gmsh(real_t ** x, int * N, int gdim,
 	       hypergraph_t ** hg,

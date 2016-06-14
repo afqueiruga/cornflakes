@@ -1,15 +1,19 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 project( proj_cornflakes )
+enable_testing()
 
 # The source files
 set(SOURCES
   src/kernel.c
   src/dofmap.c
+  src/indexmap.c
   src/cfdata.c
   src/cfmat.c
   src/target.c
-  
+
+  src/cfdata_bc.c
+  src/cfmat_bc.c
   src/cfdata_default.c
   src/cfmat_default.c
   src/cfdata_petsc.c
@@ -27,10 +31,13 @@ set( HEADERS
   src/cornflakes.h
   src/kernel.h
   src/dofmap.h
+  src/indexmap.h
   src/cfdata.h
   src/cfmat.h
   src/target.h
-  
+
+  src/cfdata_bc.h
+  src/cfmat_bc.h
   src/cfdata_default.h
   src/cfmat_default.h
   src/cfdata_petsc.h
@@ -65,7 +72,7 @@ option(USE_LIS "Enable LIS backend for assembly" ON)
 
 # Make the static library
 add_library( cornflakes STATIC ${SOURCES} )
-
+set(CORNFLAKES_LIBRARIES m)
 
 if(USE_PETSC)
   set(PETSC_DIR /home/afq/Downloads/petsc)
@@ -76,6 +83,7 @@ if(USE_PETSC)
   include_directories(${PETSC_INCLUDES})
   add_definitions(${PETSC_DEFINITIONS})  
   target_link_libraries(cornflakes ${PPETSC_LIBRARIES})
+  list(APPEND CORNFLAKES_LIBRARIES ${PETSC_LIBRARIES})
 endif(USE_PETSC)
 
 if(USE_LIS)
@@ -85,6 +93,7 @@ if(USE_LIS)
   set_property(TARGET lib_lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
   target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
   include_directories(${lis_path}/include/)
+  list(APPEND CORNFLAKES_LIBRARIES lib_lis)
 endif(USE_LIS)
 
 
@@ -114,8 +123,14 @@ if(USE_LIS)
   #    PROPERTIES COMPILE_FLAGS "-DUSE_LIS")
 endif(USE_LIS)
 
+#
+# The tests
+#
+add_subdirectory(units)
 
-
+#
+# Install stuffs
+#
 install(TARGETS cornflakes DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/cornflakes)
