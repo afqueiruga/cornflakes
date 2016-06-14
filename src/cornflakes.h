@@ -10,6 +10,8 @@
 #include "cfdata.h"
 #include "cfmat.h"
 
+#include "cfdata_bc.h"
+#include "cfmat_bc.h"
 #include "cfdata_default.h"
 #include "cfmat_default.h"
 #include "cfdata_petsc.h"

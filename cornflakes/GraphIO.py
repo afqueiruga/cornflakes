@@ -1,3 +1,6 @@
+from Hypergraph import Hypergraph
+import cornflakes_library as cflib
+
 #
 # IO Routines
 #
