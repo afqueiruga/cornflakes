@@ -1,6 +1,7 @@
 #ifdef USE_LIS
 #include "cfdata_lis.h"
 
+#include <stdlib.h>
 
 #define data(x) CFData_LIS_Data(x)
 
@@ -31,13 +32,17 @@ void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
   for(i=0;i<ndof;i++) {
     lis_vector_get_value((LIS_VECTOR)self->data, dofs[i], vals+i);
   }
+  /* printf("%lf\n",*vals); */
 }
 void CFData_LIS_Get_Ptr(cfdata_t * self, real_t **ptr) {
-  // TODO
-  lis_vector_gather(data(self),*ptr); //NO
+  // TODO: Is there a better way to do this?
+  *ptr = malloc( sizeof(real_t) * self->N);
+  lis_vector_gather(data(self),*ptr);
 }
 void CFData_LIS_Release_Ptr(cfdata_t * self, real_t **ptr) {
-  // TODO
+  printf("## %lf\n",**ptr);
+  lis_vector_scatter(*ptr,data(self));
+  free(*ptr);
   *ptr = NULL;
 }
 void CFData_LIS_Print(cfdata_t * self) {
