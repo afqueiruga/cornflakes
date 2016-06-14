@@ -30,7 +30,7 @@ void CFData_BC_Copy(cfdata_t *self, cfdata_t * src) {
   printf("CFData_BC_Copy is unimplemented : non-concrete data\n");
 }
 void CFData_BC_Destroy(cfdata_t * self) {
-  /* I don't own anything other than my internet struct of ptrs */
+  /* I don't own anything other than my internal struct of ptrs */
   free(data(self));
 }
 void CFData_BC_Wipe(cfdata_t * self) {
@@ -70,6 +70,7 @@ const _CFDATA_VTABLE_t cfdata_bc_vtable = {
   .Print = CFData_BC_Print
 };
 
+/* Constructor */
 void CFData_BC_New(cfdata_t * self,
 		   cfdata_t * R, indexmap_t * map) {
   self->vtable = &cfdata_bc_vtable;

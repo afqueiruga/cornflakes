@@ -29,7 +29,8 @@ real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
   /* for(i=0;i<n_bc;i++) printf("%d ",i_bc[i]); printf("\n"); */
   if(n_sub==n) {
     // No BCs in this block. Nothing happens to R
-    data(self)->K->vtable->Place(data(self)->K, n, dofs, vals);    
+    // But, they still map to new indices
+    data(self)->K->vtable->Place(data(self)->K, n, dofs_sub, vals);    
   } else {
     // Need to trim
     // Fill up trimmed dofs
