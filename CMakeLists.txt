@@ -12,6 +12,8 @@ set(SOURCES
   src/cfmat.c
   src/target.c
 
+  src/toctic.c
+
   src/cfdata_bc.c
   src/cfmat_bc.c
   src/cfdata_default.c
@@ -20,6 +22,7 @@ set(SOURCES
   src/cfmat_petsc.c
   src/cfdata_lis.c
   src/cfmat_lis.c
+  src/cfmat_lis_2.c
   
   src/hypergraph.c
   src/assemble.c
@@ -36,6 +39,8 @@ set( HEADERS
   src/cfmat.h
   src/target.h
 
+  #src/toctic.h
+  
   src/cfdata_bc.h
   src/cfmat_bc.h
   src/cfdata_default.h
@@ -44,7 +49,8 @@ set( HEADERS
   src/cfmat_petsc.h
   src/cfdata_lis.h
   src/cfmat_lis.h
-  
+  src/cfmat_lis_2.h
+
   src/hypergraph.h
   src/assemble.h
   src/spatialhash.h
@@ -74,6 +80,15 @@ option(USE_LIS "Enable LIS backend for assembly" ON)
 add_library( cornflakes STATIC ${SOURCES} )
 set(CORNFLAKES_LIBRARIES m)
 
+find_package(OpenMP REQUIRED)
+if(OPENMP_FOUND)
+  message("OPENMP FOUND")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
+
 if(USE_PETSC)
   set(PETSC_DIR /home/afq/Downloads/petsc)
   set(PETSC_ARCH arch-linux2-c-debug )
@@ -95,6 +110,8 @@ if(USE_LIS)
   include_directories(${lis_path}/include/)
   list(APPEND CORNFLAKES_LIBRARIES lib_lis)
 endif(USE_LIS)
+
+
 
 
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")

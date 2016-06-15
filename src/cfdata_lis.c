@@ -40,7 +40,7 @@ void CFData_LIS_Get_Ptr(cfdata_t * self, real_t **ptr) {
   lis_vector_gather(data(self),*ptr);
 }
 void CFData_LIS_Release_Ptr(cfdata_t * self, real_t **ptr) {
-  printf("## %lf\n",**ptr);
+  //printf("## %lf\n",**ptr);
   lis_vector_scatter(*ptr,data(self));
   free(*ptr);
   *ptr = NULL;
