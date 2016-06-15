@@ -5,9 +5,9 @@
 
 #define data(x) CFMat_PETSc_Data(x)
 real_t * CFMat_PETSc_Place(cfmat_t * self,
-			   int n, int * dofs, real_t * ker_out) {
-  MatSetValues(data(self), n,dofs, n,dofs,  ker_out, ADD_VALUES);
-  return ker_out + n*n;
+			   int ln, int * ldofs, int rn, int * rdofs, real_t * ker_out) {
+  MatSetValues(data(self), ln,ldofs, rn,rdofs,  ker_out, ADD_VALUES);
+  return ker_out + ln*rn;
 }
 void CFMat_PETSc_Destroy(cfmat_t * self) {
   if(self->own) MatDestroy((Mat*)&(self->data));

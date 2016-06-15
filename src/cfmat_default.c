@@ -4,22 +4,22 @@
 
 #define data(x) CFMat_Default_Data(x)
 real_t * CFMat_Default_Place(cfmat_t * self,
-			      int n, int * dofs, real_t * ker_out) {
+			     int ln, int * ldofs,int rn, int * rdofs, real_t * ker_out) {
   int i,j;
 
     // Fill this block
-    for(i=0;i<n;i++) {
-      for(j=0;j<n;j++) {
-	data(self)->IIiter[n*i + j ] = dofs[i];
-	data(self)->JJiter[n*i + j ] = dofs[j];
-	data(self)->Viter [n*i + j ] = ker_out[ n*i + j];
+    for(i=0;i<ln;i++) {
+      for(j=0;j<rn;j++) {
+	data(self)->IIiter[rn*i + j ] = ldofs[i];
+	data(self)->JJiter[rn*i + j ] = rdofs[j];
+	data(self)->Viter [rn*i + j ] = ker_out[ rn*i + j];
       }
     }
     // Advance our iterators.
-    data(self)->IIiter += n*n;
-    data(self)->JJiter += n*n;
-    data(self)->Viter += n*n;
-    return ker_out + n*n;
+    data(self)->IIiter += rn*ln;
+    data(self)->JJiter += rn*ln;
+    data(self)->Viter += rn*ln;
+    return ker_out + rn*ln;
 
 }
 void CFMat_Default_Destroy(cfmat_t * self) {
