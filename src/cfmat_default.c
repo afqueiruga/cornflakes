@@ -79,6 +79,7 @@ void CFMat_Default_New(cfmat_t * self, int onum,
   data(self)->V = malloc( matsize * sizeof(real_t) );
   data(self)->II = malloc( matsize * sizeof(int) );
   data(self)->JJ = malloc( matsize * sizeof(int) );
+  data(self)->nalloc = matsize;
   // For good measure:
   CFMat_Default_Wipe(self); 
 }
