@@ -65,5 +65,6 @@ void CFData_Default_New(cfdata_t * self, int N) {
   self->data = malloc( N*sizeof(real_t) );
   self->own = 1;
   self->N = N;
+  CFData_Default_Wipe(self);
 }
 
