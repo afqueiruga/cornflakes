@@ -120,4 +120,6 @@ void CFMat_BC_New(cfmat_t * self,
   data(self)->K = K;
   data(self)->R = R;
   data(self)->u = u;
+  self->N = imap->Nsys;
+  self->own = 0;
 }
