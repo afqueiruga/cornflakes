@@ -110,6 +110,7 @@ void assemble(kernel_t * ke, hypergraph_t * hg,
     if(tid==0) {
       glob_att = malloc(sizeof(target_t)*tmax*ke->noutp);
     }
+    #pragma omp barrier
     printf("Hi, I'm %d \n",tid);
     /* Make tempory storage owned by just this thread. Big storage cost! */
     target_t * my_att = glob_att + ke->noutp * tid;
