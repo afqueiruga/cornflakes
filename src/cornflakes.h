@@ -3,6 +3,7 @@
 #include "graphers.h"
 #include "kernel.h"
 #include "assemble.h"
+#include "assemble_omp.h"
 #include "dofmap.h"
 #include "indexmap.h"
 #include "util.h"

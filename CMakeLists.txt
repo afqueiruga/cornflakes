@@ -26,6 +26,7 @@ set(SOURCES
   
   src/hypergraph.c
   src/assemble.c
+  src/assemble_omp.c
   src/spatialhash.c
   src/graphers.c
   src/util.c
@@ -53,6 +54,7 @@ set( HEADERS
 
   src/hypergraph.h
   src/assemble.h
+  src/assemble_omp.h
   src/spatialhash.h
   src/graphers.h
   src/util.h
