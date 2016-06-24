@@ -74,7 +74,8 @@ add_subdirectory(src/kernels)
 include_directories(src/)
 
 
-
+set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
+include_directories(${EXTRA_INCLUDES})
 option(USE_PETSC "Enable PETSc backend for assembly" ON)
 option(USE_LIS "Enable LIS backend for assembly" ON)
 
@@ -98,7 +99,7 @@ if(USE_PETSC)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
   find_package(PETSc REQUIRED)
   include_directories(${PETSC_INCLUDES})
-  add_definitions(${PETSC_DEFINITIONS})  
+  add_definitions(${PETSC_DEFINITIONS})
   target_link_libraries(cornflakes ${PPETSC_LIBRARIES})
   list(APPEND CORNFLAKES_LIBRARIES ${PETSC_LIBRARIES})
 endif(USE_PETSC)

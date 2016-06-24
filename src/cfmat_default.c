@@ -41,7 +41,7 @@ void CFMat_Default_Destroy(cfmat_t * self) {
 }
 void CFMat_Default_Wipe(cfmat_t * self) {
   int i;
-  /* for(i=0;i<self->N;i++) { */
+  /* for(i=0;i<data(self)->Nalloc;i++) { */
     /* data(self)->V[i]=0.0; */
   /* } */
   data(self)->Viter = data(self)->V;
