@@ -12,6 +12,8 @@ set(SOURCES
   src/cfmat.c
   src/target.c
 
+  src/toctic.c
+
   src/cfdata_bc.c
   src/cfmat_bc.c
   src/cfdata_default.c
@@ -20,9 +22,11 @@ set(SOURCES
   src/cfmat_petsc.c
   src/cfdata_lis.c
   src/cfmat_lis.c
+  src/cfmat_lis_2.c
   
   src/hypergraph.c
   src/assemble.c
+  src/assemble_omp.c
   src/spatialhash.c
   src/graphers.c
   src/util.c
@@ -36,6 +40,8 @@ set( HEADERS
   src/cfmat.h
   src/target.h
 
+  #src/toctic.h
+  
   src/cfdata_bc.h
   src/cfmat_bc.h
   src/cfdata_default.h
@@ -44,9 +50,11 @@ set( HEADERS
   src/cfmat_petsc.h
   src/cfdata_lis.h
   src/cfmat_lis.h
-  
+  src/cfmat_lis_2.h
+
   src/hypergraph.h
   src/assemble.h
+  src/assemble_omp.h
   src/spatialhash.h
   src/graphers.h
   src/util.h
@@ -66,13 +74,23 @@ add_subdirectory(src/kernels)
 include_directories(src/)
 
 
-
+set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
+include_directories(${EXTRA_INCLUDES})
 option(USE_PETSC "Enable PETSc backend for assembly" ON)
 option(USE_LIS "Enable LIS backend for assembly" ON)
 
 # Make the static library
 add_library( cornflakes STATIC ${SOURCES} )
 set(CORNFLAKES_LIBRARIES m)
+
+find_package(OpenMP REQUIRED)
+if(OPENMP_FOUND)
+  message("OPENMP FOUND")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
 
 if(USE_PETSC)
   set(PETSC_DIR /home/afq/Downloads/petsc)
@@ -81,7 +99,7 @@ if(USE_PETSC)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
   find_package(PETSc REQUIRED)
   include_directories(${PETSC_INCLUDES})
-  add_definitions(${PETSC_DEFINITIONS})  
+  add_definitions(${PETSC_DEFINITIONS})
   target_link_libraries(cornflakes ${PPETSC_LIBRARIES})
   list(APPEND CORNFLAKES_LIBRARIES ${PETSC_LIBRARIES})
 endif(USE_PETSC)
@@ -95,6 +113,8 @@ if(USE_LIS)
   include_directories(${lis_path}/include/)
   list(APPEND CORNFLAKES_LIBRARIES lib_lis)
 endif(USE_LIS)
+
+
 
 
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")

@@ -22,6 +22,15 @@ real_t * CFMat_Default_Place(cfmat_t * self,
     return ker_out + n*n;
 
 }
+void CFMat_Default_Set_Value(cfmat_t * self,
+			     int i, int j, real_t v) {
+  *data(self)->IIiter = i;
+  *data(self)->JJiter = j;
+  *data(self)->Viter = v;
+  data(self)->IIiter += 1;
+  data(self)->JJiter += 1;
+  data(self)->Viter += 1;
+}
 void CFMat_Default_Destroy(cfmat_t * self) {
   if(self->own) {
     free(data(self)->V);
@@ -32,9 +41,9 @@ void CFMat_Default_Destroy(cfmat_t * self) {
 }
 void CFMat_Default_Wipe(cfmat_t * self) {
   int i;
-  for(i=0;i<self->N;i++) {
-    data(self)->V[i]=0.0;
-  }
+  /* for(i=0;i<data(self)->Nalloc;i++) { */
+    /* data(self)->V[i]=0.0; */
+  /* } */
   data(self)->Viter = data(self)->V;
   data(self)->IIiter = data(self)->II;
   data(self)->JJiter = data(self)->JJ;
@@ -45,6 +54,7 @@ void CFMat_Default_Finalize(cfmat_t * self) {
 
 const _CFMAT_VTABLE_t CFMat_Default_vtable = {
   .Place = &CFMat_Default_Place,
+  .Set_Value = &CFMat_Default_Set_Value,
   .Destroy = &CFMat_Default_Destroy,
   .Wipe = &CFMat_Default_Wipe,
   .Finalize = &CFMat_Default_Finalize
@@ -69,6 +79,7 @@ void CFMat_Default_New(cfmat_t * self, int onum,
   data(self)->V = malloc( matsize * sizeof(real_t) );
   data(self)->II = malloc( matsize * sizeof(int) );
   data(self)->JJ = malloc( matsize * sizeof(int) );
+  data(self)->nalloc = matsize;
   // For good measure:
   CFMat_Default_Wipe(self); 
 }

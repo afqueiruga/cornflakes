@@ -9,7 +9,11 @@
 
 void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
 	     dofmap_t ** dms, cfdata_t ** data);
-
+void place_targets(target_t * att,
+		   kernel_t * ke,
+		   real_t * ker_out, int len_ker_out,
+		   dofmap_t ** dms,
+		   hypervertex_t * edge, int l_edge);
 void assemble(kernel_t * ke, hypergraph_t * hg,
 	      dofmap_t ** dofmaps, cfdata_t ** data,
 	      target_t * att);

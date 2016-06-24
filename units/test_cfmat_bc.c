@@ -1,3 +1,4 @@
+#ifdef USE_PETSC
 #include <assert.h>
 #include <stdlib.h>
 
@@ -47,3 +48,9 @@ int main(int argc, char **argv) {
   PetscFinalize();
   return 0;
 }
+#else
+int main(int argc,char** argv) {
+  printf("ERROR: This test needs to be compiled with PETSc support!\n");
+  return -1;
+}
+#endif

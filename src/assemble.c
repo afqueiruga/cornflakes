@@ -84,10 +84,12 @@ void place_targets(target_t * att,
     } // end map loop
     //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
     // Now assemble into att[t]:
+
+    {
     ker_out_iter = Target_Place(att+t, nalldofs,alldofs, ker_out_iter);
+    }
   } // end target loop
 }
-
 
 void assemble(kernel_t * ke, hypergraph_t * hg,
 	      dofmap_t ** dofmaps, cfdata_t ** data,

@@ -27,6 +27,7 @@ void IndexMap_New(indexmap_t * self,
   index_t b=0, i=0;
   index_t N_duplicates=0; // This is to double-check the algorithm
   // i indexes the matrix, b indexes the BCs
+  self->Nsys = 0;
   for(i=istart; i < iend; i++) {
     if(b < NBC && BCs[b] == i) {
       // Mark a BC
@@ -38,10 +39,12 @@ void IndexMap_New(indexmap_t * self,
 	b++;
       }
     } else {
-      self->map[i-istart] = i-b+N_duplicates;
+      self->map[i-istart] = self->Nsys;
+      self->Nsys++; 
     }
   }
-  self->Nsys = self->map[iend-istart-1] + 1;
+  // The error is if the _last_ DOF was a BC!!!!
+  //self->Nsys = self->map[iend-istart-1] + 1;
   /*
   // Check that it all added up
   printf("%d %d %d\n",b,NBC,N_duplicates);

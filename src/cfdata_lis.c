@@ -40,7 +40,7 @@ void CFData_LIS_Get_Ptr(cfdata_t * self, real_t **ptr) {
   lis_vector_gather(data(self),*ptr);
 }
 void CFData_LIS_Release_Ptr(cfdata_t * self, real_t **ptr) {
-  printf("## %lf\n",**ptr);
+  //printf("## %lf\n",**ptr);
   lis_vector_scatter(*ptr,data(self));
   free(*ptr);
   *ptr = NULL;
@@ -68,6 +68,7 @@ void CFData_LIS_New(cfdata_t * self, int N) {
   // TODO: MPI
   lis_vector_create(/*MPI_COMM_WORLD*/ 0,(LIS_VECTOR*)&self->data);
   lis_vector_set_size(data(self), 0,N);
+  CFData_LIS_Wipe(self);
 }
 void CFData_LIS_New_From_Ptr(cfdata_t * self, int N, LIS_VECTOR lvec) {
   self->vtable = &cfdata_lis_vtable;

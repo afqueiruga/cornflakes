@@ -65,6 +65,29 @@ real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
   }
   return vals + n*n;
 }
+void CFMat_BC_Set_Value(cfmat_t * self, int i, int j, real_t v) {
+  // TODO THIS IS WHERE YOU ARE WORKING
+  int mi,mj;
+  mi = IndexMap_Get(data(self)->map, i);
+  if(mi>=0) {
+    mj = IndexMap_Get(data(self)->map, j);
+    if(mj>=0) {
+      // Add to Kij
+      CFMat_Set_Value(data(self)->K, mi,mj,v);
+    } else {
+
+    }
+  } else {
+    // Add to Ri += Kij uj
+    mj = IndexMap_Get(data(self)->map, j);
+    if(mj>=0) {
+      real_t ubar;
+      CFData_Get_Values(data(self)->u,1,&i,&ubar);
+      ubar *= v;
+      CFData_Place(data(self)->R, 1,&mj,&ubar);
+    }
+  }
+}
 void CFMat_BC_Wipe(cfmat_t * self) {
   CFMat_Wipe(data(self)->K);
   CFData_Wipe(data(self)->R);
@@ -82,6 +105,7 @@ void CFMat_BC_Destroy(cfmat_t * self) {
 
 const _CFMAT_VTABLE_t CFMat_BC_vtable = {
   .Place = &CFMat_BC_Place,
+  .Set_Value = CFMat_BC_Set_Value,
   .Destroy = &CFMat_BC_Destroy,
   .Wipe = &CFMat_BC_Wipe,
   .Finalize = &CFMat_BC_Finalize
@@ -96,4 +120,6 @@ void CFMat_BC_New(cfmat_t * self,
   data(self)->K = K;
   data(self)->R = R;
   data(self)->u = u;
+  self->N = imap->end - imap->start;
+  self->own = 0;
 }
