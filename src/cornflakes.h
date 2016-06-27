@@ -6,6 +6,7 @@
 #include "assemble_omp.h"
 #include "dofmap.h"
 #include "indexmap.h"
+#include "indexset.h"
 #include "util.h"
 #include "target.h"
 #include "cfdata.h"

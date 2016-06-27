@@ -2,6 +2,7 @@
 set(TESTS
   test_indexmap
   test_cfmat_bc
+  test_index_set
   )
 
 foreach(TEST ${TESTS})

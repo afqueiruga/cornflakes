@@ -8,6 +8,7 @@ set(SOURCES
   src/kernel.c
   src/dofmap.c
   src/indexmap.c
+  src/indexset.c
   src/cfdata.c
   src/cfmat.c
   src/target.c
@@ -36,6 +37,7 @@ set( HEADERS
   src/kernel.h
   src/dofmap.h
   src/indexmap.h
+  src/indexset.h
   src/cfdata.h
   src/cfmat.h
   src/target.h
