@@ -3,6 +3,7 @@ set(TESTS
   test_indexmap
   test_cfmat_bc
   test_index_set
+  test_sparsity_pattern
   )
 
 foreach(TEST ${TESTS})

@@ -34,5 +34,6 @@ void Sparsity_Init(sparsity_t * self, int N, int nrow_guess);
 void Sparsity_Add_NNZ(sparsity_t * self, index_t i, index_t j);
 void Sparsity_Fill(sparsity_t * self,
 		   int onum, kernel_t * ke, hypergraph_t * hg, dofmap_t ** dms);
+void Sparsity_Print(sparsity_t * self);
 void Sparsity_Destroy(sparsity_t * self);
 #endif

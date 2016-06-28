@@ -66,6 +66,16 @@ void Sparsity_Fill(sparsity_t * self,
   } // end he loop
 }
 
+void Sparsity_Print(sparsity_t * self) {
+  for(int i=0; i<self->N; i++) {
+    printf("%d :: ", i);
+    for(int j=0; j<self->Ibuild[i]->n; j++) {
+      printf("%d ",self->Ibuild[i]->table[j]);
+    }
+    printf("\n");
+  }
+}
+
 void Sparsity_Destroy(sparsity_t * self) {
   for(int i=0; i<self->N; i++) {
     IndexSet_Destroy(self->Ibuild[i]);
