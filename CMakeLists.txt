@@ -9,6 +9,7 @@ set(SOURCES
   src/dofmap.c
   src/indexmap.c
   src/indexset.c
+  src/sparsity_pattern.c
   src/cfdata.c
   src/cfmat.c
   src/target.c
@@ -38,10 +39,11 @@ set( HEADERS
   src/dofmap.h
   src/indexmap.h
   src/indexset.h
+  src/sparsity_pattern.h
   src/cfdata.h
   src/cfmat.h
   src/target.h
-
+  
   #src/toctic.h
   
   src/cfdata_bc.h

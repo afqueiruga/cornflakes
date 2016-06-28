@@ -7,6 +7,7 @@
 #include "dofmap.h"
 #include "indexmap.h"
 #include "indexset.h"
+#include "sparsity_pattern.h"
 #include "util.h"
 #include "target.h"
 #include "cfdata.h"
