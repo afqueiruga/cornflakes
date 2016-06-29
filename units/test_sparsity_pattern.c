@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   Sparsity_Make_CSR(&sp, &II,&JS);
 
   printf("II: ");
-  for(int i=0; i<sp.N; i++) {
+  for(int i=0; i<sp.N+1; i++) {
     printf("%d ",II[i]);
   }
   printf("\n");

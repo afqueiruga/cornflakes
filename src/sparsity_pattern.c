@@ -18,12 +18,13 @@ void Sparsity_Add_NNZ(sparsity_t * self, index_t i, index_t j) {
 }
 
 void Sparsity_Make_CSR(sparsity_t * self, index_t ** II, index_t **JS) {
-  *II = malloc(self->N*sizeof(index_t));
+  *II = malloc((self->N+1)*sizeof(index_t));
   *JS = malloc(self->nnz*sizeof(index_t));
   int itr = 0;
+  (*II)[0] = 0;
   for(int i=0;i<self->N;i++) {
     int nrow = self->Ibuild[i]->n;
-    (*II)[i] = itr+nrow;
+    (*II)[i+1] = itr+nrow;
     for(int j=0;j<nrow;j++) {
       (*JS)[itr + j] = self->Ibuild[i]->table[j];
     }
