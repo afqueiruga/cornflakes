@@ -4,6 +4,23 @@
 
 #define data(x) CFMat_BC_Data(x)
 
+void CFMat_BC_Add_Sparsity(cfmat_t * self, int n, int *dofs) {
+    int i,j;
+    index_t dofs_sub[n];
+    int n_sub = 0;
+    for(i=0;i<n;i++) {
+      int mapped = IndexMap_Get(data(self)->map, dofs[i]);
+      if(mapped>=0) {
+	dofs_sub[n_sub] = mapped;
+	n_sub++;
+      }
+    }
+    CFMat_Add_Sparsity(data(self)->K,n_sub,dofs_sub);
+}
+void CFMat_BC_Finalize_Sparsity(cfmat_t * self) {
+  CFMat_Finalize_Sparsity(data(self)->K);
+}
+
 real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
   int i,j;
   // I need to extract the square block to call CFMat_Place on the sub mat
@@ -104,11 +121,13 @@ void CFMat_BC_Destroy(cfmat_t * self) {
 }
 
 const _CFMAT_VTABLE_t CFMat_BC_vtable = {
-  .Place = &CFMat_BC_Place,
+  .Add_Sparsity = CFMat_BC_Add_Sparsity,
+  .Finalize_Sparsity = CFMat_BC_Finalize_Sparsity,
+  .Place = CFMat_BC_Place,
   .Set_Value = CFMat_BC_Set_Value,
-  .Destroy = &CFMat_BC_Destroy,
-  .Wipe = &CFMat_BC_Wipe,
-  .Finalize = &CFMat_BC_Finalize
+  .Destroy = CFMat_BC_Destroy,
+  .Wipe = CFMat_BC_Wipe,
+  .Finalize = CFMat_BC_Finalize
 };
 
 void CFMat_BC_New(cfmat_t * self,

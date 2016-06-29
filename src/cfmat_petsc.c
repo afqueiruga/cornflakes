@@ -4,6 +4,11 @@
 #include <petscmat.h>
 
 #define data(x) CFMat_PETSc_Data(x)
+
+void CFMat_PETSc_Finalize_Sparsity(cfmat_t * self) {
+  // TODO: Preallocate
+}
+
 real_t * CFMat_PETSc_Place(cfmat_t * self,
 			   int n, int * dofs, real_t * ker_out) {
   MatSetValues(data(self), n,dofs, n,dofs,  ker_out, ADD_VALUES);
@@ -22,6 +27,8 @@ void CFMat_PETSc_Finalize(cfmat_t * self) {
 }
 
 const _CFMAT_VTABLE_t CFMat_PETSc_vtable = {
+  .Add_Sparsity = CFMat_Default_Add_Sparsity, // Default class
+  .Finalize_Sparsity =  CFMat_PETSc_Finalize_Sparsity,
   .Place = &CFMat_PETSc_Place,
   .Destroy = &CFMat_PETSc_Destroy,
   .Wipe = &CFMat_PETSc_Wipe,
