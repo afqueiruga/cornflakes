@@ -1,6 +1,8 @@
 #ifdef USE_PETSC
 
 #include "cfmat_petsc.h"
+
+#include "cfmat_default.h"
 #include <petscmat.h>
 
 #define data(x) CFMat_PETSc_Data(x)
