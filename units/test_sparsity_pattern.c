@@ -31,4 +31,6 @@ int main(int argc, char **argv) {
   free(II);
   free(JS);
   Sparsity_Destroy(&sp);
+
+  return 0;
 }

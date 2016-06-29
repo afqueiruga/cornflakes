@@ -4,6 +4,7 @@ set(TESTS
   test_cfmat_bc
   test_index_set
   test_sparsity_pattern
+  test_fill_sparsity
   )
 
 foreach(TEST ${TESTS})

@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 
-void Fill_Target_Sparsity(kernel_t * ke, hypergraph_t * hg,
+void fill_sparsity(kernel_t * ke, hypergraph_t * hg,
 			  dofmap_t ** dofmaps,
 			  target_t * att)
 {
@@ -51,7 +51,7 @@ void Fill_Target_Sparsity(kernel_t * ke, hypergraph_t * hg,
 	/* Push them into the pattern */
 	for(i=0; i<nalldofs; i++ ) {
 	  for(j=0; j<nalldofs; j++) {
-	    Sparsity_Add_NNZ(&att[i].K->sparse, i,j);
+	    Sparsity_Add_NNZ(&att[onum].K->sparse, i,j);
 	  }
 	}
       } // end loop over onums
