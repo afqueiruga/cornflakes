@@ -32,6 +32,7 @@ typedef struct sparsity_str {
   */
 void Sparsity_Init(sparsity_t * self, int N, int nrow_guess);
 void Sparsity_Add_NNZ(sparsity_t * self, index_t i, index_t j);
+void Sparsity_Make_CSR(sparsity_t * self, index_t ** II, index_t **JS);
 void Sparsity_Print(sparsity_t * self);
 void Sparsity_Destroy(sparsity_t * self);
 #endif
