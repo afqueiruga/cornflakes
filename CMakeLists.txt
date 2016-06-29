@@ -10,6 +10,7 @@ set(SOURCES
   src/indexmap.c
   src/indexset.c
   src/sparsity_pattern.c
+
   src/cfdata.c
   src/cfmat.c
   src/target.c
@@ -29,6 +30,7 @@ set(SOURCES
   src/hypergraph.c
   src/assemble.c
   src/assemble_omp.c
+  src/fill_sparsity.c
   src/spatialhash.c
   src/graphers.c
   src/util.c
@@ -59,6 +61,7 @@ set( HEADERS
   src/hypergraph.h
   src/assemble.h
   src/assemble_omp.h
+  src/fill_sparsity.h
   src/spatialhash.h
   src/graphers.h
   src/util.h
