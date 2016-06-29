@@ -47,15 +47,10 @@ void fill_sparsity(kernel_t * ke, hypergraph_t * hg,
 	    iter+=ndof;
 	  }
 	}
-
-	/* Push them into the pattern */
-	for(i=0; i<nalldofs; i++ ) {
-	  for(j=0; j<nalldofs; j++) {
-	    Sparsity_Add_NNZ(&att[onum].K->sparse, i,j);
-	  }
-	}
-      } // end loop over onums
-
+	/* Push the sparsity pattern to the matrix */
+	CFMat_Add_Sparsity(att[onum].K, nalldofs,alldofs);
+	
+      } // end of onum loop
     } //  end hex loop
   } // end he loop
 }

@@ -9,7 +9,7 @@ void CFMat_Default_Add_Sparsity(cfmat_t * self, int n, int *dofs) {
     // Fill this block
     for(i=0;i<n;i++) {
       for(j=0;j<n;j++) {
-	Sparsity_Add_NNZ(&self->sparse,i,j);
+	Sparsity_Add_NNZ(&self->sparse,dofs[i],dofs[j]);
       }
     }
 }

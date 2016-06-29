@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
   ADDPAIR(1,2);
   ADDPAIR(0,3);
   ADDPAIR(2,3);
+  ADDPAIR(0,4);
 #undef ADDPAIR
 
   /* Setup dmaps */
@@ -73,6 +74,7 @@ int main(int argc, char **argv) {
   dofmap_t *dms[2] = {&NodeVec,&Global};
   fill_sparsity(&kernel_linear_spring,&Bonds,dms, att);
 
+  Sparsity_Print(&K.sparse);
   
   Dofmap_Destroy(&NodeVec);
   Dofmap_Destroy(&Global);
