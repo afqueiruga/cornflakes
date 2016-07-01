@@ -228,13 +228,16 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
     case 3: // A 3D vector
       fprintf(fh,"VECTORS %c double\n",names[dnum]);
       for(A=0;A<N;A++) {
-	fprintf(fh,"%e %e %e\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1],data[dnum][gdim*A+2]);
+	fprintf(fh,"%e %e %e\n",data[dnum][l_data[dnum]*A+0],
+		                data[dnum][l_data[dnum]*A+1],
+		                data[dnum][l_data[dnum]*A+2]);
       }
       break;
     case 2: // A 2D vector
       fprintf(fh,"VECTORS %c double\n",names[dnum]);
       for(A=0;A<N;A++) {
-	fprintf(fh,"%e %e 0\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1]);
+	fprintf(fh,"%e %e 0\n",data[dnum][l_data[dnum]*A+0],
+		               data[dnum][l_data[dnum]*A+1]);
       }
       break;
     case 9: // A 3D tensor
@@ -257,13 +260,16 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
     case 3: // A 3D vector
       fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
       for(A=0;A<Nelem;A++) {
-	fprintf(fh,"%e %e %e\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1],cdata[dnum][gdim*A+2]);
+	fprintf(fh,"%e %e %e\n",cdata[dnum][l_cdata[dnum]*A+0],
+		                cdata[dnum][l_cdata[dnum]*A+1],
+		                cdata[dnum][l_cdata[dnum]*A+2]);
       }
       break;
     case 2: // A 2D vector
       fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
       for(A=0;A<Nelem;A++) {
-	fprintf(fh,"%e %e 0\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1]);
+	fprintf(fh,"%e %e 0\n",cdata[dnum][l_cdata[dnum]*A+0],
+		               cdata[dnum][l_cdata[dnum]*A+1]);
       }
       break;
     case 9: // A 3D tensor
