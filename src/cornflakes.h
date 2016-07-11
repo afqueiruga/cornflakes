@@ -18,6 +18,7 @@
 #include "cfmat_bc.h"
 #include "cfdata_default.h"
 #include "cfmat_default.h"
+#include "cfmat_csr.h"
 #include "cfdata_petsc.h"
 #include "cfmat_petsc.h"
 #include "cfdata_lis.h"

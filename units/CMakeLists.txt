@@ -5,6 +5,7 @@ set(TESTS
   test_index_set
   test_sparsity_pattern
   test_fill_sparsity
+  test_assemble_csr
   )
 
 foreach(TEST ${TESTS})
