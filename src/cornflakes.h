@@ -3,6 +3,7 @@
 #include "graphers.h"
 #include "kernel.h"
 #include "assemble.h"
+#include "filter.h"
 #include "assemble_omp.h"
 #include "fill_sparsity.h"
 #include "dofmap.h"
