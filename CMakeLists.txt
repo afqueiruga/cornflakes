@@ -31,6 +31,7 @@ set(SOURCES
   src/hypergraph.c
   src/assemble.c
   src/assemble_omp.c
+  src/filter.c
   src/fill_sparsity.c
   src/spatialhash.c
   src/graphers.c
@@ -63,6 +64,7 @@ set( HEADERS
   src/hypergraph.h
   src/assemble.h
   src/assemble_omp.h
+  src/filter.h
   src/fill_sparsity.h
   src/spatialhash.h
   src/graphers.h

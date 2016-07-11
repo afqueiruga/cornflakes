@@ -1,3 +1,7 @@
+#include "filter.h"
+
+#include <stdio.h>
+
 void filter(kernel_t * ke, hypergraph_t * hg,
 	      dofmap_t ** dofmaps, cfdata_t ** data,
 	      hypergraph_t *filtered)
@@ -14,21 +18,18 @@ void filter(kernel_t * ke, hypergraph_t * hg,
     
     real_t ker_in[ len_ker_in];
     real_t ker_out[len_ker_out];
-    //printf("B %d %d\n", len_ker_in, len_ker_out);
+    
     /* Loop over the edges */
     hypervertex_t * edge;
     for(hex=0; hex<he->n_edge; hex++) {
       edge = Hyperedges_Get_Edge(he, hex);
-      //printf("e %d\n",hex);
       /* Collect the data */
       collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some overheard outside of loop
-      //printf("did\n");
       /* Calculate the kernel */
-      //printf("in:"); for(i=0;i<len_ker_in;i++) printf("%lf ",ker_in[i]); printf("\n");
       for(i=0;i<len_ker_out;i++) ker_out[i] = 0.0;
       ke->eval(he->l_edge, ker_in, ker_out);
       /* Add to the graph */
-      if(ker_out[0]) Hypergraph_Push_Edge(filtered, edge);
+      if(ker_out[0]) Hypergraph_Push_Edge(filtered,he->l_edge,edge);
     }
   }
 
