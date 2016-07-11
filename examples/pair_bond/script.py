@@ -62,3 +62,7 @@ GraphIO.write_graph("springs.vtk", HBond, X+u,
                     nodefields=[("x",X),("R",R.reshape(X.shape)),("v",v)])
 
 print "The average x-displacement at the top was ", u.flatten()[loaddofs].mean()
+
+import husk_line_test
+dmap_yglobal = Dofmap_Strided(4)
+htrue = Filter(husk_line_test.kernel_line_intersection, HBond,[dmap_ptvec,dmap_yglobal],[X,np.array([0.0,0.0,10.0,10.0])])

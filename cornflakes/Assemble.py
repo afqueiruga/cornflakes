@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse
 import cornflakes_library as cflib
-
+from Hypergraph import Hypergraph
 
 
 def Assemble_Targets(ke,H, dofmaps,data, ndof):
