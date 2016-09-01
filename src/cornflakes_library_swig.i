@@ -242,7 +242,7 @@
 		 kernel_t * ke, hypergraph_t * hg,
 		 PyObject * dofmaplist,
 		 PyObject * datalist,
-		 hypergraph_t * htrue)
+		 hypergraph_t * htrue, hypergraph_t * hfalse)
   {
     int i=0, isnewobj=0;
     PyObject *obj, *subobj;
@@ -288,7 +288,7 @@
     /* Fill up the ptr array */
     for(i=0;i<ndata;i++) data_ptrs[i] = data+i;
     /* Step 4: assemble! */
-    filter(ke, hg, dofmaps, data_ptrs, htrue);
+    filter(ke, hg, dofmaps, data_ptrs, htrue, hfalse);
 
     /* Step 5: Decrease reference counts */
     for(i=0;i<nnewobj;i++) {
