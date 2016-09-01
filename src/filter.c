@@ -3,12 +3,14 @@
 #include <stdio.h>
 
 void filter(kernel_t * ke, hypergraph_t * hg,
-	      dofmap_t ** dofmaps, cfdata_t ** data,
-	      hypergraph_t *filtered)
+	    dofmap_t ** dofmaps, cfdata_t ** data,
+	    hypergraph_t *htrue, hypergraph_t *hfalse)
 {
   int i,j, hex,hx;
   hyperedges_t * he;
-  Hypergraph_Alloc(filtered,1);
+  
+  if(htrue)  Hypergraph_Alloc(htrue, 1);
+  if(hfalse) Hypergraph_Alloc(hfalse,1);
   /* Loop over the graph sets */
   for(he = hg->he; he < hg->he+hg->n_types ; he++) {
     /* Allocate the local vectors for this size edge */
@@ -29,7 +31,11 @@ void filter(kernel_t * ke, hypergraph_t * hg,
       for(i=0;i<len_ker_out;i++) ker_out[i] = 0.0;
       ke->eval(he->l_edge, ker_in, ker_out);
       /* Add to the graph */
-      if(ker_out[0]) Hypergraph_Push_Edge(filtered,he->l_edge,edge);
+      if(ker_out[0]) {
+	if(htrue)  Hypergraph_Push_Edge(htrue,he->l_edge,edge);
+      } else {
+	if(hfalse) Hypergraph_Push_Edge(hfalse,he->l_edge,edge);
+      }
     }
   }
 

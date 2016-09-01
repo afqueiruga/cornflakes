@@ -37,8 +37,9 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
 
 def Filter(ke,H, dofmaps,data):
     htrue = Hypergraph()
-    cflib.filter_np(ke,H.hg, [d.dm for d in dofmaps], data, htrue.hg)
-    return htrue
+    hfalse = Hypergraph()
+    cflib.filter_np(ke,H.hg, [d.dm for d in dofmaps], data, htrue.hg, hfalse.hg)
+    return htrue,hfalse
 
 def Apply_BC(dofs,vals, K=None,R=None):
     if K!=None:

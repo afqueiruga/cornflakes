@@ -8,6 +8,6 @@
 
 void filter(kernel_t * ke, hypergraph_t * hg,
 	    dofmap_t ** dofmaps, cfdata_t ** data,
-	    hypergraph_t *filtered);
+	    hypergraph_t *htrue, hypergraph_t *hfalse);
 
 #endif
