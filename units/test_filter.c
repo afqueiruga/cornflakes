@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
   /* Call filter */
   dofmap_t *dms[2] = {&NodeVec,&Global};
   cfdata_t *data[3] = {&x,&v,&params};
-  filter(&kernel_linear_spring,&Bonds,dms,data, &htrue);
+  filter(&kernel_linear_spring,&Bonds,dms,data, &htrue, NULL);
 
   /* Make the checks */
   assert(htrue.n_types == 1);

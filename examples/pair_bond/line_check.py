@@ -23,8 +23,8 @@ Testout = TensorVariable("testout",1,1)
 prgm = [
     IfStmt( And(Ge(itscn[s],0),
                 Ge(itscn[r],0),
-                Le(itscn[s]**2, ((x2-x1).T*(x2-x1))[0,0] ),
-                Le(itscn[r]**2, ((y2-y1).T*(y2-y1))[0,0] ) ),
+                Le(itscn[s],1),#**2, ((x2-x1).T*(x2-x1))[0,0] ),
+                Le(itscn[r],1)),#**2, ((y2-y1).T*(y2-y1))[0,0] ) ),
             Assignment(Testout, Matrix([[1]]) )
             )
     ]
