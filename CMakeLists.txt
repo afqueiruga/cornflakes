@@ -164,14 +164,18 @@ add_subdirectory(units)
 #
 # Install stuffs
 #
-install(TARGETS cornflakes DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(TARGETS cornflakes DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
-set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/cornflakes)
+set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/pythonlib/cornflakes)
 install(TARGETS ${SWIG_MODULE_cornflakes_library_REAL_NAME} DESTINATION ${PY_INSTALL_DIR} OPTIONAL)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PY_INSTALL_DIR} OPTIONAL)
 install(FILES ${PY_FILES} DESTINATION ${PY_INSTALL_DIR})
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
+# I don't like it, but I'll just do it
+install(FILES src/numpy.i DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
 
 configure_file(cornflakes.cmake.in cornflakes.cmake @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
+configure_file(env.conf.in env.conf @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/env.conf DESTINATION ${CMAKE_INSTALL_PREFIX})
