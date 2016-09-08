@@ -17,13 +17,18 @@ real_t * Target_Place(target_t * self, int n, int * dofs, real_t * vals) {
   }
 }
 void Target_Destroy(target_t * self) {
-  switch(self->rank) {
-  case 2:
-    return CFMat_Destroy(self->K);
-    break;
-  default: //0,1
-    return CFData_Destroy(self->R);
+  // TODO: Targets shouldn't own anything anymore! 
+  /*
+  if(self->own) {
+    switch(self->rank) {
+    case 2:
+      return CFMat_Destroy(self->K);
+      break;
+    default: //0,1
+      return CFData_Destroy(self->R);
+    }
   }
+  */
 }
 void Target_Wipe(target_t * self) {
   switch(self->rank) {

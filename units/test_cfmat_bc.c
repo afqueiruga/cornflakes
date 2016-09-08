@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 #else
+#include <stdio.h>
 int main(int argc,char** argv) {
   printf("ERROR: This test needs to be compiled with PETSc support!\n");
   return -1;

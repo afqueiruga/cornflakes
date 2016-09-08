@@ -8,6 +8,9 @@ set(SOURCES
   src/kernel.c
   src/dofmap.c
   src/indexmap.c
+  src/indexset.c
+  src/sparsity_pattern.c
+
   src/cfdata.c
   src/cfmat.c
   src/target.c
@@ -18,6 +21,7 @@ set(SOURCES
   src/cfmat_bc.c
   src/cfdata_default.c
   src/cfmat_default.c
+  src/cfmat_csr.c
   src/cfdata_petsc.c
   src/cfmat_petsc.c
   src/cfdata_lis.c
@@ -27,6 +31,8 @@ set(SOURCES
   src/hypergraph.c
   src/assemble.c
   src/assemble_omp.c
+  src/filter.c
+  src/fill_sparsity.c
   src/spatialhash.c
   src/graphers.c
   src/util.c
@@ -36,16 +42,19 @@ set( HEADERS
   src/kernel.h
   src/dofmap.h
   src/indexmap.h
+  src/indexset.h
+  src/sparsity_pattern.h
   src/cfdata.h
   src/cfmat.h
   src/target.h
-
+  
   #src/toctic.h
   
   src/cfdata_bc.h
   src/cfmat_bc.h
   src/cfdata_default.h
   src/cfmat_default.h
+  src/cfmat_csr.h
   src/cfdata_petsc.h
   src/cfmat_petsc.h
   src/cfdata_lis.h
@@ -55,6 +64,8 @@ set( HEADERS
   src/hypergraph.h
   src/assemble.h
   src/assemble_omp.h
+  src/filter.h
+  src/fill_sparsity.h
   src/spatialhash.h
   src/graphers.h
   src/util.h

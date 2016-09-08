@@ -228,18 +228,45 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
     case 3: // A 3D vector
       fprintf(fh,"VECTORS %c double\n",names[dnum]);
       for(A=0;A<N;A++) {
-	fprintf(fh,"%e %e %e\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1],data[dnum][gdim*A+2]);
+	fprintf(fh,"%e %e %e\n",data[dnum][l_data[dnum]*A+0],
+		                data[dnum][l_data[dnum]*A+1],
+		                data[dnum][l_data[dnum]*A+2]);
       }
       break;
     case 2: // A 2D vector
       fprintf(fh,"VECTORS %c double\n",names[dnum]);
       for(A=0;A<N;A++) {
-	fprintf(fh,"%e %e 0\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1]);
+	fprintf(fh,"%e %e 0\n",data[dnum][l_data[dnum]*A+0],
+		               data[dnum][l_data[dnum]*A+1]);
       }
       break;
     case 9: // A 3D tensor
+      fprintf(fh,"TENSORS %c double\n",names[dnum]);
+      for(A=0;A<N;A++) {
+	fprintf(fh,"%e %e %e\n%e %e %e\n%e %e %e\n\n",
+		data[dnum][l_data[dnum]*A+0],
+		data[dnum][l_data[dnum]*A+1],
+		data[dnum][l_data[dnum]*A+2],
+		data[dnum][l_data[dnum]*A+3],
+		data[dnum][l_data[dnum]*A+4],
+		data[dnum][l_data[dnum]*A+5],
+		data[dnum][l_data[dnum]*A+6],
+		data[dnum][l_data[dnum]*A+7],
+		data[dnum][l_data[dnum]*A+8]
+		);
+      }
+      break;
     case 4: // A 2D tensor
-      // TODO: fill in
+      fprintf(fh,"TENSORS %c double\n",names[dnum]);
+      for(A=0;A<N;A++) {
+	fprintf(fh,"%e %e 0\n%e %e 0\n0 0 0\n\n",
+		data[dnum][l_data[dnum]*A+0],
+		data[dnum][l_data[dnum]*A+1],
+		data[dnum][l_data[dnum]*A+2],
+		data[dnum][l_data[dnum]*A+3]
+		);
+      }
+      break;
     case 1: // A scalar
     default: // The default case is scalar field of the first component
       fprintf(fh,"SCALARS %c double\nLOOKUP_TABLE default\n",names[dnum]);
@@ -257,18 +284,45 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
     case 3: // A 3D vector
       fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
       for(A=0;A<Nelem;A++) {
-	fprintf(fh,"%e %e %e\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1],cdata[dnum][gdim*A+2]);
+	fprintf(fh,"%e %e %e\n",cdata[dnum][l_cdata[dnum]*A+0],
+		                cdata[dnum][l_cdata[dnum]*A+1],
+		                cdata[dnum][l_cdata[dnum]*A+2]);
       }
       break;
     case 2: // A 2D vector
       fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
       for(A=0;A<Nelem;A++) {
-	fprintf(fh,"%e %e 0\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1]);
+	fprintf(fh,"%e %e 0\n",cdata[dnum][l_cdata[dnum]*A+0],
+		               cdata[dnum][l_cdata[dnum]*A+1]);
       }
       break;
     case 9: // A 3D tensor
+      fprintf(fh,"TENSORS %c double\n",cnames[dnum]);
+      for(A=0;A<Nelem;A++) {
+	fprintf(fh,"%e %e %e\n%e %e %e\n%e %e %e\n\n",
+		cdata[dnum][l_cdata[dnum]*A+0],
+		cdata[dnum][l_cdata[dnum]*A+1],
+		cdata[dnum][l_cdata[dnum]*A+2],
+		cdata[dnum][l_cdata[dnum]*A+3],
+		cdata[dnum][l_cdata[dnum]*A+4],
+		cdata[dnum][l_cdata[dnum]*A+5],
+		cdata[dnum][l_cdata[dnum]*A+6],
+		cdata[dnum][l_cdata[dnum]*A+7],
+		cdata[dnum][l_cdata[dnum]*A+8]
+		);
+      }
+      break;
     case 4: // A 2D tensor
-      // TODO: fill in
+      fprintf(fh,"TENSORS %c double\n",cnames[dnum]);
+      for(A=0;A<Nelem;A++) {
+	fprintf(fh,"%e %e 0\n%e %e 0\n0 0 0\n\n",
+		cdata[dnum][l_cdata[dnum]*A+0],
+		cdata[dnum][l_cdata[dnum]*A+1],
+		cdata[dnum][l_cdata[dnum]*A+2],
+		cdata[dnum][l_cdata[dnum]*A+3]
+		);
+      }
+      break;
     case 1: // A scalar
     default: // The default case is scalar field of the first component
       fprintf(fh,"SCALARS %c double\nLOOKUP_TABLE default\n",cnames[dnum]);

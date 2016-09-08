@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
-
+#include <stdio.h>
 #include "cornflakes.h"
 
 int main(int argc, char **argv) {

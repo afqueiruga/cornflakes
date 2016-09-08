@@ -33,6 +33,15 @@ bcvals = np.zeros(bcdofs.shape,dtype=np.double)
 marked_top = select_nodes(X, lambda x:x[1]>H-0.0001)
 loaddofs = dmap_ptvec.Get_List(marked_top).reshape(len(marked_top),2)[:,0] # Just the x's
 
+# Lets chop up our graph with a filter operation!
+import husk_line_test
+dmap_yglobal = Dofmap_Strided(4)
+htrue,hfalse = Filter(husk_line_test.kernel_line_intersection, HBond,
+                      [dmap_ptvec,dmap_yglobal],
+                      [X, np.array([0.0,H/2.0, W/2.0,H/2.0],dtype=np.double)])
+print htrue.view(), hfalse.view()
+assert( htrue.view()[0].shape[0] + hfalse.view()[0].shape[0] == HBond.view()[0].shape[0] )
+HBond = hfalse
 
 # Assemble a matrix and a vector
 R,K = Assemble_Targets(kernel_linear_spring,HBond,
@@ -59,6 +68,6 @@ u = u.reshape(X.shape) # it comes out flat
 
 # Write it out
 GraphIO.write_graph("springs.vtk", HBond, X+u,
-                    nodefields=[("x",X),("R",R.reshape(X.shape)),("v",v)])
+                    nodefields=[("x",X),("R",R.reshape(X.shape)),("u",u),("v",v)])
 
 print "The average x-displacement at the top was ", u.flatten()[loaddofs].mean()
