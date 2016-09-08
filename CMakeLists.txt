@@ -109,9 +109,8 @@ if(USE_PETSC)
   target_compile_definitions(cornflakes PRIVATE -DUSE_PETSC)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
   find_package(PETSc REQUIRED)
-  include_directories(${PETSC_INCLUDES})
-  add_definitions(${PETSC_DEFINITIONS})
-  target_link_libraries(cornflakes ${PPETSC_LIBRARIES})
+  list(APPEND CORNFLAKES_INCLUDES ${PETSC_INCLUDES})
+  list(APPEND CORNFLAKES_DEFINITIONS ${PETSC_DEFINITIONS} -DUSE_PETSC)
   list(APPEND CORNFLAKES_LIBRARIES ${PETSC_LIBRARIES})
 endif(USE_PETSC)
 
@@ -120,13 +119,16 @@ if(USE_LIS)
   set(lis_lib_location "${lis_path}/src/.libs/liblis.a" CACHE STRING "Path to liblis.a for this architecture")
   add_library(lib_lis STATIC IMPORTED)
   set_property(TARGET lib_lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
-  target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
-  include_directories(${lis_path}/include/)
+  #target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
+  list(APPEND CORNFLAKES_DEFINITIONS -DUSE_LIS)
+  list(APPEND CORNFLAKES_INCLUDES ${lis_path}/include/)
   list(APPEND CORNFLAKES_LIBRARIES lib_lis)
 endif(USE_LIS)
 
 
-
+target_link_libraries(cornflakes ${CORNFLAKES_LIBRARIES} )
+include_directories( ${CORNFLAKES_INCLUDES} )
+target_compile_definitions(cornflakes PRIVATE ${CORNFLAKES_DEFINITIONS})
 
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")
 
@@ -172,3 +174,4 @@ install(FILES ${PY_FILES} DESTINATION ${PY_INSTALL_DIR})
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
 
 configure_file(cornflakes.cmake.in cornflakes.cmake @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
