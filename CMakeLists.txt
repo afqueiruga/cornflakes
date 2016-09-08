@@ -170,3 +170,5 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PY
 install(FILES ${PY_FILES} DESTINATION ${PY_INSTALL_DIR})
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
+
+configure_file(cornflakes.cmake.in cornflakes.cmake @ONLY)
