@@ -85,6 +85,7 @@ add_subdirectory(src/kernels)
 include_directories(src/)
 
 
+
 set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
 include_directories(${EXTRA_INCLUDES})
 option(USE_PETSC "Enable PETSc backend for assembly" ON)
@@ -104,8 +105,11 @@ endif()
 
 
 if(USE_PETSC)
-  set(PETSC_DIR /home/afq/Downloads/petsc)
-  set(PETSC_ARCH arch-linux2-c-debug )
+  set(PETSC_DIR $ENV{PETSC_DIR})
+  set(PETSC_ARCH ) #$ENV{PETSC_ARCH})
+
+  #set(PETSC_DIR /home/afq/Downloads/petsc)
+  #set(PETSC_ARCH arch-linux2-c-debug )
   target_compile_definitions(cornflakes PRIVATE -DUSE_PETSC)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
   find_package(PETSc REQUIRED)
@@ -115,8 +119,8 @@ if(USE_PETSC)
 endif(USE_PETSC)
 
 if(USE_LIS)
-  set(lis_path "${PROJECT_SOURCE_DIR}/../lis/" CACHE STRING "Path to lis")
-  set(lis_lib_location "${lis_path}/src/.libs/liblis.a" CACHE STRING "Path to liblis.a for this architecture")
+  set(lis_path "/home/afq/Research/Distribute/Stonedist" CACHE STRING "Path to lis")
+  set(lis_lib_location "${lis_path}/lib/liblis.a")
   add_library(lib_lis STATIC IMPORTED)
   set_property(TARGET lib_lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
   #target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
