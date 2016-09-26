@@ -45,6 +45,10 @@
 %include "dofmap.h"
 %include "util.h"
 %include "target.h"
+%include "cfdata_default.h"
+%include "cfdata_bc.h"
+%include "cfmat_default.h"
+%include "cfmat_bc.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action
@@ -237,6 +241,20 @@
 	free(att[i].R);
       }
     }
+  }
+  void fill_sparsity_np(PyObject * targetlist,
+			kernel_t * ke, hypergraph_t * hg,
+			PyObject * dofmaplist,
+			PyObject * datalist)
+  {
+    
+  }
+  void assemble_csr_np(PyObject * targetlist,
+		       kernel_t * ke, hypergraph_t * hg,
+		       PyObject * dofmaplist,
+		       PyObject * datalist)
+  {
+    
   }
   void filter_np(
 		 kernel_t * ke, hypergraph_t * hg,
