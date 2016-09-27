@@ -10,13 +10,19 @@
   //import_managed();
 %}
 
-%apply (int DIM1, int* IN_ARRAY1) {(int nvert, hypervertex_t * verts),
-                                   (int l_edge, hypervertex_t * verts)};
-%apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {(int Npart, int dim, real_t * x),
-     (int npart, int dim, real_t * x),
-     (int nx1, int dx1, real_t * x1),
-     (int nx2, int dx2, real_t * x2),
-     (int nu1, int du1, real_t * u1)
+%apply (int DIM1, int* IN_ARRAY1) {
+         (int nvert, hypervertex_t * verts),
+         (int l_edge, hypervertex_t * verts)
+     };
+%apply (int* IN_ARRAY1, int DIM1) {
+         (index_t *BCs, index_t NBC)
+     };
+%apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {
+         (int Npart, int dim, real_t * x),
+	 (int npart, int dim, real_t * x),
+	 (int nx1, int dx1, real_t * x1),
+	 (int nx2, int dx2, real_t * x2),
+	 (int nu1, int du1, real_t * u1)
      };
 %apply (int DIM1, int  DIM2, real_t * INPLACE_ARRAY2) {
   (int nu2, int du2, real_t * u2)
@@ -33,6 +39,7 @@
 %array_class(inp_t,inpArray)
 %array_class(outp_t,outpArray)
 %array_class(hyperedges_t,hyperedgesArray)
+%array_class(target_t, targetArray)
 
 %include "cpointer.i"
 %pointer_class(int, intp)
@@ -48,6 +55,7 @@
 %include "cfdata_default.h"
 %include "cfdata_bc.h"
 %include "cfmat_default.h"
+%include "cfmat_csr.h"
 %include "cfmat_bc.h"
 
 %exception Hypergraph_Push_Edge_np {
@@ -242,17 +250,28 @@
       }
     }
   }
-  void fill_sparsity_np(PyObject * targetlist,
-			kernel_t * ke, hypergraph_t * hg,
+  void fill_sparsity_np(kernel_t * ke, hypergraph_t * hg,
 			PyObject * dofmaplist,
-			PyObject * datalist)
+			target_t * att)
   {
+    int i;
+    PyObject *obj;
     
+    /* Step 1: Create the dofmap list */
+    if(!PyList_Check(dofmaplist)) return;
+    int ndofmap = PyList_Size(dofmaplist);
+    dofmap_t * dofmaps[ndofmap];
+    for(i=0;i<ndofmap;i++) {
+      obj = PyList_GetItem(dofmaplist,i);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+    }
+    /* Step 2: Make the call */
+    fill_sparsity(ke,hg, dofmaps, att);
   }
-  void assemble_csr_np(PyObject * targetlist,
-		       kernel_t * ke, hypergraph_t * hg,
-		       PyObject * dofmaplist,
-		       PyObject * datalist)
+  void assemble_np(kernel_t * ke, hypergraph_t * hg,
+		   PyObject * dofmaplist,
+		   PyObject * datalist,
+		   target_t * att)
   {
     
   }
