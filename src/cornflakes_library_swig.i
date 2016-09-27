@@ -33,6 +33,16 @@
 %apply (int* ARGOUT_ARRAY1, int * DIM1) {(int * dofs, int *ndofs)};
 %apply (int DIM1, int DIM2, int * IN_ARRAY2) { (int Nentry, int stride, int * table) };
 
+%apply ( real_t** ARGOUTVIEW_ARRAY1, int* DIM1 ) {
+  (real_t** V, int* N),
+  (real_t** V, int* Vnnz) 
+    };
+
+%apply ( int** ARGOUTVIEW_ARRAY1, int* DIM1 ) {
+    (int** J, int* Jnnz),
+      (int** IA, int* Ni) // for some reason calling the array I makes a bug in swig. Hygiene?
+      };
+
 %include "carrays.i"
 %array_class(int,intArray)
 %array_class(k_map_t,k_mapArray)
@@ -126,6 +136,30 @@
     Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
   }
 
+  /* 
+   * Wrappers for CFData and CFMat viewing
+   */
+  void CFData_Default_View_np(cfdata_t * self, real_t **V, int *N) {
+    *V = CFData_Default_Data(self);
+    *N = self->N;
+  }
+  void CFMat_CSR_View_np(cfmat_t * self,
+			 
+			 int** IA, int* Ni,
+			 int** J, int* Jnnz,
+			 real_t** V, int* Vnnz)
+  {
+    
+    *Ni  = self->N+1;
+    *IA    = CFMat_CSR_Data(self)->IA;
+    
+    *Jnnz = CFMat_CSR_Data(self)->nnz;
+    *J    = CFMat_CSR_Data(self)->JA;
+    
+    *Vnnz = CFMat_CSR_Data(self)->nnz;
+    *V    = CFMat_CSR_Data(self)->V;
+    
+  }
   /*
    * Other wrappers
    */
