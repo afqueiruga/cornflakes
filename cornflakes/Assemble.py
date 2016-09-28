@@ -31,9 +31,8 @@ class CFData():
         cflib.CFData_Wipe(self)
     def np(self):
         " Wrap as a numpy array "
-        pass
+        return cflib.CFData_Default_View_np(self.dat)
     
-            
 class CFMat():
     def __init__(self, ndof, imap=None):
         self.mat = cflib.cfmat_t()
@@ -62,7 +61,8 @@ class CFMat():
         cflib.CFMat_Wipe(self.mat)
     def np(self):
         " Wrap as a scipy csr matrix "
-        pass
+        I,J,V = cflib.CFMat_CSR_View_np(self.mat)
+        return scipy.sparse.csr_matrix( (V,J,I) , shape=(self.mat.N, self.mat.N) )
     
 class CFTargets():
     def __init__(self, ke,H, dofmaps, ndof, bcs=None):

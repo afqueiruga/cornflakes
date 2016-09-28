@@ -33,13 +33,13 @@
 %apply (int* ARGOUT_ARRAY1, int * DIM1) {(int * dofs, int *ndofs)};
 %apply (int DIM1, int DIM2, int * IN_ARRAY2) { (int Nentry, int stride, int * table) };
 
-%apply ( real_t** ARGOUTVIEW_ARRAY1, int* DIM1 ) {
-  (real_t** V, int* N),
-  (real_t** V, int* Vnnz) 
-    };
+%apply ( int* DIM1, real_t** ARGOUTVIEW_ARRAY1 ) {
+  (int* NA, real_t** VA),
+    (int* Vnnz, real_t** VA) 
+};
 
 %apply ( int** ARGOUTVIEW_ARRAY1, int* DIM1 ) {
-    (int** J, int* Jnnz),
+    (int** JA, int* Jnnz),
       (int** IA, int* Ni) // for some reason calling the array I makes a bug in swig. Hygiene?
       };
 
@@ -139,25 +139,25 @@
   /* 
    * Wrappers for CFData and CFMat viewing
    */
-  void CFData_Default_View_np(cfdata_t * self, real_t **V, int *N) {
-    *V = CFData_Default_Data(self);
-    *N = self->N;
+  void CFData_Default_View_np(cfdata_t * self,  int* NA, real_t** VA) {
+    *VA = CFData_Default_Data(self);
+    *NA = self->N;
   }
   void CFMat_CSR_View_np(cfmat_t * self,
 			 
 			 int** IA, int* Ni,
-			 int** J, int* Jnnz,
-			 real_t** V, int* Vnnz)
+			 int** JA, int* Jnnz,
+			 int* Vnnz, real_t** VA)
   {
     
     *Ni  = self->N+1;
     *IA    = CFMat_CSR_Data(self)->IA;
     
     *Jnnz = CFMat_CSR_Data(self)->nnz;
-    *J    = CFMat_CSR_Data(self)->JA;
+    *JA    = CFMat_CSR_Data(self)->JA;
     
     *Vnnz = CFMat_CSR_Data(self)->nnz;
-    *V    = CFMat_CSR_Data(self)->V;
+    *VA    = CFMat_CSR_Data(self)->V;
     
   }
   /*
@@ -299,6 +299,7 @@
       obj = PyList_GetItem(dofmaplist,i);
       const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
     }
+    printf("%d %d\n",att[0].rank, att[1].rank);
     /* Step 2: Make the call */
     fill_sparsity(ke,hg, dofmaps, att);
   }
