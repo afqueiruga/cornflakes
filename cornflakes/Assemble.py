@@ -75,21 +75,22 @@ class CFTargets():
 
         # Initialize the data structures
         self.cfobjs = []
-        self.att = cflib.targetArray(ke.noutp)
+        self.targets = [] #cflib.targetArray(ke.noutp) # The array typemap sucks.
         outps = cflib.outpArray_frompointer(ke.outp)
         for j in xrange(ke.noutp):
             op = outps[j]
+            targ = cflib.target_t()
             if op.rank==2:
                 K = CFMat(ndof,self.imap)
-                cflib.Target_New_From_Ptr(self.att[j],2,K.top())
+                cflib.Target_New_From_Ptr(targ,2,K.top())
                 self.cfobjs.append(K)
             else:
                 R = CFData(ndof,self.imap)
-                cflib.Target_New_From_Ptr(self.att[j],1,R.top())
+                cflib.Target_New_From_Ptr(targ,1,R.top())
                 self.cfobjs.append(R)
-        
+            self.targets.append(targ)
         # Fill in the sparsities
-        cflib.fill_sparsity_np(ke,H.hg, dofmaps, self.att[0])
+        cflib.fill_sparsity_np(ke,H.hg, [ d.dm for d in dofmaps ], self.targets)
         
         # Finalize the sparsities
         for k in self.cfobjs:

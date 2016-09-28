@@ -286,21 +286,35 @@
   }
   void fill_sparsity_np(kernel_t * ke, hypergraph_t * hg,
 			PyObject * dofmaplist,
-			target_t * att)
+			PyObject * targetlist)
   {
     int i;
     PyObject *obj;
-    
-    /* Step 1: Create the dofmap list */
     if(!PyList_Check(dofmaplist)) return;
+    if(!PyList_Check(targetlist)) return;
+    /* Step 1: Create the dofmap list */
     int ndofmap = PyList_Size(dofmaplist);
     dofmap_t * dofmaps[ndofmap];
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
       const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
     }
-    printf("%d %d\n",att[0].rank, att[1].rank);
-    /* Step 2: Make the call */
+
+    /* Step 2: Create the target array */
+    int ntarget = PyList_Size(targetlist);
+    target_t att[ntarget];
+    for(i=0;i<ntarget;i++) {
+      obj = PyList_GetItem(targetlist,i);
+      target_t * t;
+      const int rest = SWIG_ConvertPtr(obj, (void**)(&t),SWIGTYPE_p_target_t, 0);
+      att[i].rank = t->rank;
+      if(att[i].rank==2)
+	att[i].K = t->K;
+      else
+	att[i].R = t->R;
+    }
+
+    /* Step 3: Make the call */
     fill_sparsity(ke,hg, dofmaps, att);
   }
   void assemble_np(kernel_t * ke, hypergraph_t * hg,
