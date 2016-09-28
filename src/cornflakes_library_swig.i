@@ -290,6 +290,7 @@
   {
     int i;
     PyObject *obj;
+    
     if(!PyList_Check(dofmaplist)) return;
     if(!PyList_Check(targetlist)) return;
     /* Step 1: Create the dofmap list */
@@ -320,12 +321,65 @@
   void assemble_np(kernel_t * ke, hypergraph_t * hg,
 		   PyObject * dofmaplist,
 		   PyObject * datalist,
-		   target_t * att)
+		   PyObject * targetlist)
   {
+    int i, isnewobj;
+    PyObject *obj;
+    PyArrayObject *arrobj;
     
+    if(!PyList_Check(dofmaplist)) return;
+    if(!PyList_Check(targetlist)) return;
+    if(!PyList_Check(datalist))   return;
+    
+    /* Step 1: Create the dofmap list */
+    int ndofmap = PyList_Size(dofmaplist);
+    dofmap_t * dofmaps[ndofmap];
+    for(i=0;i<ndofmap;i++) {
+      obj = PyList_GetItem(dofmaplist,i);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+    }
+
+    /* Step 2: Create the target array */
+    int ntarget = PyList_Size(targetlist);
+    target_t att[ntarget];
+    for(i=0;i<ntarget;i++) {
+      obj = PyList_GetItem(targetlist,i);
+      target_t * t;
+      const int rest = SWIG_ConvertPtr(obj, (void**)(&t),SWIGTYPE_p_target_t, 0);
+      att[i].rank = t->rank;
+      if(att[i].rank==2)
+	att[i].K = t->K;
+      else
+	att[i].R = t->R;
+    }
+
+    /* Step 3: Collect the data ptrs */
+    int ndata = PyList_Size(datalist);
+    cfdata_t  data[ndata];
+    cfdata_t* data_ptrs[ndata];
+    int nnewobj = 0;
+    PyArrayObject * newobjs[ndata];
+    for(i=0;i<ndata;i++) {
+      obj = PyList_GetItem(datalist,i );
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0),  array_data(arrobj));
+      if(isnewobj) {
+	newobjs[nnewobj] = arrobj;
+	nnewobj++;
+      }
+    }
+    for(i=0;i<ndata;i++) data_ptrs[i] = data+i;
+    
+    /* Step 4: Make the call */
+    assemble(ke,hg, dofmaps,data_ptrs, att); 
+
+    /* Step 5: Decrease reference counts */
+    for(i=0;i<nnewobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
   }
-  void filter_np(
-		 kernel_t * ke, hypergraph_t * hg,
+  void filter_np(kernel_t * ke, hypergraph_t * hg,
 		 PyObject * dofmaplist,
 		 PyObject * datalist,
 		 hypergraph_t * htrue, hypergraph_t * hfalse)

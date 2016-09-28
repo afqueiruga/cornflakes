@@ -5,6 +5,14 @@
 #include "cfdata.h"
 
 /* A polymorphic class for targets with different backends */
+/*
+ * NOTE: Is the target_t type obselete by CFMat/CFData?
+ * The kernel has the rank info, I could replace target_t by just a void* array,
+ * or, to be cleaner, typedef target_t union{ cfmat_t* K; cfdata_t* R; };
+ *
+ * Then, I could just translate the python function into a C function to create
+ * targets automagically... Though that defeats the backend agnostism
+ */
 typedef struct _TARGET_VTABLE_t _TARGET_VTABLE_t;
 typedef struct target_t {
   int rank;

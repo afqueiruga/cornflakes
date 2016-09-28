@@ -75,7 +75,7 @@ class CFTargets():
 
         # Initialize the data structures
         self.cfobjs = []
-        self.targets = [] #cflib.targetArray(ke.noutp) # The array typemap sucks.
+        self.targets = []
         outps = cflib.outpArray_frompointer(ke.outp)
         for j in xrange(ke.noutp):
             op = outps[j]
