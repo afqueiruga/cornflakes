@@ -24,12 +24,19 @@
 	 (int nx2, int dx2, real_t * x2),
 	 (int nu1, int du1, real_t * u1)
      };
+%apply (int DIM1, real_t *IN_ARRAY1) {
+    (int N, real_t * payload),
+    (int Ncfbc, real_t* Acfbc),
+    (int Norig, real_t* Aorig)
+    }
 %apply (int DIM1, int  DIM2, real_t * INPLACE_ARRAY2) {
   (int nu2, int du2, real_t * u2)
     };
 %apply (int DIM1, int* INPLACE_ARRAY1) {(int dim_II, int * array_II),
                                         (int dim_JJ, int * array_JJ)};
-%apply (int DIM1, real_t* INPLACE_ARRAY1) {(int dim_KK, real_t * array_KK)};
+%apply (int DIM1, real_t* INPLACE_ARRAY1) {
+  (int dim_KK, real_t * array_KK)
+    };
 %apply (int* ARGOUT_ARRAY1, int * DIM1) {(int * dofs, int *ndofs)};
 %apply (int DIM1, int DIM2, int * IN_ARRAY2) { (int Nentry, int stride, int * table) };
 
@@ -159,6 +166,28 @@
     *Vnnz = CFMat_CSR_Data(self)->nnz;
     *VA    = CFMat_CSR_Data(self)->V;
     
+  }
+  /*
+   * IndexMap operations on numpy arrays
+   */
+  
+  void IndexMap_Push_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Push(self,&cfbc,&orig);
+  }
+  void IndexMap_Pull_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Push(self,&cfbc,&orig);
   }
   /*
    * Other wrappers
