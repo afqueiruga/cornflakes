@@ -120,10 +120,10 @@ class CFTargets():
             f.Finalize()
     def Push(self, cfbc, orig):
         if self.imap:
-            cflib.IndexMap_Push_np(self.imap,cfbc,orig)
+            cflib.IndexMap_Set_Values_np(self.imap,cfbc,orig)
     def Pull(self, cfbc, orig):
         if self.imap:
-            cflib.IndexMap_Pull_np(self.imap,cfbc,orig)
+            cflib.IndexMap_Get_Values_np(self.imap,cfbc,orig)
     def Wipe(self):
         for f in self.cfobjs:
             f.Wipe()

@@ -171,6 +171,25 @@
    * IndexMap operations on numpy arrays
    */
   
+  void IndexMap_Set_Values_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Set_Values(self,&cfbc,&orig);
+  }
+  void IndexMap_Get_Values_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Get_Values(self,&cfbc,&orig);
+  }
+  
   void IndexMap_Push_np(indexmap_t * self,
 			int Ncfbc, real_t *Acfbc,
 			int Norig, real_t* Aorig )
