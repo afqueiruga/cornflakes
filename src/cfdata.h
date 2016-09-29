@@ -15,6 +15,7 @@ struct _CFDATA_VTABLE_t {
   void (*Scatter)(cfdata_t * self, real_t * src);
   void (*Copy)(cfdata_t * self, cfdata_t * src);
   void (*Get_Values)(cfdata_t * self, int ndof,int * dofs, real_t * vals);
+  void (*Set_Values)(cfdata_t * self, int ndof,int * dofs, real_t * vals);
   void (*Wipe)(cfdata_t * self);
   void (*Finalize)(cfdata_t * self);
   void (*Destroy)(cfdata_t * self);
@@ -24,9 +25,11 @@ struct _CFDATA_VTABLE_t {
 };
 
 void CFData_Get_Values(cfdata_t * self, int ndof,int * dofs, real_t * vals);
+void CFData_Set_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals);
 void CFData_Scatter(cfdata_t * self, real_t * src);
 void CFData_Copy(cfdata_t * self, cfdata_t * src);
 real_t * CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals);
+
 void CFData_Wipe(cfdata_t * self);
 void CFData_Finalize(cfdata_t * self);
 void CFData_Destroy(cfdata_t * self);
