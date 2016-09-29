@@ -187,7 +187,7 @@
     cfdata_t cfbc, orig;
     CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
     CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
-    IndexMap_Push(self,&cfbc,&orig);
+    IndexMap_Pull(self,&cfbc,&orig);
   }
   /*
    * Other wrappers
