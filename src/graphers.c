@@ -21,7 +21,7 @@ void Build_Pair_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t 
   SpatialHash_destroy(&sh);
 }
 
-void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff) {
+void Build_Proximity_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff) {
   spatialhash_t sh;
   int A;
   //printf("alloc hg\n");
@@ -35,6 +35,48 @@ void Build_Adjacency_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t
   int Nlist=0;
   void action(int FOO, int b) {
     if( b!=A &&  dist(dim, x+dim*A,x+dim*b)<=cutoff) {
+      if (Nlist >= listbuf) {
+	listbuf *= 2;
+	list = realloc(list,sizeof(int)*listbuf);
+      }
+      list[Nlist] = b;
+      Nlist++;
+    }
+  }
+
+  for(A=0; A<Npart; A++) {
+    list[0] = A;
+    Nlist = 1;
+    SpatialHash_ScanPt(&sh, x+dim*A, action);
+    Hypergraph_Push_Edge(hg,Nlist,list);
+  }
+  free(list);
+  //SpatialHash_Scanall(&sh,x,action);
+  //printf("destroy hash\n");
+  SpatialHash_destroy(&sh);
+}
+
+void Build_Proximity_Graph_Variable(hypergraph_t * hg,
+				    int Npart, int dim, real_t * x,
+				    real_t * r) {
+  spatialhash_t sh;
+  int A;
+  // Determine the maximum radius to use in the hash table
+  real_t cutoff = 0.0;
+  for(A=0;A<Npart;A++) if( r[A] > cutoff ) cutoff = r[A] ;
+  cutoff *= 2.0001; // Just a wee bit extra for roundoff, lolz.
+  
+  //printf("alloc hg\n");
+  Hypergraph_Alloc(hg,1); //2, Npart);
+  //printf("alloc hash\n");
+  Build_New_Hash(&sh, Npart,dim,x, cutoff);
+  //printf("scan\n");
+
+  int listbuf = 20;
+  int * list = malloc(sizeof(int)*listbuf); 
+  int Nlist=0;
+  void action(int FOO, int b) {
+    if( b!=A &&  dist(dim, x+dim*A,x+dim*b)<= r[A] ) {
       if (Nlist >= listbuf) {
 	listbuf *= 2;
 	list = realloc(list,sizeof(int)*listbuf);

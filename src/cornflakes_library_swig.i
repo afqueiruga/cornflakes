@@ -486,6 +486,12 @@
     
   }
 
+  void Build_Proximity_Graph_Variable_np( hypergraph_t * hg,
+					  int Npart, int dim, real_t * x,
+					  int DIM1, real_t * IN_ARRAY1) {
+    Build_Proximity_Graph_Variable(hg, Npart, dim, x, IN_ARRAY1);
+  }
+
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
 				  hypergraph_t * mesh,
 				  kernel_t * ke_circum,
@@ -566,5 +572,30 @@
     Py_DECREF(x_wrap);
     free(xc);
     return x_np;
+  }
+
+
+  PyObject* Remove_Duplicate_Particles_np(int Npart, int dim, real_t * x,
+
+				  real_t cutoff, real_t binsize) {
+    int Naccept;
+    real_t * y;
+
+    y = malloc( dim*Npart * sizeof(real_t) );
+
+    Remove_Duplicate_Particles(Npart,dim,x,
+			     &Naccept,y,
+			     cutoff,binsize);
+    
+    
+    npy_intp dims_trim[2] = {Naccept, dim};
+    // This should work, right? y is just malloc'd a little longer
+    PyObject * y_long = PyArray_SimpleNewFromData(2,dims_trim, NPY_DOUBLE, y); 
+    PyObject * y_trim = PyArray_SimpleNew(2,dims_trim, NPY_DOUBLE);
+    PyArray_CopyInto((PyArrayObject*)y_trim,(PyArrayObject*)y_long);
+    Py_DECREF(y_long);
+    free(y);
+
+    return y_trim;
   }
 %}
