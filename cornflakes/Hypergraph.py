@@ -5,7 +5,8 @@ class Hypergraph():
 
     def __init__(self, alloc_init=1):
         self.hg = cflib.hypergraph_t()
-        cflib.Hypergraph_Alloc(self.hg, alloc_init)
+        if alloc_init:
+            cflib.Hypergraph_Alloc(self.hg, alloc_init)
 
     def __del__(self):
         cflib.Hypergraph_Destroy(self.hg)
