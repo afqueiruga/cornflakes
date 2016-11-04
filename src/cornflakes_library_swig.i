@@ -488,10 +488,18 @@
 
   void Build_Proximity_Graph_Variable_np( hypergraph_t * hg,
 					  int Npart, int dim, real_t * x,
-					  int DIM1, real_t * IN_ARRAY1) {
+					  int DIM1, real_t * IN_ARRAY1)
+  {
     Build_Proximity_Graph_Variable(hg, Npart, dim, x, IN_ARRAY1);
   }
-
+  void Build_Proximity_Graph_Given_Length_np(hypergraph_t * hg,
+					     int Npart, int dim, real_t * x,
+					     int N_desired, real_t cutoff,
+					     int DIM1, real_t * INPLACE_ARRAY1)
+  {
+    Build_Proximity_Graph_Given_Length(hg,Npart,dim,x,N_desired,cutoff, INPLACE_ARRAY1);
+  }
+  
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
 				  hypergraph_t * mesh,
 				  kernel_t * ke_circum,
