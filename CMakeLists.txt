@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-
+#enable_language(Fortran)
 project( proj_cornflakes )
 enable_testing()
 
@@ -78,6 +78,7 @@ set( PY_FILES
   cornflakes/Hypergraph.py
   cornflakes/ParticlePlacers.py
   cornflakes/SpatialHash.py
+  cornflakes/Graphers.py
   )
   
 # Add in kernels to be included in the distribution
@@ -129,7 +130,7 @@ if(USE_LIS)
   list(APPEND CORNFLAKES_DEFINITIONS -DUSE_LIS)
   list(APPEND CORNFLAKES_INCLUDES ${lis_path}/include/)
   list(APPEND CORNFLAKES_STATIC_LIBRARIES "${lis_path}/lib/liblis.a")
-  list(APPEND CORNFLAKES_SHARED_LIBRARIES "${lis_path}/lib/liblis.so")
+  list(APPEND CORNFLAKES_SHARED_LIBRARIES "${lis_path}/lib/liblis.so" gfortran)
 endif(USE_LIS)
 
 
