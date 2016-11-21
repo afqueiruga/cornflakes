@@ -1,7 +1,10 @@
 #ifndef __KERNEL_H
 #define __KERNEL_H
 
+#ifndef TYPEDEF_REAL_T
+#define TYPEDEF_REAL_T
 typedef double real_t;
+#endif
 
 #define KERNEL_MAP_MAX 10
 #define KERNEL_INP_MAX 10
