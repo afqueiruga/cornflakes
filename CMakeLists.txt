@@ -94,6 +94,7 @@ option(USE_LIS "Enable LIS backend for assembly" ON)
 
 # Make the static library
 add_library( cornflakes STATIC ${SOURCES} )
+set_property(TARGET cornflakes PROPERTY C_STANDARD 11)
 set(CORNFLAKES_LIBRARIES m)
 
 find_package(OpenMP REQUIRED)
