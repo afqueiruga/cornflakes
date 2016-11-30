@@ -168,7 +168,7 @@ void Build_Proximity_Graph_Given_Length(hypergraph_t * hg,
     SpatialHash_ScanPt(&sh, x+dim*A, action);
     Hypergraph_Push_Edge(hg,(N_desired > Nlist-1 ? Nlist : N_desired+1),list);
 
-    r[A] = (dists[Nlist-1]+dists[Nlist-2])/2.0;
+    r[A] = (dists[Nlist-1]+dists[Nlist-2])/2.0 + 1.0e-10;
   }
 
   SpatialHash_destroy(&sh);

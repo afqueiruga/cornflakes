@@ -110,7 +110,7 @@ const _CFMAT_VTABLE_t CFMat_CSR_Doppel_vtable = {
   .Finalize_Sparsity = CFMat_CSR_Finalize_Sparsity,
   .Place = CFMat_CSR_Place,
   .Set_Value = CFMat_CSR_Set_Value,
-  .Destroy = CFMat_CSR_Doppel_Destroy,
+  .Destroy = CFMat_CSR_Doppel_Destroy, // Difference
   .Wipe = CFMat_CSR_Wipe,
   .Finalize = CFMat_CSR_Finalize
 };
