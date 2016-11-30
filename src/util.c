@@ -69,6 +69,70 @@ void Interpolate_Closest(real_t * uold, real_t * Xold, int Nold,
 }
 
 
+#ifndef SQ
+#define SQ(x) ((x)*(x))
+#define MIN(A,B) ((A)>(B)?(B):(A))
+#define MAX(A,B) ((A)>(B)?(A):(B))
+#endif
+
+void Remove_Duplicate_Particles(int Npart, int dim, real_t * x,
+				int * Naccept, real_t * y,
+				real_t cutoff, real_t binsize)
+{
+  spatialhash_t sh;
+  int A,i;
+
+  // 
+  //Build_New_Hash(&sh, 1,dim,x, hashsize);
+  real_t start[dim], end[dim], h[dim];
+  for(i=0; i<dim; i++) {
+    start[i] = 1e10;
+    end[i] = -1e10;
+    h[i] = binsize;
+  }
+  for(A=0; A<Npart ;A++) {
+    for(i=0; i<dim; i++) {
+      start[i] = MIN(start[i],x[A*dim + i]);
+      end[i] = MAX(end[i],x[A*dim + i]);
+    }
+  }
+  for(i=0;i<dim;i++) {
+    start[i] -= 1.0*binsize;
+    end[i] += 2.0*binsize;
+  }
+  SpatialHash_init(&sh, Npart,dim,
+		   start,end,h);
+
+  // First Particle
+  SpatialHash_Push(&sh, 0, x);
+  for(i=0;i<dim;i++) y[ i ] = x[  i ];
+  *Naccept = 1;
+  
+  // Push them all in one-by-one
+  int accept;
+  void action(int FOO, int b) {
+    if( dist(dim, x+dim*A, y+dim*b) <= cutoff ) accept = 0;
+  }
+  for(A=1;A<Npart;A++) {
+    accept = 1;
+    SpatialHash_ScanPt(&sh, x+dim*A, action);
+    if(accept) {
+      // Copy into the new array
+      for(i=0;i<dim;i++) y[ *Naccept * dim + i ] = x[ A*dim + i ];
+      // Add him to the hash      
+      SpatialHash_Push(&sh, *Naccept, y+dim*(*Naccept));
+      // Increment the count
+      (*Naccept)+=1;
+    }
+    
+  }
+
+  
+  SpatialHash_destroy(&sh);
+  
+}
+
+
 
 void load_gmsh(real_t ** x, int * N, int gdim,
 	       hypergraph_t ** hg,

@@ -67,6 +67,36 @@ void IndexMap_Destroy(indexmap_t * self) {
 }
 
 
+void IndexMap_Set_Values(indexmap_t * self, cfdata_t * cfbc,
+			 cfdata_t * orig) {
+  index_t i_bc,i_o;
+  real_t v;
+  for(i_o=0; i_o< orig->N; i_o++) {
+    i_bc = IndexMap_Get(self,i_o);
+    if(i_bc>=0) {
+      CFData_Get_Values(cfbc, 1,&i_bc,&v);
+      CFData_Set_Values(orig, 1,&i_o,&v);
+    }
+  }
+  CFData_Finalize(orig);
+  //  CFData_Place(orig, data(self)->imap->Nsys,data(self)->map->map,
+}
+void IndexMap_Get_Values(indexmap_t * self, cfdata_t * cfbc,
+			 cfdata_t * orig) {
+  index_t i_bc,i_o;
+  real_t v;
+  /* for(i_bc=0;i_bc<data(self)->map->Nsys;i_bc++) { */
+  for(i_o=0; i_o< orig->N; i_o++) {
+    /* i_o = data(self)->map->map[i_bc]; */
+    i_bc = IndexMap_Get(self,i_o);
+    if(i_bc>=0) {
+      CFData_Get_Values(orig, 1,&i_o,&v);
+      CFData_Set_Values(cfbc, 1,&i_bc,&v);
+    }
+  }
+  CFData_Finalize(orig);
+}
+
 
 void IndexMap_Push(indexmap_t * self, cfdata_t * cfbc,
 		    cfdata_t * orig) {

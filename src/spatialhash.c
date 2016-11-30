@@ -4,12 +4,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 #ifndef SQ
 #define SQ(x) ((x)*(x))
 #define MIN(A,B) ((A)>(B)?(B):(A))
 #define MAX(A,B) ((A)>(B)?(A):(B))
 #endif
-
 
 // TODO: Why did I redefine macros everywhere??? That was a bad idea
 
@@ -111,7 +111,6 @@ void Build_New_Hash(spatialhash_t * sh,  int Npart,int dim, real_t * x, real_t b
   //printf("\n");
   //SpatialHash_print(sh);
 }
-
 
 /*
  * Top level scanning operations:

@@ -5,7 +5,8 @@ class Hypergraph():
 
     def __init__(self, alloc_init=1):
         self.hg = cflib.hypergraph_t()
-        cflib.Hypergraph_Alloc(self.hg, alloc_init)
+        if alloc_init:
+            cflib.Hypergraph_Alloc(self.hg, alloc_init)
 
     def __del__(self):
         cflib.Hypergraph_Destroy(self.hg)
@@ -19,9 +20,16 @@ class Hypergraph():
             cflib.Hypergraph_Get_Edge_View_np(self.hg,i)
             for i in xrange(self.hg.n_types)
         ]
-
+    def __iter__(self):
+        for i in xrange(self.hg.n_types):
+            ev = cflib.Hypergraph_Get_Edge_View_np(self.hg,i)
+            for e in ev:
+                yield e
+                
     def Add_Edge_Vertex(self,offset=0):
         hgnew = cflib.hypergraph_t()
         cflib.Add_Edge_Vertex(hgnew, self.hg, offset)
         cflib.Hypergraph_Destroy(self.hg)
         self.hg = hgnew
+
+        

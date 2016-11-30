@@ -1,9 +1,12 @@
 #ifndef _SPATIAL_HASH_H
 #define _SPATIAL_HASH_H
 
-#define SPATIAL_HASH_MAXDIM 3
-
+#ifndef TYPEDEF_REAL_T
+#define TYPEDEF_REAL_T
 typedef double real_t;
+#endif
+
+#define SPATIAL_HASH_MAXDIM 3
 
 typedef struct spatialhash_t {
   int dim;

@@ -10,22 +10,45 @@
   //import_managed();
 %}
 
-%apply (int DIM1, int* IN_ARRAY1) {(int nvert, hypervertex_t * verts),
-                                   (int l_edge, hypervertex_t * verts)};
-%apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {(int Npart, int dim, real_t * x),
-     (int npart, int dim, real_t * x),
-     (int nx1, int dx1, real_t * x1),
-     (int nx2, int dx2, real_t * x2),
-     (int nu1, int du1, real_t * u1)
+%apply (int DIM1, int* IN_ARRAY1) {
+         (int nvert, hypervertex_t * verts),
+         (int l_edge, hypervertex_t * verts)
      };
+%apply (int* IN_ARRAY1, int DIM1) {
+         (index_t *BCs, index_t NBC)
+     };
+%apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {
+         (int Npart, int dim, real_t * x),
+	 (int npart, int dim, real_t * x),
+	 (int nx1, int dx1, real_t * x1),
+	 (int nx2, int dx2, real_t * x2),
+	 (int nu1, int du1, real_t * u1)
+     };
+%apply (int DIM1, real_t *IN_ARRAY1) {
+    (int N, real_t * payload),
+    (int Ncfbc, real_t* Acfbc),
+    (int Norig, real_t* Aorig)
+    }
 %apply (int DIM1, int  DIM2, real_t * INPLACE_ARRAY2) {
   (int nu2, int du2, real_t * u2)
     };
 %apply (int DIM1, int* INPLACE_ARRAY1) {(int dim_II, int * array_II),
                                         (int dim_JJ, int * array_JJ)};
-%apply (int DIM1, real_t* INPLACE_ARRAY1) {(int dim_KK, real_t * array_KK)};
+%apply (int DIM1, real_t* INPLACE_ARRAY1) {
+  (int dim_KK, real_t * array_KK)
+    };
 %apply (int* ARGOUT_ARRAY1, int * DIM1) {(int * dofs, int *ndofs)};
 %apply (int DIM1, int DIM2, int * IN_ARRAY2) { (int Nentry, int stride, int * table) };
+
+%apply ( int* DIM1, real_t** ARGOUTVIEW_ARRAY1 ) {
+  (int* NA, real_t** VA),
+    (int* Vnnz, real_t** VA) 
+};
+
+%apply ( int** ARGOUTVIEW_ARRAY1, int* DIM1 ) {
+    (int** JA, int* Jnnz),
+      (int** IA, int* Ni) // for some reason calling the array I makes a bug in swig. Hygiene?
+      };
 
 %include "carrays.i"
 %array_class(int,intArray)
@@ -33,6 +56,7 @@
 %array_class(inp_t,inpArray)
 %array_class(outp_t,outpArray)
 %array_class(hyperedges_t,hyperedgesArray)
+%array_class(target_t, targetArray)
 
 %include "cpointer.i"
 %pointer_class(int, intp)
@@ -45,6 +69,11 @@
 %include "dofmap.h"
 %include "util.h"
 %include "target.h"
+%include "cfdata_default.h"
+%include "cfdata_bc.h"
+%include "cfmat_default.h"
+%include "cfmat_csr.h"
+%include "cfmat_bc.h"
 
 %exception Hypergraph_Push_Edge_np {
     $action
@@ -114,6 +143,71 @@
     Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
   }
 
+  /* 
+   * Wrappers for CFData and CFMat viewing
+   */
+  void CFData_Default_View_np(cfdata_t * self,  int* NA, real_t** VA) {
+    *VA = CFData_Default_Data(self);
+    *NA = self->N;
+  }
+  void CFMat_CSR_View_np(cfmat_t * self,
+			 
+			 int** IA, int* Ni,
+			 int** JA, int* Jnnz,
+			 int* Vnnz, real_t** VA)
+  {
+    
+    *Ni  = self->N+1;
+    *IA    = CFMat_CSR_Data(self)->IA;
+    
+    *Jnnz = CFMat_CSR_Data(self)->nnz;
+    *JA    = CFMat_CSR_Data(self)->JA;
+    
+    *Vnnz = CFMat_CSR_Data(self)->nnz;
+    *VA    = CFMat_CSR_Data(self)->V;
+    
+  }
+  /*
+   * IndexMap operations on numpy arrays
+   */
+  
+  void IndexMap_Set_Values_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Set_Values(self,&cfbc,&orig);
+  }
+  void IndexMap_Get_Values_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Get_Values(self,&cfbc,&orig);
+  }
+  
+  void IndexMap_Push_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Push(self,&cfbc,&orig);
+  }
+  void IndexMap_Pull_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Pull(self,&cfbc,&orig);
+  }
   /*
    * Other wrappers
    */
@@ -238,8 +332,102 @@
       }
     }
   }
-  void filter_np(
-		 kernel_t * ke, hypergraph_t * hg,
+  void fill_sparsity_np(kernel_t * ke, hypergraph_t * hg,
+			PyObject * dofmaplist,
+			PyObject * targetlist)
+  {
+    int i;
+    PyObject *obj;
+    
+    if(!PyList_Check(dofmaplist)) return;
+    if(!PyList_Check(targetlist)) return;
+    /* Step 1: Create the dofmap list */
+    int ndofmap = PyList_Size(dofmaplist);
+    dofmap_t * dofmaps[ndofmap];
+    for(i=0;i<ndofmap;i++) {
+      obj = PyList_GetItem(dofmaplist,i);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+    }
+
+    /* Step 2: Create the target array */
+    int ntarget = PyList_Size(targetlist);
+    target_t att[ntarget];
+    for(i=0;i<ntarget;i++) {
+      obj = PyList_GetItem(targetlist,i);
+      target_t * t;
+      const int rest = SWIG_ConvertPtr(obj, (void**)(&t),SWIGTYPE_p_target_t, 0);
+      att[i].rank = t->rank;
+      if(att[i].rank==2)
+	att[i].K = t->K;
+      else
+	att[i].R = t->R;
+    }
+
+    /* Step 3: Make the call */
+    fill_sparsity(ke,hg, dofmaps, att);
+  }
+  void assemble_np(kernel_t * ke, hypergraph_t * hg,
+		   PyObject * dofmaplist,
+		   PyObject * datalist,
+		   PyObject * targetlist)
+  {
+    int i, isnewobj;
+    PyObject *obj;
+    PyArrayObject *arrobj;
+    
+    if(!PyList_Check(dofmaplist)) return;
+    if(!PyList_Check(targetlist)) return;
+    if(!PyList_Check(datalist))   return;
+    
+    /* Step 1: Create the dofmap list */
+    int ndofmap = PyList_Size(dofmaplist);
+    dofmap_t * dofmaps[ndofmap];
+    for(i=0;i<ndofmap;i++) {
+      obj = PyList_GetItem(dofmaplist,i);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+    }
+
+    /* Step 2: Create the target array */
+    int ntarget = PyList_Size(targetlist);
+    target_t att[ntarget];
+    for(i=0;i<ntarget;i++) {
+      obj = PyList_GetItem(targetlist,i);
+      target_t * t;
+      const int rest = SWIG_ConvertPtr(obj, (void**)(&t),SWIGTYPE_p_target_t, 0);
+      att[i].rank = t->rank;
+      if(att[i].rank==2)
+	att[i].K = t->K;
+      else
+	att[i].R = t->R;
+    }
+
+    /* Step 3: Collect the data ptrs */
+    int ndata = PyList_Size(datalist);
+    cfdata_t  data[ndata];
+    cfdata_t* data_ptrs[ndata];
+    int nnewobj = 0;
+    PyArrayObject * newobjs[ndata];
+    for(i=0;i<ndata;i++) {
+      obj = PyList_GetItem(datalist,i );
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0),  array_data(arrobj));
+      if(isnewobj) {
+	newobjs[nnewobj] = arrobj;
+	nnewobj++;
+      }
+    }
+    for(i=0;i<ndata;i++) data_ptrs[i] = data+i;
+    
+    /* Step 4: Make the call */
+    assemble(ke,hg, dofmaps,data_ptrs, att); 
+
+    /* Step 5: Decrease reference counts */
+    for(i=0;i<nnewobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
+  }
+  void filter_np(kernel_t * ke, hypergraph_t * hg,
 		 PyObject * dofmaplist,
 		 PyObject * datalist,
 		 hypergraph_t * htrue, hypergraph_t * hfalse)
@@ -298,6 +486,20 @@
     
   }
 
+  void Build_Proximity_Graph_Variable_np( hypergraph_t * hg,
+					  int Npart, int dim, real_t * x,
+					  int DIM1, real_t * IN_ARRAY1)
+  {
+    Build_Proximity_Graph_Variable(hg, Npart, dim, x, IN_ARRAY1);
+  }
+  void Build_Proximity_Graph_Given_Length_np(hypergraph_t * hg,
+					     int Npart, int dim, real_t * x,
+					     int N_desired, real_t cutoff,
+					     int DIM1, real_t * INPLACE_ARRAY1)
+  {
+    Build_Proximity_Graph_Given_Length(hg,Npart,dim,x,N_desired,cutoff, INPLACE_ARRAY1);
+  }
+  
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
 				  hypergraph_t * mesh,
 				  kernel_t * ke_circum,
@@ -378,5 +580,30 @@
     Py_DECREF(x_wrap);
     free(xc);
     return x_np;
+  }
+
+
+  PyObject* Remove_Duplicate_Particles_np(int Npart, int dim, real_t * x,
+
+				  real_t cutoff, real_t binsize) {
+    int Naccept;
+    real_t * y;
+
+    y = malloc( dim*Npart * sizeof(real_t) );
+
+    Remove_Duplicate_Particles(Npart,dim,x,
+			     &Naccept,y,
+			     cutoff,binsize);
+    
+    
+    npy_intp dims_trim[2] = {Naccept, dim};
+    // This should work, right? y is just malloc'd a little longer
+    PyObject * y_long = PyArray_SimpleNewFromData(2,dims_trim, NPY_DOUBLE, y); 
+    PyObject * y_trim = PyArray_SimpleNew(2,dims_trim, NPY_DOUBLE);
+    PyArray_CopyInto((PyArrayObject*)y_trim,(PyArrayObject*)y_long);
+    Py_DECREF(y_long);
+    free(y);
+
+    return y_trim;
   }
 %}

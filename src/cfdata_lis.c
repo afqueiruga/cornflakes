@@ -34,6 +34,10 @@ void CFData_LIS_Get_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
   }
   /* printf("%lf\n",*vals); */
 }
+void CFData_LIS_Set_Values(cfdata_t * self, int ndof, int *dofs, real_t * vals)
+{
+  lis_vector_set_values(LIS_INS_VALUE, ndof,dofs, vals, data(self));
+}
 void CFData_LIS_Get_Ptr(cfdata_t * self, real_t **ptr) {
   // TODO: Is there a better way to do this?
   *ptr = malloc( sizeof(real_t) * self->N);
@@ -50,6 +54,7 @@ void CFData_LIS_Print(cfdata_t * self) {
 }
 const _CFDATA_VTABLE_t cfdata_lis_vtable = {
   .Get_Values = CFData_LIS_Get_Values,
+  .Set_Values = CFData_LIS_Set_Values,
   .Scatter = CFData_LIS_Scatter,
   .Copy = CFData_LIS_Copy,
   .Place = CFData_LIS_Place,

@@ -82,3 +82,46 @@ void CFMat_CSR_New(cfmat_t * self, int N) {
   data(self)->JA = NULL;
   data(self)->V = NULL;
 }
+
+/* 
+ * Add together two CSR mats WITH IDENTICAL STRUCTURES
+ * For parallel assembly, where rhs is intended to be a 
+ * doppelganger
+ */
+void CFMat_CSR_Add(cfmat_t * self, cfmat_t * rhs) {
+  for(int i=0; i<data(self)->nnz; i++) {
+    data(self)->V[i] += data(rhs)->V[i];
+  }
+}
+
+
+/*
+ * A nasty little shadower class. Used for parallel assembly.
+ * A CSR Matrix in all respects, except that it recycles IA and JA,
+ * so the Destroy method is a little different.
+ * (einzel for einzelganger)
+ */
+void CFMat_CSR_Doppel_Destroy(cfmat_t * self) {
+  if(self->own) free( data(self)->V );
+  free( data(self) );
+}
+const _CFMAT_VTABLE_t CFMat_CSR_Doppel_vtable = {
+  .Add_Sparsity = CFMat_Default_Add_Sparsity,
+  .Finalize_Sparsity = CFMat_CSR_Finalize_Sparsity,
+  .Place = CFMat_CSR_Place,
+  .Set_Value = CFMat_CSR_Set_Value,
+  .Destroy = CFMat_CSR_Doppel_Destroy, // Difference
+  .Wipe = CFMat_CSR_Wipe,
+  .Finalize = CFMat_CSR_Finalize
+};
+void CFMat_CSR_Doppel_New(cfmat_t * self, cfmat_t * einzel) {
+  self->vtable = &CFMat_CSR_Doppel_vtable;
+  self->N = einzel->N;
+  self->own = 1;
+  self->data = malloc(sizeof(CFMat_CSR_data_t));
+  
+  data(self)-> IA = data(einzel)->IA;
+  data(self)-> nnz = data(einzel)->nnz;
+  data(self)->JA = data(einzel)->JA;
+  data(self)->V = calloc( sizeof(real_t) , data(self)->nnz);
+}

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-
+#enable_language(Fortran)
 project( proj_cornflakes )
 enable_testing()
 
@@ -78,11 +78,13 @@ set( PY_FILES
   cornflakes/Hypergraph.py
   cornflakes/ParticlePlacers.py
   cornflakes/SpatialHash.py
+  cornflakes/Graphers.py
   )
   
 # Add in kernels to be included in the distribution
 add_subdirectory(src/kernels)
 include_directories(src/)
+
 
 
 set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
@@ -92,6 +94,7 @@ option(USE_LIS "Enable LIS backend for assembly" ON)
 
 # Make the static library
 add_library( cornflakes STATIC ${SOURCES} )
+set_property(TARGET cornflakes PROPERTY C_STANDARD 11)
 set(CORNFLAKES_LIBRARIES m)
 
 find_package(OpenMP REQUIRED)
@@ -104,30 +107,38 @@ endif()
 
 
 if(USE_PETSC)
-  set(PETSC_DIR /home/afq/Downloads/petsc)
-  set(PETSC_ARCH arch-linux2-c-debug )
-  target_compile_definitions(cornflakes PRIVATE -DUSE_PETSC)
+  set(PETSC_DIR $ENV{PETSC_DIR})
+  set(PETSC_ARCH ) #$ENV{PETSC_ARCH})
+
+  #set(PETSC_DIR /home/afq/Downloads/petsc)
+  #set(PETSC_ARCH arch-linux2-c-debug )
+  #target_compile_definitions(cornflakes PRIVATE -DUSE_PETSC)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
   find_package(PETSc REQUIRED)
-  include_directories(${PETSC_INCLUDES})
-  add_definitions(${PETSC_DEFINITIONS})
-  target_link_libraries(cornflakes ${PPETSC_LIBRARIES})
-  list(APPEND CORNFLAKES_LIBRARIES ${PETSC_LIBRARIES})
+  list(APPEND CORNFLAKES_INCLUDES ${PETSC_INCLUDES})
+  list(APPEND CORNFLAKES_DEFINITIONS ${PETSC_DEFINITIONS} -DUSE_PETSC)
+  list(APPEND CORNFLAKES_STATIC_LIBRARIES ${PETSC_LIBRARIES})
+  list(APPEND CORNFLAKES_SHARED_LIBRARIES ${PETSC_LIBRARIES})
 endif(USE_PETSC)
 
 if(USE_LIS)
-  set(lis_path "${PROJECT_SOURCE_DIR}/../lis/" CACHE STRING "Path to lis")
-  set(lis_lib_location "${lis_path}/src/.libs/liblis.a" CACHE STRING "Path to liblis.a for this architecture")
-  add_library(lib_lis STATIC IMPORTED)
-  set_property(TARGET lib_lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
-  target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
-  include_directories(${lis_path}/include/)
-  list(APPEND CORNFLAKES_LIBRARIES lib_lis)
+  set(lis_path "/home/afq/Research/Distribute/Stonedist" CACHE STRING "Path to lis")
+  #set(lis_lib_location "${lis_path}/lib/liblis.a")
+  #add_library(lisstatic STATIC IMPORTED)
+  #set_property(TARGET lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
+  #set_property(TARGET lib_lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
+  #target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
+  list(APPEND CORNFLAKES_DEFINITIONS -DUSE_LIS)
+  list(APPEND CORNFLAKES_INCLUDES ${lis_path}/include/)
+  list(APPEND CORNFLAKES_STATIC_LIBRARIES "${lis_path}/lib/liblis.a")
+  list(APPEND CORNFLAKES_SHARED_LIBRARIES "${lis_path}/lib/liblis.so" gfortran)
 endif(USE_LIS)
 
 
-
-
+target_link_libraries(cornflakes ${CORNFLAKES_STATIC_LIBRARIES} )
+include_directories( ${CORNFLAKES_INCLUDES} )
+#target_compile_definitions(cornflakes PRIVATE ${CORNFLAKES_DEFINITIONS})
+add_definitions( ${CORNFLAKES_DEFINITIONS} )
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")
 
 target_link_libraries( cornflakes packaged_kernels m )
@@ -148,7 +159,7 @@ swig_add_module(cornflakes_library python src/cornflakes_library_swig.i ${SOURCE
 if(USE_PETSC)
   #SWIG_LINK_LIBRARIES(cornflakes_library ${PETSC_LIBRARIES})
 endif(USE_PETSC)
-swig_link_libraries(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES})
+swig_link_libraries(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
 if(USE_LIS)
   #set_source_files_properties( ${swig_generated_file_fullname}
   #    PROPERTIES COMPILE_FLAGS "-DUSE_LIS")
@@ -162,11 +173,18 @@ add_subdirectory(units)
 #
 # Install stuffs
 #
-install(TARGETS cornflakes DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(TARGETS cornflakes DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
-set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/cornflakes)
+set( PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/pythonlib/cornflakes)
 install(TARGETS ${SWIG_MODULE_cornflakes_library_REAL_NAME} DESTINATION ${PY_INSTALL_DIR} OPTIONAL)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes_library.py DESTINATION ${PY_INSTALL_DIR} OPTIONAL)
 install(FILES ${PY_FILES} DESTINATION ${PY_INSTALL_DIR})
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
+# I don't like it, but I'll just do it
+install(FILES src/numpy.i DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
+
+configure_file(cornflakes.cmake.in cornflakes.cmake @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
+configure_file(env.conf.in env.conf @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/env.conf DESTINATION ${CMAKE_INSTALL_PREFIX})

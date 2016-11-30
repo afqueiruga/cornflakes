@@ -34,6 +34,13 @@ void CFData_Default_Get_Values(cfdata_t * self, int ndof,int *dofs, real_t * val
   int k;
   for(k=0;k<ndof;k++) vals[k] = ((real_t*)self->data)[ dofs[k] ];
 }
+void CFData_Default_Set_Values(cfdata_t * self, int ndof,int *dofs, real_t * vals) {
+  int i;
+  for(i=0;i<ndof;i++) {
+    data(self)[dofs[i]] = vals[i];
+  }
+}
+
 void CFData_Default_Get_Ptr(cfdata_t * self, real_t **ptr) {
   *ptr = data(self);
   }
@@ -44,6 +51,7 @@ void CFData_Default_Release_Ptr(cfdata_t * self, real_t **ptr) {
 /* vtable */
 const _CFDATA_VTABLE_t cfdata_default_vtable = {
   .Get_Values = CFData_Default_Get_Values,
+  .Set_Values = CFData_Default_Set_Values,
   .Scatter = &CFData_Default_Scatter,
   .Place = &CFData_Default_Place,
   .Destroy = &CFData_Default_Destroy,

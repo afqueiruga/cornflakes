@@ -35,6 +35,9 @@ void CFData_PETSc_Finalize(cfdata_t * self) {
 void CFData_PETSc_Get_Values(cfdata_t * self, int ndof,int *dofs, real_t * vals) {
   VecGetValues((Vec)self->data, ndof,dofs,  vals);
 }
+void CFData_PETSc_Set_Values(cfdata_t * self, int ndof,int *dofs, real_t * vals) {
+  VecSetValues((Vec)self->data, ndof,dofs,  vals, INSERT_VALUES);
+}
 void CFData_PETSc_Get_Ptr(cfdata_t * self, real_t **ptr) {
   VecGetArray(data(self), ptr);
 }
@@ -49,6 +52,7 @@ void CFData_PETSc_Print(cfdata_t * self) {
 /* vtable */
 const _CFDATA_VTABLE_t cfdata_petsc_vtable = {
   .Get_Values = CFData_PETSc_Get_Values,
+  .Set_Values = CFData_PETSc_Set_Values,
   .Scatter = CFData_PETSc_Scatter,
   .Copy = CFData_PETSc_Copy,
   .Place = &CFData_PETSc_Place,

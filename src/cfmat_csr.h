@@ -18,4 +18,7 @@ void CFMat_CSR_New(cfmat_t * self, int N);
 /* void CFMat_CSR_Set_Sparsity(cfmat_t * self); */
 /* void CFMat_CSR_From_Array(cfmat_t * self, int ndof, */
 			      /* real_t * V, int * II, int * JJ); */
+void CFMat_CSR_Add(cfmat_t * self, cfmat_t * rhs);
+void CFMat_CSR_Doppel_New(cfmat_t * self, cfmat_t * einzel);
+
 #endif
