@@ -108,7 +108,7 @@ endif()
 
 if(USE_PETSC)
   set(PETSC_DIR $ENV{PETSC_DIR})
-  set(PETSC_ARCH ) #$ENV{PETSC_ARCH})
+  set(PETSC_ARCH $ENV{PETSC_ARCH})
 
   #set(PETSC_DIR /home/afq/Downloads/petsc)
   #set(PETSC_ARCH arch-linux2-c-debug )
@@ -186,5 +186,7 @@ install(FILES src/numpy.i DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
 
 configure_file(cornflakes.cmake.in cornflakes.cmake @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cornflakes.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
-configure_file(env.conf.in env.conf @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/env.conf DESTINATION ${CMAKE_INSTALL_PREFIX})
+configure_file(env.bash.conf.in env.bash.conf @ONLY)
+configure_file(env.csh.conf.in env.csh.conf @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/env.bash.conf DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/env.csh.conf  DESTINATION ${CMAKE_INSTALL_PREFIX})
