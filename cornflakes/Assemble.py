@@ -3,19 +3,33 @@ import scipy.sparse
 import cornflakes_library as cflib
 from Hypergraph import Hypergraph
 
+class IndexMap():
+    def __init__(self, start,end,bcs):
+        self.imap = cflib.indexmap_t()
+        cflib.IndexMap_New(self.imap, start,end,bcs)
+    def __del__(self):
+        cflib.IndexMap_Destroy(self.imap)
 
 # The python version wraps in the BCs? IDK How I feel about this......
 class CFData():
-    def __init__(self, ndof, imap=None):
+    def __init__(self, ndof, imap=None, fromptr=None):
         self.dat = cflib.cfdata_t()
-        if imap:
+        if imap is not None:
             self.dat_bc = cflib.cfdata_t()
             cflib.CFData_BC_New(self.dat_bc, self.dat, imap)
-            cflib.CFData_Default_New(self.dat,imap.Nsys)
+            if fromptr is not None:
+                cflib.CFData_Default_New_From_Ptr(self.dat,fromptr)
+            else:
+                cflib.CFData_Default_New(self.dat,imap.Nsys)
+                
         else:
             self.dat_bc = None
-            cflib.CFData_Default_New(self.dat,ndof)
+            if fromptr is not None:
+                cflib.CFData_Default_New_From_Ptr(self.dat,fromptr)
+            else:
+                cflib.CFData_Default_New(self.dat, ndof)
     def __del__(self):
+        #print "CFDATA WAS DESTROYED"
         cflib.CFData_Destroy(self.dat)
         if(self.dat_bc):
             cflib.CFData_Destroy(self.dat_bc)
@@ -46,6 +60,7 @@ class CFMat():
             self.mat_bc = None
             cflib.CFMat_CSR_New(self.mat,ndof)
     def __del__(self):
+        #print "CFMAT WAS DESTROYED"
         cflib.CFMat_Destroy(self.mat)
         if(self.mat_bc):
             cflib.CFMat_Destroy(self.mat_bc)
