@@ -82,6 +82,7 @@ class CFTargets():
         self.targets = []
         outps = cflib.outpArray_frompointer(ke.outp)
         Rtarg = None
+        # This loop requires that the R's come before the K's
         for j in xrange(ke.noutp):
             op = outps[j]
             targ = cflib.target_t()
@@ -127,13 +128,41 @@ class CFTargets():
     def Wipe(self):
         for f in self.cfobjs:
             f.Wipe()
+
+def _sanitize_targets(cftargets):
+    # Need to figure out what type cftargets is?
+    try: # Is it that stupid data structure up there?
+        att = cftargets.targets
+    except AttributeError:
+        att = cftargets # It better be a list
+    if type(att[0]) is not cflib.target_t: # Do I need to make list of target_t's?
+        att2 = []
+        for cf in att:
+            targ = cflib.target_t()
+            try:
+                cf.mat
+                rank = 2
+            except AttributeError:           
+                rank = 1
+            cflib.Target_New_From_Ptr(targ,rank, cf.top() )
+            att2.append(targ)
+        att = att2
+    return att
+
+def Fill_Sparsity(ke, H, dofmaps, cftargets):
+    att = _sanitize_targets(cftargets)
     
-def Assemble(ke,H, dofmaps,data, cftargets):
-    he = cflib.hyperedgesArray_frompointer(H.hg.he)
+    cflib.fill_sparsity_np(ke, H.hg, [d.dm for d in dofmaps], att)
+    
+def Assemble(ke,H, dofmaps,data, cftargets, wipe=True):
+    att = _sanitize_targets(cftargets)
+    
     # call wipe
-    cftargets.Wipe()
-    cflib.assemble_np(ke,H.hg, [ d.dm for d in dofmaps], data, cftargets.targets)
-    cftargets.Finalize()
+    if(wipe):
+        cftargets.Wipe()
+    cflib.assemble_np(ke,H.hg, [ d.dm for d in dofmaps], data, att)
+    if(wipe):
+        cftargets.Finalize()
     # call finalize
 def Assemble_Targets(ke,H, dofmaps,data, ndof):
     he = cflib.hyperedgesArray_frompointer(H.hg.he)
