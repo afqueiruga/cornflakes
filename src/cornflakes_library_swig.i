@@ -88,24 +88,37 @@
   /*
    * Extrawrappers for the Dofmap
    */
-  void Dofmap_Get_np(dofmap_t * dm, hypervertex_t V,
-		     int* DIM1, int** ARGOUTVIEW_ARRAY1) {
+  PyObject * make_np_copy_i(int len, int * arr) {
+    npy_intp dims[1] = { len };
+    PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, NPY_INT, arr);
+    PyObject * npret = PyArray_SimpleNew        (1,dims, NPY_INT);
+    PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
+    Py_DECREF(cpy);
+    return npret;
+  }
+  PyObject * Dofmap_Get_np(dofmap_t * dm, hypervertex_t V) {
     int len;
-    int *pay;
+    int *pay, pdim;
     len = Dofmap_Max_Len(dm);
     pay = (int*)malloc( sizeof(int)* (len));
-    Dofmap_Get(dm,V, pay, DIM1);
-    *ARGOUTVIEW_ARRAY1 = pay;
+    Dofmap_Get(dm,V, pay, &pdim);
+    
     // MEMLEAK!
+    PyObject * npret = make_np_copy_i(len,pay);
+    free(pay);
+    return npret;
   }
-  void Dofmap_Get_List_np(dofmap_t * dm, int nvert, hypervertex_t * verts,
-		     int* DIM1, int** ARGOUTVIEW_ARRAY1) {
+  PyObject * Dofmap_Get_List_np(dofmap_t * dm, int nvert, hypervertex_t * verts) {
     int len;
-    int *pay;
+    int *pay, pdim;
     len = nvert * Dofmap_Max_Len(dm);
     pay = (int*)malloc(sizeof(int)* (len));
-    Dofmap_Get_List(dm, nvert,verts, pay,DIM1);
-    *ARGOUTVIEW_ARRAY1 = pay;
+    
+    Dofmap_Get_List(dm, nvert,verts, pay, &pdim);
+
+    PyObject * npret = make_np_copy_i(len,pay);
+    free(pay);
+    return npret;
   }
   /*
    * Extra wrappers for Hypergraph and Hyperedges
