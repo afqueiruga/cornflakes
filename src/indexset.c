@@ -10,7 +10,7 @@ void IndexSet_New(indexset_t * self, int nalloc) {
 }
 int IndexSet_Insert(indexset_t * self, index_t i) {
   // Realloc if needed:
-  if(self->nalloc == self->n) {
+  if(self->nalloc == self->n+1) {
     self->table = realloc(self->table, sizeof(index_t)*2*self->nalloc);
     self->nalloc *= 2;
   }
