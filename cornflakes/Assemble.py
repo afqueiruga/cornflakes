@@ -29,7 +29,7 @@ class CFData():
             else:
                 cflib.CFData_Default_New(self.dat, ndof)
     def __del__(self):
-        #print "CFDATA WAS DESTROYED"
+        print "CFDATA WAS DESTROYED"
         cflib.CFData_Destroy(self.dat)
         if(self.dat_bc):
             cflib.CFData_Destroy(self.dat_bc)
@@ -60,7 +60,7 @@ class CFMat():
             self.mat_bc = None
             cflib.CFMat_CSR_New(self.mat,ndof)
     def __del__(self):
-        #print "CFMAT WAS DESTROYED"
+        print "CFMAT WAS DESTROYED"
         cflib.CFMat_Destroy(self.mat)
         if(self.mat_bc):
             cflib.CFMat_Destroy(self.mat_bc)
