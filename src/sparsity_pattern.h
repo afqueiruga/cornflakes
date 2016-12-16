@@ -11,7 +11,6 @@ typedef struct sparsity_str {
   indexset_t ** Ibuild;
   int N;
   int nnz;
-  void * arena;
 } sparsity_t;
   /* Analysis 
      We need to minimize memory reallocations and copies.

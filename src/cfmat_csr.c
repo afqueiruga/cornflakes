@@ -51,9 +51,9 @@ void CFMat_CSR_Finalize(cfmat_t * self) {
 
 void CFMat_CSR_Destroy(cfmat_t * self) {
   if(self->own) {
-    if(data(self)->IA) free(data(self)->IA);
-    if(data(self)->JA) free(data(self)->JA);
-    if(data(self)->V) free(data(self)->V);
+    if(data(self)->IA) {free(data(self)->IA); printf("FREE"); }
+    if(data(self)->JA) {free(data(self)->JA);printf("FREE"); }
+    if(data(self)->V)  {free(data(self)->V);printf("FREE"); }
   }
   free(data(self));
 }
@@ -75,7 +75,7 @@ void CFMat_CSR_New(cfmat_t * self, int N) {
   self->N = N;
   self->own = 1;
   self->data = malloc(sizeof(CFMat_CSR_data_t));
-  Sparsity_Init(&self->sparse,self->N,20);
+  Sparsity_Init(&self->sparse,self->N,64); // If this is too small, the heap starts to fragment!!!
 
   data(self)->IA = NULL;
   data(self)->nnz = 0;

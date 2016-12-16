@@ -44,6 +44,7 @@ void Sparsity_Print(sparsity_t * self) {
 }
 
 void Sparsity_Destroy(sparsity_t * self) {
+  printf("Destroying sparsity of size %d with %d nnz\n",self->N, self->nnz);
   for(int i=0; i<self->N; i++) {
     IndexSet_Destroy(self->Ibuild[i]);
     free(self->Ibuild[i]);

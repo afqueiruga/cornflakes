@@ -117,7 +117,6 @@ void CFMat_BC_Destroy(cfmat_t * self) {
   // I don't own K and R, but I do own the map
   // Nope, I don't even own the map
   free(self->data);
-  //IndexMap_Destroy(&self->map);
 }
 
 const _CFMAT_VTABLE_t CFMat_BC_vtable = {
