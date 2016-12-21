@@ -88,6 +88,8 @@ include_directories(src/)
 
 
 set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
+list(APPEND CORNFLAKES_INCLUDES ${EXTRA_INCLUDES})
+
 include_directories(${EXTRA_INCLUDES})
 option(USE_PETSC "Enable PETSc backend for assembly" ON)
 option(USE_LIS "Enable LIS backend for assembly" ON)
@@ -104,6 +106,7 @@ if(OPENMP_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
+
 
 
 if(USE_PETSC)
@@ -128,10 +131,15 @@ if(USE_LIS)
   #set_property(TARGET lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
   #set_property(TARGET lib_lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
   #target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
+  find_library(LIS NAMES lis PATHS "${lis_path}/lib" REQUIRED)
+  message("${LIS}")
+  message("${LIS_LIBRARY}")
   list(APPEND CORNFLAKES_DEFINITIONS -DUSE_LIS)
   list(APPEND CORNFLAKES_INCLUDES ${lis_path}/include/)
-  list(APPEND CORNFLAKES_STATIC_LIBRARIES "${lis_path}/lib/liblis.a")
-  list(APPEND CORNFLAKES_SHARED_LIBRARIES "${lis_path}/lib/liblis.so" gfortran)
+  # list(APPEND CORNFLAKES_STATIC_LIBRARIES "${lis_path}/lib/liblis.a")
+  # list(APPEND CORNFLAKES_SHARED_LIBRARIES "${lis_path}/lib/liblis.so" gfortran)
+  list(APPEND CORNFLAKES_STATIC_LIBRARIES ${LIS})
+  list(APPEND CORNFLAKES_SHARED_LIBRARIES ${LIS} gfortran)
 endif(USE_LIS)
 
 
