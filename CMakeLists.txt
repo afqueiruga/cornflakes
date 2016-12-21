@@ -85,8 +85,9 @@ set( PY_FILES
 add_subdirectory(src/kernels)
 include_directories(src/)
 
-
-
+#
+# Options
+#
 set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
 list(APPEND CORNFLAKES_INCLUDES ${EXTRA_INCLUDES})
 
@@ -94,11 +95,18 @@ include_directories(${EXTRA_INCLUDES})
 option(USE_PETSC "Enable PETSc backend for assembly" ON)
 option(USE_LIS "Enable LIS backend for assembly" ON)
 
-# Make the static library
+
+#
+# Define the static library
+#
 add_library( cornflakes STATIC ${SOURCES} )
 set_property(TARGET cornflakes PROPERTY C_STANDARD 11)
 set(CORNFLAKES_LIBRARIES m)
 
+
+#
+# Look for libraries
+#
 find_package(OpenMP REQUIRED)
 if(OPENMP_FOUND)
   message("OPENMP FOUND")
@@ -106,8 +114,6 @@ if(OPENMP_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
-
-
 
 if(USE_PETSC)
   set(PETSC_DIR $ENV{PETSC_DIR})
@@ -126,33 +132,28 @@ endif(USE_PETSC)
 
 if(USE_LIS)
   set(lis_path "/home/afq/Research/Distribute/Stonedist" CACHE STRING "Path to lis")
-  #set(lis_lib_location "${lis_path}/lib/liblis.a")
-  #add_library(lisstatic STATIC IMPORTED)
-  #set_property(TARGET lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
-  #set_property(TARGET lib_lis PROPERTY IMPORTED_LOCATION ${lis_lib_location})
-  #target_compile_definitions(cornflakes PRIVATE -DUSE_LIS)
+
   find_library(LIS NAMES lis PATHS "${lis_path}/lib" REQUIRED)
-  message("${LIS}")
-  message("${LIS_LIBRARY}")
+
   list(APPEND CORNFLAKES_DEFINITIONS -DUSE_LIS)
   list(APPEND CORNFLAKES_INCLUDES ${lis_path}/include/)
-  # list(APPEND CORNFLAKES_STATIC_LIBRARIES "${lis_path}/lib/liblis.a")
-  # list(APPEND CORNFLAKES_SHARED_LIBRARIES "${lis_path}/lib/liblis.so" gfortran)
+
   list(APPEND CORNFLAKES_STATIC_LIBRARIES ${LIS})
   list(APPEND CORNFLAKES_SHARED_LIBRARIES ${LIS} gfortran)
 endif(USE_LIS)
 
-
-target_link_libraries(cornflakes ${CORNFLAKES_STATIC_LIBRARIES} )
 include_directories( ${CORNFLAKES_INCLUDES} )
-#target_compile_definitions(cornflakes PRIVATE ${CORNFLAKES_DEFINITIONS})
+
 add_definitions( ${CORNFLAKES_DEFINITIONS} )
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")
 
+target_link_libraries( cornflakes ${CORNFLAKES_STATIC_LIBRARIES} )
 target_link_libraries( cornflakes packaged_kernels m )
 
 
-# Configure swig
+#
+# Define the swig-wrapped library
+#
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 set(CMAKE_SWIG_FLAGS "")
@@ -164,19 +165,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set_source_files_properties(src/cornflakes_library_swig.i PROPERTIES SWIG_FLAGS "-includeall")
 swig_add_module(cornflakes_library python src/cornflakes_library_swig.i ${SOURCES})
 
-if(USE_PETSC)
-  #SWIG_LINK_LIBRARIES(cornflakes_library ${PETSC_LIBRARIES})
-endif(USE_PETSC)
 swig_link_libraries(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
-if(USE_LIS)
-  #set_source_files_properties( ${swig_generated_file_fullname}
-  #    PROPERTIES COMPILE_FLAGS "-DUSE_LIS")
-endif(USE_LIS)
+
 
 #
 # The tests
 #
 add_subdirectory(units)
+
 
 #
 # Install stuffs
