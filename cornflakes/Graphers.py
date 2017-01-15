@@ -8,11 +8,17 @@ import numpy as np
 
 def Build_Pair_Graph(x, cutoff, y=None):
     H = Hypergraph(0)
-    cflib.Build_Pair_Graph( H.hg, x, cutoff)
+    if y is not None:
+        cflib.Build_Pair_Graph_2Sets( H.hg, x, y, cutoff)
+    else:
+        cflib.Build_Pair_Graph( H.hg, x, cutoff)
     return H
 def Build_Proximity_Graph_Uniform(x, cutoff, y=None):
     H = Hypergraph(0)
-    cflib.Build_Proximity_Graph_Uniform(H.hg, x, cutoff)
+    if y is not None:
+        cflib.Build_Proximity_Graph_2Sets_Uniform(H.hg, x, y, cutoff)
+    else:
+        cflib.Build_Proximity_Graph_Uniform(H.hg, x, cutoff)
     return H
 
 def Build_Proximity_Graph_Variable(x, r, y=None):

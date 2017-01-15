@@ -5,11 +5,8 @@
 
 void Build_Pair_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff) {
   spatialhash_t sh;
-  //printf("alloc hg\n");
-  Hypergraph_Alloc(hg,1); //2, Npart);
-  //printf("alloc hash\n");
+  Hypergraph_Alloc(hg,1);
   Build_New_Hash(&sh, Npart,dim,x, cutoff);
-  //printf("scan\n");
   void action(int a, int b) {
     if(dist(dim, x+dim*a,x+dim*b)<=cutoff) {
       int v[2] = {a,b};
@@ -17,18 +14,32 @@ void Build_Pair_Graph(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t 
     }
   }
   SpatialHash_Scanall(&sh,x,action);
-  //printf("destroy hash\n");
+  SpatialHash_destroy(&sh);
+}
+void Build_Pair_Graph_2Sets(hypergraph_t * hg,
+			    int Npart, int dim, real_t * x,
+			    int Nparty, int dimy, real_t * y,
+			    real_t cutoff) {
+  spatialhash_t sh;
+  Hypergraph_Alloc(hg,1);
+  Build_New_Hash(&sh, Npart,dim,x, cutoff);
+  void action(int a, int b) {
+    if(dist(dim, y+dimy*a,x+dim*b)<=cutoff) {
+      int v[2] = {a,b};
+      Hypergraph_Push_Edge(hg,2,v);
+    }
+  }
+  for(int A=0; A<Nparty; A++) {
+    SpatialHash_ScanPt(&sh, y+dimy*A, action);
+  }
   SpatialHash_destroy(&sh);
 }
 
 void Build_Proximity_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t * x, real_t cutoff) {
   spatialhash_t sh;
   int A;
-  //printf("alloc hg\n");
-  Hypergraph_Alloc(hg,1); //2, Npart);
-  //printf("alloc hash\n");
+  Hypergraph_Alloc(hg,1);
   Build_New_Hash(&sh, Npart,dim,x, cutoff);
-  //printf("scan\n");
 
   int listbuf = 20;
   int * list = malloc(sizeof(int)*listbuf); 
@@ -51,10 +62,42 @@ void Build_Proximity_Graph_Uniform(hypergraph_t * hg, int Npart, int dim, real_t
     Hypergraph_Push_Edge(hg,Nlist,list);
   }
   free(list);
-  //SpatialHash_Scanall(&sh,x,action);
-  //printf("destroy hash\n");
   SpatialHash_destroy(&sh);
 }
+void Build_Proximity_Graph_2Sets_Uniform(hypergraph_t * hg,
+					 int Npart, int dim, real_t * x,
+					 int Nparty, int dimy, real_t * y,
+					 real_t cutoff) {
+  spatialhash_t sh;
+  int A;
+  Hypergraph_Alloc(hg,1);
+  Build_New_Hash(&sh, Npart,dim,x, cutoff);
+
+  int listbuf = 20;
+  int * list = malloc(sizeof(int)*listbuf); 
+  int Nlist=0;
+  void action(int FOO, int b) {
+    if( dist(dim, y+dim*A,x+dim*b)<=cutoff) {
+      if (Nlist >= listbuf) {
+	listbuf *= 2;
+	list = realloc(list,sizeof(int)*listbuf);
+      }
+      list[Nlist] = b;
+      Nlist++;
+    }
+  }
+
+  for(A=0; A<Nparty; A++) {
+    list[0] = A;
+    Nlist = 1;
+    SpatialHash_ScanPt(&sh, y+dimy*A, action);
+    Hypergraph_Push_Edge(hg,Nlist,list);
+  }
+  free(list);
+  SpatialHash_destroy(&sh);
+}
+
+
 
 void Build_Proximity_Graph_Variable(hypergraph_t * hg,
 				    int Npart, int dim, real_t * x,
