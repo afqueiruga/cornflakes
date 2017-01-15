@@ -20,6 +20,7 @@
 %apply (int DIM1, int DIM2, real_t* IN_ARRAY2) {
          (int Npart, int dim, real_t * x),
 	 (int npart, int dim, real_t * x),
+	 (int Nparty,  int dimy, real_t * y),
 	 (int nx1, int dx1, real_t * x1),
 	 (int nx2, int dx2, real_t * x2),
 	 (int nu1, int du1, real_t * u1)
@@ -511,6 +512,27 @@
 					     int DIM1, real_t * INPLACE_ARRAY1)
   {
     Build_Proximity_Graph_Given_Length(hg,Npart,dim,x,N_desired,cutoff, INPLACE_ARRAY1);
+  }
+  void Build_Proximity_Graph_2Sets_Variable_np( hypergraph_t * hg,
+						int Npart, int dim, real_t * x,
+						int Nparty, int dimy, real_t * y,
+						int DIM1, real_t * IN_ARRAY1)
+  {
+    Build_Proximity_Graph_2Sets_Variable(hg,
+					 Npart, dim, x,
+					 Nparty,dimy,y,
+					 IN_ARRAY1);
+  }
+  void Build_Proximity_Graph_2Sets_Given_Length_np(hypergraph_t * hg,
+						   int Npart, int dim, real_t * x,
+						   int Nparty, int dimy, real_t * y,
+						   int N_desired, real_t cutoff,
+						   int DIM1, real_t * INPLACE_ARRAY1)
+  {
+    Build_Proximity_Graph_2Sets_Given_Length(hg,
+					     Npart,dim,x,
+					     Nparty,dimy,y,
+					     N_desired,cutoff, INPLACE_ARRAY1);
   }
   
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
