@@ -147,7 +147,7 @@ void Build_Proximity_Graph_2Sets_Variable(hypergraph_t * hg,
   int A;
   // Determine the maximum radius to use in the hash table
   real_t cutoff = 0.0;
-  for(A=0;A<Npart;A++) if( r[A] > cutoff ) cutoff = r[A] ;
+  for(A=0;A<Nparty;A++) if( r[A] > cutoff ) cutoff = r[A] ;
   cutoff *= 2.0001; // Just a wee bit extra for roundoff, lolz.
   
   Hypergraph_Alloc(hg,1);
@@ -158,7 +158,7 @@ void Build_Proximity_Graph_2Sets_Variable(hypergraph_t * hg,
   int * list = malloc(sizeof(int)*listbuf); 
   int Nlist=0;
   void action(int FOO, int b) {
-    if( dist(dim, x+dim*A,x+dim*b)<= r[A] ) {
+    if( dist(dim, y+dimy*A,x+dim*b)<= r[A] ) {
       if (Nlist >= listbuf) {
 	listbuf *= 2;
 	list = realloc(list,sizeof(int)*listbuf);
@@ -171,7 +171,7 @@ void Build_Proximity_Graph_2Sets_Variable(hypergraph_t * hg,
   for(A=0; A<Nparty; A++) {
     list[0] = A;
     Nlist = 1;
-    SpatialHash_ScanPt(&sh, y+dim*A, action);
+    SpatialHash_ScanPt(&sh, y+dimy*A, action);
     Hypergraph_Push_Edge(hg,Nlist,list);
   }
   free(list);
