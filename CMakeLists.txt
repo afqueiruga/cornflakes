@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.9)
 #enable_language(Fortran)
 project( proj_cornflakes )
-enable_testing()
+# enable_testing()
 
 # The source files
 set(SOURCES
@@ -138,7 +138,7 @@ if(USE_LIS)
   list(APPEND CORNFLAKES_DEFINITIONS -DUSE_LIS)
   list(APPEND CORNFLAKES_INCLUDES ${lis_path}/include/)
 
-  list(APPEND CORNFLAKES_STATIC_LIBRARIES ${LIS})
+  list(APPEND CORNFLAKES_STATIC_LIBRARIES ${LIS} gfortran)
   list(APPEND CORNFLAKES_SHARED_LIBRARIES ${LIS} gfortran)
 endif(USE_LIS)
 
