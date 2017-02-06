@@ -23,6 +23,15 @@ class Dofmap_Tabled(Dofmap):
     def __init__(self, stride, table, offset=0):
         self.dm = cflib.dofmap_t()
         cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), int(offset) )
+class Dofmap_From_Vertices(Dofmap):
+    def __init__(self, stride, vertices, offset=0):
+        self.dm = cflib.dofmap_t()
+        start = int(vertices.min())
+        stop =  int(vertices.max())+1
+        table = np.zeros(stop-start, dtype=np.intc)
+        for i,l in enumerate(vertices):
+            table[ l-start ] = i + offset
+        cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), -start )
 
 
 # DEPRECATED
