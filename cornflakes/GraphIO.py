@@ -14,13 +14,18 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
         #4:10,
         8:12}
     vecformatdict = {
-        1:"{0} 0.0 0.0\n",
-        2:"{0} {1} 0.0\n",
+        1:"{0} 0 0\n",
+        2:"{0} {1} 0\n",
         3:"{0} {1} {2}\n"
+        }
+    tenformatdict = {
+        1:"{0} 0 0\n0 0 0\n0 0 0\n",
+        2:"{0} {1} 0\n{2} {3} 0\n0 0 0\n",
+        3:"{0} {1} {2}\n{3} {4} {5}\n{6} {7} {8}\n"
         }
     elems = H.view()[0]
     vecfmt = vecformatdict[X.shape[1]]
-    
+    tenfmt = tenformatdict[X.shape[1]]
     fh = open(fname,"w")
     fh.write("# vtk DataFile Version 2.0\nGraph connectivity\nASCII\n")
     fh.write("DATASET UNSTRUCTURED_GRID\n")
@@ -52,11 +57,14 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
             fh.write("LOOKUP_TABLE default\n")
             for l in f:
                 fh.write(str(l)+"\n")
-        else:
+        elif f.shape[1]==X.shape[1]:
             fh.write("VECTORS {0} double\n".format(n))
             for l in f:
                 fh.write(vecfmt.format(*l))
-    
+        else:
+            fh.write("TENSORS {0} double\n".format(n))
+            for l in f:
+                fh.write(tenfmt.format(*l))
     # Dump all of the node fields
     if nodefields:
         fh.write("POINT_DATA {0}\n".format(X.shape[0]))
