@@ -235,7 +235,16 @@
 		 u2, x2, nu2,
 		 du1, dx1, rad);
   }
-  
+  void Interpolate_Closest_np(int nu1, int du1, real_t * u1,
+		      int nx1, int dx1, real_t * x1,
+		      int nu2, int du2, real_t * u2,
+		      int nx2, int dx2, real_t * x2,
+		      real_t rad)
+  {
+    Interpolate_Closest( u1, x1, nu1,
+		 u2, x2, nu2,
+		 du1, dx1, rad);
+  }
   /*
    * Assembly wrappers
    */
