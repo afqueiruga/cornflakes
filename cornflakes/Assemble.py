@@ -10,6 +10,33 @@ class IndexMap():
     def __del__(self):
         cflib.IndexMap_Destroy(self.imap)
 
+# Sanitizing the wrappers vs. the raw swig points
+def _sanitize_imap(imap):
+    try:
+        return imap.imap
+    except AttributeError:
+        return imap
+        
+def _sanitize_targets(cftargets):
+    # Need to figure out what type cftargets is?
+    try: # Is it that stupid data structure up there?
+        att = cftargets.targets
+    except AttributeError:
+        att = cftargets # It better be a list
+    if type(att[0]) is not cflib.target_t: # Do I need to make list of target_t's?
+        att2 = []
+        for cf in att:
+            targ = cflib.target_t()
+            try:
+                cf.mat
+                rank = 2
+            except AttributeError:           
+                rank = 1
+            cflib.Target_New_From_Ptr(targ,rank, cf.top() )
+            att2.append(targ)
+        att = att2
+    return att
+
 # The python version wraps in the BCs? IDK How I feel about this......
 class CFData():
     def __init__(self, ndof, imap=None, fromptr=None):
@@ -144,41 +171,31 @@ class CFTargets():
         for f in self.cfobjs:
             f.Wipe()
 
-def _sanitize_targets(cftargets):
-    # Need to figure out what type cftargets is?
-    try: # Is it that stupid data structure up there?
-        att = cftargets.targets
-    except AttributeError:
-        att = cftargets # It better be a list
-    if type(att[0]) is not cflib.target_t: # Do I need to make list of target_t's?
-        att2 = []
-        for cf in att:
-            targ = cflib.target_t()
-            try:
-                cf.mat
-                rank = 2
-            except AttributeError:           
-                rank = 1
-            cflib.Target_New_From_Ptr(targ,rank, cf.top() )
-            att2.append(targ)
-        att = att2
-    return att
-
 def Fill_Sparsity(ke, H, dofmaps, cftargets):
     att = _sanitize_targets(cftargets)
     
     cflib.fill_sparsity_np(ke, H.hg, [d.dm for d in dofmaps], att)
     
-def Assemble(ke,H, dofmaps,data, cftargets, wipe=True):
-    att = _sanitize_targets(cftargets)
-    
+def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
+    if cftargets!=None:
+        att = _sanitize_targets(cftargets)
+        ret_np = False
+    else:
+        ret_np = True
+        cftargets = CFTargets(ke,H,dofmaps,ndof)
+        wipe = True
+        att = cftargets.targets
     # call wipe
     if(wipe):
         cftargets.Wipe()
     cflib.assemble_np(ke,H.hg, [ d.dm for d in dofmaps], data, att)
     if(wipe):
         cftargets.Finalize()
-    # call finalize
+    if ret_np:
+        return [ _.copy() for _ in cftargets.np() ]
+    else:
+        return cftargets.cfobjs
+    
 def Assemble_Targets(ke,H, dofmaps,data, ndof):
     he = cflib.hyperedgesArray_frompointer(H.hg.he)
     n_edges = np.sum([ he[i].n_edge for i in xrange(H.hg.n_types) ])
