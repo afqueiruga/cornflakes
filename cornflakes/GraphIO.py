@@ -217,3 +217,8 @@ def Load_gmsh(fname,gdim=3):
     cflib.Hypergraph_Destroy(H.hg)
     X = cflib.load_gmsh_np(2, H.hg, fname)
     return X,H
+def write_cloud(fname, X, nodefields):
+    import cornflakes as cf
+    Hcloud = cf.Hypergraph()
+    for l in xrange(X.shape[0]): Hcloud.Push_Edge([l])
+    cf.GraphIO.write_graph(fname, Hcloud, X,nodefields)
