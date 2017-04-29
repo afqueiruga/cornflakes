@@ -1,4 +1,9 @@
 %module cornflakes_library
+ // %{
+  //  typedef struct indexmap_str IndexMap;
+  //  %}
+//typedef struct indexmap_str IndexMap;
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include "cornflakes.h"
@@ -62,6 +67,10 @@
 %include "cpointer.i"
 %pointer_class(int, intp)
 
+ //
+
+//%inline %{
+
 %include "hypergraph.h"
 %include "spatialhash.h"
 %include "graphers.h"
@@ -76,6 +85,7 @@
 %include "cfmat_csr.h"
 %include "cfmat_bc.h"
 
+
 %exception Hypergraph_Push_Edge_np {
     $action
     if (PyErr_Occurred()) SWIG_fail;
@@ -84,6 +94,32 @@
     $action
     if (PyErr_Occurred()) SWIG_fail;
 }
+
+
+/*
+ *
+ */
+//%rename(IndexMap) indexmap_t;
+%extend IndexMap {
+    IndexMap(index_t istart, index_t iend,
+	     index_t *BCs, index_t NBC) {
+      indexmap_t * imap = malloc(sizeof(indexmap_t));
+      IndexMap_New(imap, istart,iend,BCs,NBC);
+      return imap;
+    }
+    ~IndexMap() {
+      IndexMap_Destroy($self);
+      free($self);
+    }
+    index_t Get(index_t i);
+    void Set_Values(cfdata_t * cfbc,
+		    cfdata_t * orig);
+    void Get_Values(cfdata_t * cfbc,
+		    cfdata_t * orig);
+    void Push(cfdata_t * cfbc, cfdata_t * orig);
+    void Pull(cfdata_t * cfbc, cfdata_t * orig);
+    
+};
 
 %inline %{
   /*

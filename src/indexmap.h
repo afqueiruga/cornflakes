@@ -7,11 +7,12 @@
   CFMat_BC and CF_Data BC.
  */
 typedef int index_t ;
-typedef struct indexmap_str {
+typedef struct IndexMap {
   int start,end; // Of the inputs
   int Nsys; // Of the output
   int * map;
 } indexmap_t;
+
 void IndexMap_New(indexmap_t * self,
 		  index_t istart, index_t iend,
 				   index_t *BCs, index_t NBC);
