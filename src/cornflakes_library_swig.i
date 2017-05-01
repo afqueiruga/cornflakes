@@ -97,9 +97,49 @@
 
 
 /*
- *
+ * IndexMap object transcription
  */
 //%rename(IndexMap) indexmap_t;
+%inline %{
+   /* IndexMap operations on numpy arrays */
+  void IndexMap_Set_Values_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Set_Values(self,&cfbc,&orig);
+  }
+  void IndexMap_Get_Values_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Get_Values(self,&cfbc,&orig);
+  }
+  
+  void IndexMap_Push_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Push(self,&cfbc,&orig);
+  }
+  void IndexMap_Pull_np(indexmap_t * self,
+			int Ncfbc, real_t *Acfbc,
+			int Norig, real_t* Aorig )
+  {
+    cfdata_t cfbc, orig;
+    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
+    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
+    IndexMap_Pull(self,&cfbc,&orig);
+  }
+%}
 %extend IndexMap {
     IndexMap(index_t istart, index_t iend,
 	     index_t *BCs, index_t NBC) {
@@ -112,14 +152,79 @@
       free($self);
     }
     index_t Get(index_t i);
+    
     void Set_Values(cfdata_t * cfbc,
 		    cfdata_t * orig);
     void Get_Values(cfdata_t * cfbc,
 		    cfdata_t * orig);
     void Push(cfdata_t * cfbc, cfdata_t * orig);
     void Pull(cfdata_t * cfbc, cfdata_t * orig);
-    
+
+    void Set_Values_np(int Ncfbc, real_t *Acfbc,
+		       int Norig, real_t* Aorig );
+    void Get_Values_np(int Ncfbc, real_t *Acfbc,
+		       int Norig, real_t* Aorig );
+    void Push_np(int Ncfbc, real_t *Acfbc,
+		 int Norig, real_t* Aorig );
+    void Pull_np(int Ncfbc, real_t *Acfbc,
+		 int Norig, real_t* Aorig );
 };
+
+
+/*
+ * CFData object transcription
+ */
+%inline %{
+  void CFData_Default_View_np(cfdata_t * self,  int* NA, real_t** VA) {
+    *VA = CFData_Default_Data(self);
+    *NA = self->N;
+  }
+%}
+%extend CFData {
+  CFData(int N) {
+    // Default Constructor
+    cfdata_t * dat = malloc(sizeof(cfdata_t));
+    CFData_Default_New(dat,N);
+    return dat;
+  }
+  ~CFData() {
+    CFData_Destroy($self);
+    free($self);
+  }
+  void Get_Values( int ndof,int * dofs, real_t * vals);
+  void Set_Values( int ndof, int *dofs, real_t * vals);
+  void Scatter( real_t * src);
+  void Copy( cfdata_t * src);
+  real_t * Place( int n, int * dofs, real_t * vals);
+  
+  void Wipe();
+  void Finalize();
+  void Get_Ptr( real_t **ptr);
+  void Release_Ptr( real_t **ptr);
+  void Print();
+
+  void Default_View_np(int* NA, real_t** VA);
+};
+
+
+/*
+ * CFMat object transcription
+ */
+%inline %{
+  void CFMat_CSR_View_np(cfmat_t * self,
+			 int** IA, int* Ni,
+			 int** JA, int* Jnnz,
+			 int* Vnnz, real_t** VA)
+  {
+    *Ni  = self->N+1;
+    *IA    = CFMat_CSR_Data(self)->IA;
+    *Jnnz = CFMat_CSR_Data(self)->nnz;
+    *JA    = CFMat_CSR_Data(self)->JA;
+    *Vnnz = CFMat_CSR_Data(self)->nnz;
+    *VA    = CFMat_CSR_Data(self)->V;
+  }
+%}
+
 
 %inline %{
   /*
@@ -192,72 +297,7 @@
 				int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
     Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
   }
-
-  /* 
-   * Wrappers for CFData and CFMat viewing
-   */
-  void CFData_Default_View_np(cfdata_t * self,  int* NA, real_t** VA) {
-    *VA = CFData_Default_Data(self);
-    *NA = self->N;
-  }
-  void CFMat_CSR_View_np(cfmat_t * self,
-			 
-			 int** IA, int* Ni,
-			 int** JA, int* Jnnz,
-			 int* Vnnz, real_t** VA)
-  {
-    
-    *Ni  = self->N+1;
-    *IA    = CFMat_CSR_Data(self)->IA;
-    
-    *Jnnz = CFMat_CSR_Data(self)->nnz;
-    *JA    = CFMat_CSR_Data(self)->JA;
-    
-    *Vnnz = CFMat_CSR_Data(self)->nnz;
-    *VA    = CFMat_CSR_Data(self)->V;
-    
-  }
-  /*
-   * IndexMap operations on numpy arrays
-   */
   
-  void IndexMap_Set_Values_np(indexmap_t * self,
-			int Ncfbc, real_t *Acfbc,
-			int Norig, real_t* Aorig )
-  {
-    cfdata_t cfbc, orig;
-    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
-    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
-    IndexMap_Set_Values(self,&cfbc,&orig);
-  }
-  void IndexMap_Get_Values_np(indexmap_t * self,
-			int Ncfbc, real_t *Acfbc,
-			int Norig, real_t* Aorig )
-  {
-    cfdata_t cfbc, orig;
-    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
-    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
-    IndexMap_Get_Values(self,&cfbc,&orig);
-  }
-  
-  void IndexMap_Push_np(indexmap_t * self,
-			int Ncfbc, real_t *Acfbc,
-			int Norig, real_t* Aorig )
-  {
-    cfdata_t cfbc, orig;
-    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
-    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
-    IndexMap_Push(self,&cfbc,&orig);
-  }
-  void IndexMap_Pull_np(indexmap_t * self,
-			int Ncfbc, real_t *Acfbc,
-			int Norig, real_t* Aorig )
-  {
-    cfdata_t cfbc, orig;
-    CFData_Default_New_From_Ptr(&cfbc,Ncfbc,Acfbc);
-    CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
-    IndexMap_Pull(self,&cfbc,&orig);
-  }
   /*
    * Other wrappers
    */
