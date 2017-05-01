@@ -95,7 +95,16 @@
     if (PyErr_Occurred()) SWIG_fail;
 }
 
-
+%inline %{
+PyObject * make_np_copy_i(int len, int * arr) {
+    npy_intp dims[1] = { len };
+    PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, NPY_INT, arr);
+    PyObject * npret = PyArray_SimpleNew        (1,dims, NPY_INT);
+    PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
+    Py_DECREF(cpy);
+    return npret;
+  }
+%}
 /*
  * IndexMap object transcription
  */
@@ -251,23 +260,7 @@
 /*
  * Dofmap object transcription
  */
-
-
-/*
- * Extra Wrappers
- */
 %inline %{
-  /*
-   * Extrawrappers for the Dofmap
-   */
-  PyObject * make_np_copy_i(int len, int * arr) {
-    npy_intp dims[1] = { len };
-    PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, NPY_INT, arr);
-    PyObject * npret = PyArray_SimpleNew        (1,dims, NPY_INT);
-    PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
-    Py_DECREF(cpy);
-    return npret;
-  }
   PyObject * Dofmap_Get_np(dofmap_t * dm, hypervertex_t V) {
     int len;
     int *pay, pdim;
@@ -292,6 +285,34 @@
     free(pay);
     return npret;
   }
+%}
+%extend Dofmap {
+  Dofmap(int stride, int offset) {
+    dofmap_t * dmap = malloc(sizeof(dofmap_t));
+    Dofmap_Strided(dmap, stride,offset);
+    return dmap;
+  }
+  ~Dofmap() {
+    Dofmap_Destroy($self);
+    free($self);
+  }
+  
+  void Get_List(int nvert, hypervertex_t * Vs, int * dofs, int * ndofs);
+  void Get(hypervertex_t V, int * dofs, int * ndofs);
+  int  Max_Len();
+  void Destroy();
+
+};
+
+
+/*
+ * Extra Wrappers
+ */
+%inline %{
+  /*
+   * Extrawrappers for the Dofmap
+   */
+  
   /*
    * Extra wrappers for Hypergraph and Hyperedges
    */
@@ -436,7 +457,7 @@
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
       // BEEN FIXED
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
@@ -475,7 +496,7 @@
     dofmap_t * dofmaps[ndofmap];
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
     }
 
     /* Step 2: Create the target array */
@@ -513,7 +534,7 @@
     dofmap_t * dofmaps[ndofmap];
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
     }
 
     /* Step 2: Create the target array */
@@ -596,7 +617,7 @@
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
       // BEEN FIXED
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
@@ -690,7 +711,7 @@
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
       // BEEN FIXED
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
