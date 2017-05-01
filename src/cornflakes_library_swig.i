@@ -224,8 +224,38 @@
     *VA    = CFMat_CSR_Data(self)->V;
   }
 %}
+%extend CFMat {
+  CFMat(int N) {
+    cfmat_t * mat = malloc(sizeof(cfmat_t));
+    CFMat_CSR_New(mat,N);
+    return mat;
+  }
+  ~CFMat() {
+    CFMat_Destroy($self);
+    free($self);
+  }
+  
+  void Add_Sparsity(int n, int *dofs);
+  void Finalize_Sparsity();
+  real_t * Place(int n, int * dofs, real_t * vals);
+  void Set_Value(int i, int j, real_t v);
+  void Wipe();
+  void Finalize();
+
+  void CSR_View_np(int** IA, int* Ni,
+		   int** JA, int* Jnnz,
+		   int* Vnnz, real_t** VA);
+};
 
 
+/*
+ * Dofmap object transcription
+ */
+
+
+/*
+ * Extra Wrappers
+ */
 %inline %{
   /*
    * Extrawrappers for the Dofmap
