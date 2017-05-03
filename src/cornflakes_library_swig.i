@@ -1,13 +1,10 @@
 %module cornflakes_library
- // %{
-  //  typedef struct indexmap_str IndexMap;
-  //  %}
-//typedef struct indexmap_str IndexMap;
 
 %{
 #define SWIG_FILE_WITH_INIT
 #include "cornflakes.h"
 %}
+
 
 %include "numpy.i"
 %init %{
@@ -108,7 +105,8 @@ PyObject * make_np_copy_i(int len, int * arr) {
 /*
  * IndexMap object transcription
  */
-//%rename(IndexMap) indexmap_t;
+
+
 %inline %{
    /* IndexMap operations on numpy arrays */
   void IndexMap_Set_Values_np(indexmap_t * self,
@@ -178,7 +176,9 @@ PyObject * make_np_copy_i(int len, int * arr) {
     void Pull_np(int Ncfbc, real_t *Acfbc,
 		 int Norig, real_t* Aorig );
 };
-
+%pythoncode %{
+IndexMap = indexmap_t
+%}
 
 /*
  * CFData object transcription
@@ -214,7 +214,9 @@ PyObject * make_np_copy_i(int len, int * arr) {
 
   void Default_View_np(int* NA, real_t** VA);
 };
-
+%pythoncode %{
+CFData = cfdata_t
+%}
 
 /*
  * CFMat object transcription
@@ -255,6 +257,10 @@ PyObject * make_np_copy_i(int len, int * arr) {
 		   int** JA, int* Jnnz,
 		   int* Vnnz, real_t** VA);
 };
+%pythoncode %{
+CFData = cfdata_t
+%}
+
 
 
 /*
@@ -285,6 +291,11 @@ PyObject * make_np_copy_i(int len, int * arr) {
     free(pay);
     return npret;
   }
+  dofmap_t * new_Dofmap_Tabled(int Nentry, int stride, int * table, int offset ) {
+    dofmap_t * dmap = malloc(sizeof(dofmap_t));
+    Dofmap_Tabled(dmap, Nentry,stride,table,offset);
+    return dmap;
+  }
 %}
 %extend Dofmap {
   Dofmap(int stride, int offset) {
@@ -301,18 +312,24 @@ PyObject * make_np_copy_i(int len, int * arr) {
   void Get(hypervertex_t V, int * dofs, int * ndofs);
   int  Max_Len();
   void Destroy();
-
 };
+%pythoncode %{
+Dofmap = dofmap_t
+
+def Dofmap_From_Vertices(stride, vertices, offset=0):
+    start = int(vertices.min())
+    stop =  int(vertices.max())+1
+    table = np.zeros(stop-start, dtype=np.intc)
+    for i,l in enumerate(vertices):
+        table[ l-start ] = i + offset
+    return new_Dofmap_Tabled(table.reshape((table.size/stride,stride)), -start )
+%}
 
 
 /*
  * Extra Wrappers
  */
 %inline %{
-  /*
-   * Extrawrappers for the Dofmap
-   */
-  
   /*
    * Extra wrappers for Hypergraph and Hyperedges
    */
