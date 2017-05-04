@@ -64,10 +64,6 @@
 %include "cpointer.i"
 %pointer_class(int, intp)
 
- //
-
-//%inline %{
-
 %include "hypergraph.h"
 %include "spatialhash.h"
 %include "graphers.h"
@@ -102,11 +98,10 @@ PyObject * make_np_copy_i(int len, int * arr) {
     return npret;
   }
 %}
+
 /*
  * IndexMap object transcription
  */
-
-
 %inline %{
    /* IndexMap operations on numpy arrays */
   void IndexMap_Set_Values_np(indexmap_t * self,
@@ -180,6 +175,7 @@ PyObject * make_np_copy_i(int len, int * arr) {
 IndexMap = indexmap_t
 %}
 
+
 /*
  * CFData object transcription
  */
@@ -218,6 +214,7 @@ IndexMap = indexmap_t
 CFData = cfdata_t
 CFData.np = CFData.Default_View_np
 %}
+
 
 /*
  * CFMat object transcription
@@ -267,7 +264,6 @@ def CFMat_np(mat):
     return scipy.sparse.csr_matrix( (V,J,I) , shape=(mat.N, mat.N) )
 CFMat.np=CFMat_np
 %}
-
 
 
 /*
@@ -405,6 +401,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 		 u2, x2, nu2,
 		 du1, dx1, rad);
   }
+
+  
   /*
    * Assembly wrappers
    */
@@ -515,6 +513,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       }
     }
   }
+
+  
   void fill_sparsity_np(kernel_t * ke, hypergraph_t * hg,
 			PyObject * dofmaplist,
 			PyObject * targetlist)
@@ -549,6 +549,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     /* Step 3: Make the call */
     fill_sparsity(ke,hg, dofmaps, att);
   }
+
+  
   void assemble_np(kernel_t * ke, hypergraph_t * hg,
 		   PyObject * dofmaplist,
 		   PyObject * datalist,
@@ -610,6 +612,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       Py_DECREF(newobjs[i]);
     }
   }
+
+  
   void filter_np(kernel_t * ke, hypergraph_t * hg,
 		 PyObject * dofmaplist,
 		 PyObject * datalist,
@@ -669,6 +673,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     
   }
 
+  
   void Build_Proximity_Graph_Variable_np( hypergraph_t * hg,
 					  int Npart, int dim, real_t * x,
 					  int DIM1, real_t * IN_ARRAY1)
@@ -703,6 +708,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 					     Nparty,dimy,y,
 					     N_desired,cutoff, INPLACE_ARRAY1);
   }
+
   
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
 				  hypergraph_t * mesh,

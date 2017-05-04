@@ -153,20 +153,15 @@ void load_gmsh(real_t ** x, int * N, int gdim,
   int nn, ne, i,k,A;
   /* Read in the header */
   fgets( buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
 
   /* The nodes block */
   fgets(buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
 
   sscanf(buf,"%d\n",&nn);
-  printf("There are %d nodes\n",nn);
+  //printf("There are %d nodes\n",nn);
   *N = nn;
   *x = malloc(sizeof(real_t)*gdim* *N);
   #define IX(A,i) (gdim*(A)+(i))
@@ -191,12 +186,10 @@ void load_gmsh(real_t ** x, int * N, int gdim,
   Hypergraph_Alloc(hg[0],1);
   
   fgets(buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
 
   sscanf(buf,"%d\n",&ne);
-  printf("There are %d elements\n",ne);
+  //printf("There are %d elements\n",ne);
   for(A=0; A<ne; A++) {
     int eid, etype,ntag, groupnum;
     //fgets(buf,1024, fh);

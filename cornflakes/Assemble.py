@@ -71,12 +71,6 @@ class CFTargets():
             except AttributeError:
                 pass
         
-    def __del__(self):
-        pass
-        #if self.imap:
-        #    cflib.IndexMap_Destroy(self.imap)
-        # The targets don't need to be finalized since they don't own anything
-        
     def np(self):
         return [ f.np() for f in self.cfobjs ]
     
@@ -136,8 +130,6 @@ def Apply_BC(dofs,vals, K=None,R=None):
 #
 # Deprecated
 #
-
-# Deprecated
 def Assemble_Targets(ke,H, dofmaps,data, ndof):
     he = cflib.hyperedgesArray_frompointer(H.hg.he)
     n_edges = np.sum([ he[i].n_edge for i in xrange(H.hg.n_types) ])
@@ -167,91 +159,3 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
             K = Kcoo.tocsr()
             forms[j]=K
     return forms
-
-
-#class IndexMap():
-#    def __init__(self, start,end,bcs):
-#        self.imap = cflib.indexmap_t()
-#        cflib.IndexMap_New(self.imap, start,end,bcs)
-#    def __del__(self):
-#        cflib.IndexMap_Destroy(self.imap)
-
-# Sanitizing the wrappers vs. the raw swig points
-#def _sanitize_imap(imap):
-#    try:
-#        return imap.imap
-#    except AttributeError:
-#        return imap
-        
-# The python version wraps in the BCs? IDK How I feel about this......
-# class CFData():
-#     def __init__(self, ndof, imap=None, fromptr=None):
-#         self.dat = cflib.cfdata_t()
-#         self.imap = imap
-#         if imap is not None:
-#             self.dat_bc = cflib.cfdata_t()
-#             cflib.CFData_BC_New(self.dat_bc, self.dat, imap)
-#             if fromptr is not None:
-#                 cflib.CFData_Default_New_From_Ptr(self.dat,fromptr)
-#             else:
-#                 cflib.CFData_Default_New(self.dat,imap.Nsys)
-                
-#         else:
-#             self.dat_bc = None
-#             if fromptr is not None:
-#                 cflib.CFData_Default_New_From_Ptr(self.dat,fromptr)
-#             else:
-#                 cflib.CFData_Default_New(self.dat, ndof)
-#     def __del__(self):
-#         print "CFDATA WAS DESTROYED"
-#         cflib.CFData_Destroy(self.dat)
-#         if(self.dat_bc):
-#             cflib.CFData_Destroy(self.dat_bc)
-#     def top(self):
-#         " Return the CFData that need to be placed into "
-#         if(self.dat_bc):
-#             return self.dat_bc
-#         else:
-#             return self.dat
-#     def Finalize(self):
-#         cflib.CFData_Finalize(self.dat)
-#     def Wipe(self):
-#         cflib.CFData_Wipe(self.dat)
-#     def np(self):
-#         " Wrap as a numpy array "
-#         return cflib.CFData_Default_View_np(self.dat)
-    
-# class CFMat():
-#     def __init__(self, ndof, Rtarg=None,ubc=None,imap=None):
-#         self.mat = cflib.cfmat_t()
-#         self.imap = imap
-#         if imap:
-#             self.ubc = ubc
-#             self.mat_bc = cflib.cfmat_t()
-#             cflib.CFMat_BC_New(self.mat_bc, self.mat, Rtarg.dat,self.ubc,imap)
-#             cflib.CFMat_CSR_New(self.mat,imap.Nsys)
-#         else:
-#             self.mat_bc = None
-#             cflib.CFMat_CSR_New(self.mat,ndof)
-#     def __del__(self):
-#         print "CFMAT WAS DESTROYED"
-#         cflib.CFMat_Destroy(self.mat)
-#         if(self.mat_bc):
-#             cflib.CFMat_Destroy(self.mat_bc)
-#     def top(self):
-#         " Return the cfmat that needs to be placed into "
-#         if(self.mat_bc):
-#             return self.mat_bc
-#         else:
-#             return self.mat
-#     def Finalize_Sparsity(self):
-#         cflib.CFMat_Finalize_Sparsity(self.mat)
-#     def Finalize(self):
-#         cflib.CFMat_Finalize(self.mat)
-#     def Wipe(self):
-#         cflib.CFMat_Wipe(self.mat)
-#     def np(self):
-#         " Wrap as a scipy csr matrix "
-#         I,J,V = cflib.CFMat_CSR_View_np(self.mat)
-#         return scipy.sparse.csr_matrix( (V,J,I) , shape=(self.mat.N, self.mat.N) )
-    
