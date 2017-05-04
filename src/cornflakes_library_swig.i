@@ -216,6 +216,7 @@ IndexMap = indexmap_t
 };
 %pythoncode %{
 CFData = cfdata_t
+CFData.np = CFData.Default_View_np
 %}
 
 /*
@@ -258,7 +259,12 @@ CFData = cfdata_t
 		   int* Vnnz, real_t** VA);
 };
 %pythoncode %{
-CFData = cfdata_t
+CFMat = cfmat_t
+def CFMat_np(mat):
+    " Wrap as a scipy csr matrix "
+    I,J,V = CFMat_CSR_View_np(self.mat)
+    return scipy.sparse.csr_matrix( (V,J,I) , shape=(self.mat.N, self.mat.N) )
+CFMat.np=CFMat_np
 %}
 
 
