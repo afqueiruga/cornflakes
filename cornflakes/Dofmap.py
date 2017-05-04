@@ -3,36 +3,40 @@ import numpy as np
 
 
 # interface class
-class Dofmap():
-    def __init__(self):
-        self.dm = cflib.dofmap_t()
-        # NO VTABLE SET
-    def Get(self,V):
-        return cflib.Dofmap_Get_np(self.dm,V)
-    def Max_Len(self):
-        return cflib.Dofmap_Max_Len(self.dm)
-    def Get_List(self,Vs):
-        return cflib.Dofmap_Get_List_np(self.dm, Vs)
-    def __del__(self):
-        cflib.Dofmap_Destroy(self.dm)
-class Dofmap_Strided(Dofmap):
-    def __init__(self, stride, offset=0):
-        self.dm = cflib.dofmap_t()
-        cflib.Dofmap_Strided(self.dm, stride,offset)
-class Dofmap_Tabled(Dofmap):
-    def __init__(self, stride, table, offset=0):
-        self.dm = cflib.dofmap_t()
-        cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), int(offset) )
-class Dofmap_From_Vertices(Dofmap):
-    def __init__(self, stride, vertices, offset=0):
-        self.dm = cflib.dofmap_t()
-        start = int(vertices.min())
-        stop =  int(vertices.max())+1
-        table = np.zeros(stop-start, dtype=np.intc)
-        for i,l in enumerate(vertices):
-            table[ l-start ] = i + offset
-        cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), -start )
+#class Dofmap():
+#    def __init__(self):
+#        self.dm = cflib.dofmap_t()
+#        # NO VTABLE SET
+#    def Get(self,V):
+#        return cflib.Dofmap_Get_np(self.dm,V)
+#    def Max_Len(self):
+#        return cflib.Dofmap_Max_Len(self.dm)
+#    def Get_List(self,Vs):
+#        return cflib.Dofmap_Get_List_np(self.dm, Vs)
+#    def __del__(self):
+#        cflib.Dofmap_Destroy(self.dm)
+#class Dofmap_Strided(Dofmap):
+#    def __init__(self, stride, offset=0):
+#        self.dm = cflib.dofmap_t()
+#        cflib.Dofmap_Strided(self.dm, stride,offset)
+#class Dofmap_Tabled(Dofmap):
+#    def __init__(self, stride, table, offset=0):
+#        self.dm = cflib.dofmap_t()
+#        cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), int(offset) )
+#class Dofmap_From_Vertices(Dofmap):
+#    def __init__(self, stride, vertices, offset=0):
+#        self.dm = cflib.dofmap_t()
+#        start = int(vertices.min())
+#        stop =  int(vertices.max())+1
+#        table = np.zeros(stop-start, dtype=np.intc)
+#        for i,l in enumerate(vertices):
+#            table[ l-start ] = i + offset
+#        cflib.Dofmap_Tabled(self.dm, table.reshape((table.size/stride,stride)), -start )
 
+Dofmap = cflib.Dofmap
+Dofmap_Strided = cflib.Dofmap_Strided
+Dofmap_Tabled = cflib.new_Dofmap_Tabled
+Dofmap_From_Vertices = cflib.Dofmap_From_Vertices
 
 # DEPRECATED
 class Dofmap_dep():

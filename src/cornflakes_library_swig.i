@@ -308,13 +308,22 @@ CFData = cfdata_t
     free($self);
   }
   
-  void Get_List(int nvert, hypervertex_t * Vs, int * dofs, int * ndofs);
-  void Get(hypervertex_t V, int * dofs, int * ndofs);
+  void Get_List(int nvert, hypervertex_t * verts,int * dofs, int * ndofs);
+  void Get(hypervertex_t V, int * dofs, int *ndofs);
+  
+  PyObject * Get_List_np(int nvert, hypervertex_t * verts);
+  PyObject * Get_np(hypervertex_t V);
+  
   int  Max_Len();
   void Destroy();
 };
 %pythoncode %{
 Dofmap = dofmap_t
+Dofmap.Get = Dofmap.Get_np
+Dofmap.Get_List = Dofmap.Get_List_np
+
+def Dofmap_Strided(stride,offset=0):
+    return Dofmap(stride,offset)
 
 def Dofmap_From_Vertices(stride, vertices, offset=0):
     start = int(vertices.min())

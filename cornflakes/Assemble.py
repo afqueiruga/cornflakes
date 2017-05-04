@@ -3,20 +3,8 @@ import scipy.sparse
 import cornflakes_library as cflib
 from Hypergraph import Hypergraph
 
-class IndexMap():
-    def __init__(self, start,end,bcs):
-        self.imap = cflib.indexmap_t()
-        cflib.IndexMap_New(self.imap, start,end,bcs)
-    def __del__(self):
-        cflib.IndexMap_Destroy(self.imap)
 
-# Sanitizing the wrappers vs. the raw swig points
-def _sanitize_imap(imap):
-    try:
-        return imap.imap
-    except AttributeError:
-        return imap
-        
+IndexMap = cflib.IndexMap
 def _sanitize_targets(cftargets):
     # Need to figure out what type cftargets is?
     try: # Is it that stupid data structure up there?
@@ -41,6 +29,7 @@ def _sanitize_targets(cftargets):
 class CFData():
     def __init__(self, ndof, imap=None, fromptr=None):
         self.dat = cflib.cfdata_t()
+        self.imap = imap
         if imap is not None:
             self.dat_bc = cflib.cfdata_t()
             cflib.CFData_BC_New(self.dat_bc, self.dat, imap)
@@ -77,7 +66,7 @@ class CFData():
 class CFMat():
     def __init__(self, ndof, Rtarg=None,ubc=None,imap=None):
         self.mat = cflib.cfmat_t()
-
+        self.imap = imap
         if imap:
             self.ubc = ubc
             self.mat_bc = cflib.cfmat_t()
@@ -188,7 +177,7 @@ def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     # call wipe
     if(wipe):
         cftargets.Wipe()
-    cflib.assemble_np(ke,H.hg, [ d.dm for d in dofmaps], data, att)
+    cflib.assemble_np(ke,H.hg, [ d for d in dofmaps], data, att)
     if(wipe):
         cftargets.Finalize()
     if ret_np:
@@ -217,7 +206,7 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
                           np.zeros(matsize,dtype=np.intc),
                           np.zeros(matsize,dtype=np.intc)))
     
-    cflib.assemble_targets_np(forms, ke,H.hg, [ d.dm for d in dofmaps], data)
+    cflib.assemble_targets_np(forms, ke,H.hg, [ d for d in dofmaps], data)
     
     for j in xrange(ke.noutp):
         if outps[j].rank==2:
@@ -229,7 +218,7 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
 def Filter(ke,H, dofmaps,data):
     htrue = Hypergraph()
     hfalse = Hypergraph()
-    cflib.filter_np(ke,H.hg, [d.dm for d in dofmaps], data, htrue.hg, hfalse.hg)
+    cflib.filter_np(ke,H.hg, [d for d in dofmaps], data, htrue.hg, hfalse.hg)
     return htrue,hfalse
 
 def Apply_BC(dofs,vals, K=None,R=None):
@@ -239,3 +228,23 @@ def Apply_BC(dofs,vals, K=None,R=None):
             K[i,i] = 1.0
     if R!=None:
         R[dofs]=vals
+
+
+
+#
+# Deprecated
+#
+#class IndexMap():
+#    def __init__(self, start,end,bcs):
+#        self.imap = cflib.indexmap_t()
+#        cflib.IndexMap_New(self.imap, start,end,bcs)
+#    def __del__(self):
+#        cflib.IndexMap_Destroy(self.imap)
+
+# Sanitizing the wrappers vs. the raw swig points
+#def _sanitize_imap(imap):
+#    try:
+#        return imap.imap
+#    except AttributeError:
+#        return imap
+        
