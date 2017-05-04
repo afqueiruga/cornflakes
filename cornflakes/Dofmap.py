@@ -1,5 +1,4 @@
 import cornflakes_library as cflib
-import numpy as np
 
 Dofmap = cflib.Dofmap
 Dofmap_Strided = cflib.Dofmap_Strided

@@ -339,7 +339,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 
 
 /*
- * Extra Wrappers
+ * Hypergraph object transcription
  */
 %inline %{
   /*
@@ -377,7 +377,30 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 				int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
     Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
   }
+%}
+/* TODO: Hypergraph needs to be redone anyways
+%extend Hypergraph {
+  Hypergraph(int alloc_init) {
+    hypergraph_t * hg = malloc(sizeof(hypergraph_t));
+    Hypergraph_Alloc(hg,alloc_init);
+    return hg;
+  }
+  ~Hypergraph() {
+    Hypergraph_Destroy($self);
+    free($self);
+  }
+  Push_Edge(int l_edge, hypervertex_t * verts);
   
+};
+%pythoncode %{
+Hypergraph = hypergraph_t
+%}
+*/
+
+/*
+ * Extra Wrappers
+ */
+%inline %{  
   /*
    * Other wrappers
    */
