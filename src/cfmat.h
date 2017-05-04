@@ -6,7 +6,7 @@
 #include "sparsity_pattern.h"
 
 typedef struct _CFMAT_VTABLE_t _CFMAT_VTABLE_t;
-typedef struct cfmat_t {
+typedef struct CFMat {
   int N;
   int own;
   sparsity_t sparse;

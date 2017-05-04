@@ -4,7 +4,7 @@
 #include "kernel.h"
 
 typedef struct _CFDATA_VTABLE_t _CFDATA_VTABLE_t;
-typedef struct cfdata_t {
+typedef struct CFData {
   int own;
   int N;
   void * data;

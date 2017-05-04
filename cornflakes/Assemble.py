@@ -3,20 +3,11 @@ import scipy.sparse
 import cornflakes_library as cflib
 from Hypergraph import Hypergraph
 
-class IndexMap():
-    def __init__(self, start,end,bcs):
-        self.imap = cflib.indexmap_t()
-        cflib.IndexMap_New(self.imap, start,end,bcs)
-    def __del__(self):
-        cflib.IndexMap_Destroy(self.imap)
 
-# Sanitizing the wrappers vs. the raw swig points
-def _sanitize_imap(imap):
-    try:
-        return imap.imap
-    except AttributeError:
-        return imap
-        
+IndexMap = cflib.IndexMap
+CFData = cflib.CFData
+CFMat = cflib.CFMat
+
 def _sanitize_targets(cftargets):
     # Need to figure out what type cftargets is?
     try: # Is it that stupid data structure up there?
@@ -37,81 +28,11 @@ def _sanitize_targets(cftargets):
         att = att2
     return att
 
-# The python version wraps in the BCs? IDK How I feel about this......
-class CFData():
-    def __init__(self, ndof, imap=None, fromptr=None):
-        self.dat = cflib.cfdata_t()
-        if imap is not None:
-            self.dat_bc = cflib.cfdata_t()
-            cflib.CFData_BC_New(self.dat_bc, self.dat, imap)
-            if fromptr is not None:
-                cflib.CFData_Default_New_From_Ptr(self.dat,fromptr)
-            else:
-                cflib.CFData_Default_New(self.dat,imap.Nsys)
-                
-        else:
-            self.dat_bc = None
-            if fromptr is not None:
-                cflib.CFData_Default_New_From_Ptr(self.dat,fromptr)
-            else:
-                cflib.CFData_Default_New(self.dat, ndof)
-    def __del__(self):
-        print "CFDATA WAS DESTROYED"
-        cflib.CFData_Destroy(self.dat)
-        if(self.dat_bc):
-            cflib.CFData_Destroy(self.dat_bc)
-    def top(self):
-        " Return the CFData that need to be placed into "
-        if(self.dat_bc):
-            return self.dat_bc
-        else:
-            return self.dat
-    def Finalize(self):
-        cflib.CFData_Finalize(self.dat)
-    def Wipe(self):
-        cflib.CFData_Wipe(self.dat)
-    def np(self):
-        " Wrap as a numpy array "
-        return cflib.CFData_Default_View_np(self.dat)
-    
-class CFMat():
-    def __init__(self, ndof, Rtarg=None,ubc=None,imap=None):
-        self.mat = cflib.cfmat_t()
 
-        if imap:
-            self.ubc = ubc
-            self.mat_bc = cflib.cfmat_t()
-            cflib.CFMat_BC_New(self.mat_bc, self.mat, Rtarg.dat,self.ubc,imap)
-            cflib.CFMat_CSR_New(self.mat,imap.Nsys)
-        else:
-            self.mat_bc = None
-            cflib.CFMat_CSR_New(self.mat,ndof)
-    def __del__(self):
-        print "CFMAT WAS DESTROYED"
-        cflib.CFMat_Destroy(self.mat)
-        if(self.mat_bc):
-            cflib.CFMat_Destroy(self.mat_bc)
-    def top(self):
-        " Return the cfmat that needs to be placed into "
-        if(self.mat_bc):
-            return self.mat_bc
-        else:
-            return self.mat
-    def Finalize_Sparsity(self):
-        cflib.CFMat_Finalize_Sparsity(self.mat)
-    def Finalize(self):
-        cflib.CFMat_Finalize(self.mat)
-    def Wipe(self):
-        cflib.CFMat_Wipe(self.mat)
-    def np(self):
-        " Wrap as a scipy csr matrix "
-        I,J,V = cflib.CFMat_CSR_View_np(self.mat)
-        return scipy.sparse.csr_matrix( (V,J,I) , shape=(self.mat.N, self.mat.N) )
-    
 class CFTargets():
     def __init__(self, ke,H, dofmaps, ndof, bcs=None,bcvals=None):
         # First, if there are BCs, create the indexmap
-        if bcs is not None:
+        if False: #bcs is not None:
             self.imap = cflib.indexmap_t()
             cflib.IndexMap_New(self.imap, 0,ndof, bcs)
             ubc = cflib.cfdata_t()
@@ -129,19 +50,19 @@ class CFTargets():
             op = outps[j]
             targ = cflib.target_t()
             if op.rank==2:
-                K = CFMat(ndof,Rtarg,ubc,self.imap)
-                cflib.Target_New_From_Ptr(targ,2,K.top())
+                K = CFMat(ndof) #,Rtarg,ubc,self.imap)
+                cflib.Target_New_From_Ptr(targ,2,K) #.top())
                 self.cfobjs.append(K)
             else:
-                R = CFData(ndof,self.imap)
-                if not Rtarg:
-                    Rtarg = R
-                cflib.Target_New_From_Ptr(targ,1,R.top())
+                R = CFData(ndof) #,self.imap)
+                #if not Rtarg:
+                #    Rtarg = R
+                cflib.Target_New_From_Ptr(targ,1,R) #.top())
                 self.cfobjs.append(R)
             self.targets.append(targ)
             
         # Fill in the sparsities
-        cflib.fill_sparsity_np(ke,H.hg, [ d.dm for d in dofmaps ], self.targets)
+        cflib.fill_sparsity_np(ke,H.hg,  dofmaps, self.targets)
         
         # Finalize the sparsities
         for k in self.cfobjs:
@@ -149,11 +70,6 @@ class CFTargets():
                 k.Finalize_Sparsity()
             except AttributeError:
                 pass
-        
-    def __del__(self):
-        if self.imap:
-            cflib.IndexMap_Destroy(self.imap)
-        # The targets don't need to be finalized since they don't own anything
         
     def np(self):
         return [ f.np() for f in self.cfobjs ]
@@ -172,9 +88,8 @@ class CFTargets():
             f.Wipe()
 
 def Fill_Sparsity(ke, H, dofmaps, cftargets):
-    att = _sanitize_targets(cftargets)
-    
-    cflib.fill_sparsity_np(ke, H.hg, [d.dm for d in dofmaps], att)
+    att = _sanitize_targets(cftargets)    
+    cflib.fill_sparsity_np(ke, H.hg, dofmaps, att)
     
 def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     if cftargets!=None:
@@ -188,14 +103,33 @@ def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     # call wipe
     if(wipe):
         cftargets.Wipe()
-    cflib.assemble_np(ke,H.hg, [ d.dm for d in dofmaps], data, att)
+    cflib.assemble_np(ke,H.hg, dofmaps, data, att)
     if(wipe):
         cftargets.Finalize()
     if ret_np:
         return [ _.copy() for _ in cftargets.np() ]
     else:
         return cftargets.cfobjs
-    
+
+def Filter(ke,H, dofmaps,data):
+    htrue = Hypergraph()
+    hfalse = Hypergraph()
+    cflib.filter_np(ke,H.hg, dofmaps, data, htrue.hg, hfalse.hg)
+    return htrue,hfalse
+
+def Apply_BC(dofs,vals, K=None,R=None):
+    if K!=None:
+        for i in dofs:
+            K.data[K.indptr[i]:K.indptr[i+1]] = 0.0
+            K[i,i] = 1.0
+    if R!=None:
+        R[dofs]=vals
+
+
+
+#
+# Deprecated
+#
 def Assemble_Targets(ke,H, dofmaps,data, ndof):
     he = cflib.hyperedgesArray_frompointer(H.hg.he)
     n_edges = np.sum([ he[i].n_edge for i in xrange(H.hg.n_types) ])
@@ -217,7 +151,7 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
                           np.zeros(matsize,dtype=np.intc),
                           np.zeros(matsize,dtype=np.intc)))
     
-    cflib.assemble_targets_np(forms, ke,H.hg, [ d.dm for d in dofmaps], data)
+    cflib.assemble_targets_np(forms, ke,H.hg, dofmaps, data)
     
     for j in xrange(ke.noutp):
         if outps[j].rank==2:
@@ -225,17 +159,3 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
             K = Kcoo.tocsr()
             forms[j]=K
     return forms
-
-def Filter(ke,H, dofmaps,data):
-    htrue = Hypergraph()
-    hfalse = Hypergraph()
-    cflib.filter_np(ke,H.hg, [d.dm for d in dofmaps], data, htrue.hg, hfalse.hg)
-    return htrue,hfalse
-
-def Apply_BC(dofs,vals, K=None,R=None):
-    if K!=None:
-        for i in dofs:
-            K.data[K.indptr[i]:K.indptr[i+1]] = 0.0
-            K[i,i] = 1.0
-    if R!=None:
-        R[dofs]=vals

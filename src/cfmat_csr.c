@@ -51,9 +51,9 @@ void CFMat_CSR_Finalize(cfmat_t * self) {
 
 void CFMat_CSR_Destroy(cfmat_t * self) {
   if(self->own) {
-    if(data(self)->IA) {free(data(self)->IA); printf("FREE"); }
-    if(data(self)->JA) {free(data(self)->JA);printf("FREE"); }
-    if(data(self)->V)  {free(data(self)->V);printf("FREE"); }
+    if(data(self)->IA) {free(data(self)->IA); }
+    if(data(self)->JA) {free(data(self)->JA); }
+    if(data(self)->V)  {free(data(self)->V);  }
   }
   free(data(self));
 }

@@ -1,8 +1,10 @@
 %module cornflakes_library
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include "cornflakes.h"
 %}
+
 
 %include "numpy.i"
 %init %{
@@ -76,6 +78,7 @@
 %include "cfmat_csr.h"
 %include "cfmat_bc.h"
 
+
 %exception Hypergraph_Push_Edge_np {
     $action
     if (PyErr_Occurred()) SWIG_fail;
@@ -86,10 +89,7 @@
 }
 
 %inline %{
-  /*
-   * Extrawrappers for the Dofmap
-   */
-  PyObject * make_np_copy_i(int len, int * arr) {
+PyObject * make_np_copy_i(int len, int * arr) {
     npy_intp dims[1] = { len };
     PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, NPY_INT, arr);
     PyObject * npret = PyArray_SimpleNew        (1,dims, NPY_INT);
@@ -97,94 +97,13 @@
     Py_DECREF(cpy);
     return npret;
   }
-  PyObject * Dofmap_Get_np(dofmap_t * dm, hypervertex_t V) {
-    int len;
-    int *pay, pdim;
-    len = Dofmap_Max_Len(dm);
-    pay = (int*)malloc( sizeof(int)* (len));
-    Dofmap_Get(dm,V, pay, &pdim);
-    
-    // MEMLEAK!
-    PyObject * npret = make_np_copy_i(len,pay);
-    free(pay);
-    return npret;
-  }
-  PyObject * Dofmap_Get_List_np(dofmap_t * dm, int nvert, hypervertex_t * verts) {
-    int len;
-    int *pay, pdim;
-    len = nvert * Dofmap_Max_Len(dm);
-    pay = (int*)malloc(sizeof(int)* (len));
-    
-    Dofmap_Get_List(dm, nvert,verts, pay, &pdim);
+%}
 
-    PyObject * npret = make_np_copy_i(len,pay);
-    free(pay);
-    return npret;
-  }
-  /*
-   * Extra wrappers for Hypergraph and Hyperedges
-   */
-  void Hyperedges_Push_Edge_np(hyperedges_t * he, int nvert, int * verts) {
-    if (nvert < he->l_edge) {
-        PyErr_Format(PyExc_ValueError,
-                     "Array of insufficent length (verts %d < edge length %d)",
-                     nvert, he->l_edge);
-        return;
-    }
-    Hyperedges_Push_Edge(he,verts);
-  }
-  void Hyperedges_Get_Edge_np(hyperedges_t * he, int i,
-			      int * DIM1,int** ARGOUTVIEW_ARRAY1) {
-    if(i<0 || i>=he->n_edge) {
-        PyErr_Format(PyExc_ValueError,
-                     "Bad index: require 0<%d<%d",
-                     i, he->n_edge);
-        return;
-    }
-    *DIM1 = he->l_edge;
-    *ARGOUTVIEW_ARRAY1 = Hyperedges_Get_Edge(he,i);
-  }
-
-  void Hyperedges_Get_View_np(hyperedges_t * he,
-			       int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
-    *DIM1 = he->n_edge;
-    *DIM2 = he->l_edge;
-    *ARGOUTVIEW_ARRAY2 = he->edges;
-  }
-
-  void Hypergraph_Get_Edge_View_np(hypergraph_t * hg, int i,
-				int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
-    Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
-  }
-
-  /* 
-   * Wrappers for CFData and CFMat viewing
-   */
-  void CFData_Default_View_np(cfdata_t * self,  int* NA, real_t** VA) {
-    *VA = CFData_Default_Data(self);
-    *NA = self->N;
-  }
-  void CFMat_CSR_View_np(cfmat_t * self,
-			 
-			 int** IA, int* Ni,
-			 int** JA, int* Jnnz,
-			 int* Vnnz, real_t** VA)
-  {
-    
-    *Ni  = self->N+1;
-    *IA    = CFMat_CSR_Data(self)->IA;
-    
-    *Jnnz = CFMat_CSR_Data(self)->nnz;
-    *JA    = CFMat_CSR_Data(self)->JA;
-    
-    *Vnnz = CFMat_CSR_Data(self)->nnz;
-    *VA    = CFMat_CSR_Data(self)->V;
-    
-  }
-  /*
-   * IndexMap operations on numpy arrays
-   */
-  
+/*
+ * IndexMap object transcription
+ */
+%inline %{
+   /* IndexMap operations on numpy arrays */
   void IndexMap_Set_Values_np(indexmap_t * self,
 			int Ncfbc, real_t *Acfbc,
 			int Norig, real_t* Aorig )
@@ -222,6 +141,266 @@
     CFData_Default_New_From_Ptr(&orig,Norig,Aorig);
     IndexMap_Pull(self,&cfbc,&orig);
   }
+%}
+%extend IndexMap {
+    IndexMap(index_t istart, index_t iend,
+	     index_t *BCs, index_t NBC) {
+      indexmap_t * imap = malloc(sizeof(indexmap_t));
+      IndexMap_New(imap, istart,iend,BCs,NBC);
+      return imap;
+    }
+    ~IndexMap() {
+      IndexMap_Destroy($self);
+      free($self);
+    }
+    index_t Get(index_t i);
+    
+    void Set_Values(cfdata_t * cfbc,
+		    cfdata_t * orig);
+    void Get_Values(cfdata_t * cfbc,
+		    cfdata_t * orig);
+    void Push(cfdata_t * cfbc, cfdata_t * orig);
+    void Pull(cfdata_t * cfbc, cfdata_t * orig);
+
+    void Set_Values_np(int Ncfbc, real_t *Acfbc,
+		       int Norig, real_t* Aorig );
+    void Get_Values_np(int Ncfbc, real_t *Acfbc,
+		       int Norig, real_t* Aorig );
+    void Push_np(int Ncfbc, real_t *Acfbc,
+		 int Norig, real_t* Aorig );
+    void Pull_np(int Ncfbc, real_t *Acfbc,
+		 int Norig, real_t* Aorig );
+};
+%pythoncode %{
+IndexMap = indexmap_t
+%}
+
+
+/*
+ * CFData object transcription
+ */
+%inline %{
+  void CFData_Default_View_np(cfdata_t * self,  int* NA, real_t** VA) {
+    *VA = CFData_Default_Data(self);
+    *NA = self->N;
+  }
+%}
+%extend CFData {
+  CFData(int N) {
+    // Default Constructor
+    cfdata_t * dat = malloc(sizeof(cfdata_t));
+    CFData_Default_New(dat,N);
+    return dat;
+  }
+  ~CFData() {
+    CFData_Destroy($self);
+    free($self);
+  }
+  void Get_Values( int ndof,int * dofs, real_t * vals);
+  void Set_Values( int ndof, int *dofs, real_t * vals);
+  void Scatter( real_t * src);
+  void Copy( cfdata_t * src);
+  real_t * Place( int n, int * dofs, real_t * vals);
+  
+  void Wipe();
+  void Finalize();
+  void Get_Ptr( real_t **ptr);
+  void Release_Ptr( real_t **ptr);
+  void Print();
+
+  void Default_View_np(int* NA, real_t** VA);
+};
+%pythoncode %{
+CFData = cfdata_t
+CFData.np = CFData.Default_View_np
+%}
+
+
+/*
+ * CFMat object transcription
+ */
+%inline %{
+  void CFMat_CSR_View_np(cfmat_t * self,
+			 int** IA, int* Ni,
+			 int** JA, int* Jnnz,
+			 int* Vnnz, real_t** VA)
+  {
+    *Ni  = self->N+1;
+    *IA    = CFMat_CSR_Data(self)->IA;
+    *Jnnz = CFMat_CSR_Data(self)->nnz;
+    *JA    = CFMat_CSR_Data(self)->JA;
+    *Vnnz = CFMat_CSR_Data(self)->nnz;
+    *VA    = CFMat_CSR_Data(self)->V;
+  }
+%}
+%extend CFMat {
+  CFMat(int N) {
+    cfmat_t * mat = malloc(sizeof(cfmat_t));
+    CFMat_CSR_New(mat,N);
+    return mat;
+  }
+  ~CFMat() {
+    CFMat_Destroy($self);
+    free($self);
+  }
+  
+  void Add_Sparsity(int n, int *dofs);
+  void Finalize_Sparsity();
+  real_t * Place(int n, int * dofs, real_t * vals);
+  void Set_Value(int i, int j, real_t v);
+  void Wipe();
+  void Finalize();
+
+  void CSR_View_np(int** IA, int* Ni,
+		   int** JA, int* Jnnz,
+		   int* Vnnz, real_t** VA);
+};
+%pythoncode %{
+CFMat = cfmat_t
+def CFMat_np(mat):
+    import scipy.sparse
+    " Wrap as a scipy csr matrix "
+    I,J,V = CFMat_CSR_View_np(mat)
+    return scipy.sparse.csr_matrix( (V,J,I) , shape=(mat.N, mat.N) )
+CFMat.np=CFMat_np
+%}
+
+
+/*
+ * Dofmap object transcription
+ */
+%inline %{
+  PyObject * Dofmap_Get_np(dofmap_t * dm, hypervertex_t V) {
+    int len;
+    int *pay, pdim;
+    len = Dofmap_Max_Len(dm);
+    pay = (int*)malloc( sizeof(int)* (len));
+    Dofmap_Get(dm,V, pay, &pdim);
+    
+    // MEMLEAK!
+    PyObject * npret = make_np_copy_i(len,pay);
+    free(pay);
+    return npret;
+  }
+  PyObject * Dofmap_Get_List_np(dofmap_t * dm, int nvert, hypervertex_t * verts) {
+    int len;
+    int *pay, pdim;
+    len = nvert * Dofmap_Max_Len(dm);
+    pay = (int*)malloc(sizeof(int)* (len));
+    
+    Dofmap_Get_List(dm, nvert,verts, pay, &pdim);
+
+    PyObject * npret = make_np_copy_i(len,pay);
+    free(pay);
+    return npret;
+  }
+  dofmap_t * new_Dofmap_Tabled(int Nentry, int stride, int * table, int offset ) {
+    dofmap_t * dmap = malloc(sizeof(dofmap_t));
+    Dofmap_Tabled(dmap, Nentry,stride,table,offset);
+    return dmap;
+  }
+%}
+%extend Dofmap {
+  Dofmap(int stride, int offset) {
+    dofmap_t * dmap = malloc(sizeof(dofmap_t));
+    Dofmap_Strided(dmap, stride,offset);
+    return dmap;
+  }
+  ~Dofmap() {
+    Dofmap_Destroy($self);
+    free($self);
+  }
+  
+  void Get_List(int nvert, hypervertex_t * verts,int * dofs, int * ndofs);
+  void Get(hypervertex_t V, int * dofs, int *ndofs);
+  
+  PyObject * Get_List_np(int nvert, hypervertex_t * verts);
+  PyObject * Get_np(hypervertex_t V);
+  
+  int  Max_Len();
+  void Destroy();
+};
+%pythoncode %{
+Dofmap = dofmap_t
+Dofmap.Get = Dofmap.Get_np
+Dofmap.Get_List = Dofmap.Get_List_np
+
+def Dofmap_Strided(stride,offset=0):
+    return Dofmap(stride,offset)
+
+def Dofmap_From_Vertices(stride, vertices, offset=0):
+    start = int(vertices.min())
+    stop =  int(vertices.max())+1
+    table = np.zeros(stop-start, dtype=np.intc)
+    for i,l in enumerate(vertices):
+        table[ l-start ] = i + offset
+    return new_Dofmap_Tabled(table.reshape((table.size/stride,stride)), -start )
+%}
+
+
+/*
+ * Hypergraph object transcription
+ */
+%inline %{
+  /*
+   * Extra wrappers for Hypergraph and Hyperedges
+   */
+  void Hyperedges_Push_Edge_np(hyperedges_t * he, int nvert, int * verts) {
+    if (nvert < he->l_edge) {
+        PyErr_Format(PyExc_ValueError,
+                     "Array of insufficent length (verts %d < edge length %d)",
+                     nvert, he->l_edge);
+        return;
+    }
+    Hyperedges_Push_Edge(he,verts);
+  }
+  void Hyperedges_Get_Edge_np(hyperedges_t * he, int i,
+			      int * DIM1,int** ARGOUTVIEW_ARRAY1) {
+    if(i<0 || i>=he->n_edge) {
+        PyErr_Format(PyExc_ValueError,
+                     "Bad index: require 0<%d<%d",
+                     i, he->n_edge);
+        return;
+    }
+    *DIM1 = he->l_edge;
+    *ARGOUTVIEW_ARRAY1 = Hyperedges_Get_Edge(he,i);
+  }
+
+  void Hyperedges_Get_View_np(hyperedges_t * he,
+			       int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
+    *DIM1 = he->n_edge;
+    *DIM2 = he->l_edge;
+    *ARGOUTVIEW_ARRAY2 = he->edges;
+  }
+
+  void Hypergraph_Get_Edge_View_np(hypergraph_t * hg, int i,
+				int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
+    Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
+  }
+%}
+/* TODO: Hypergraph needs to be redone anyways
+%extend Hypergraph {
+  Hypergraph(int alloc_init) {
+    hypergraph_t * hg = malloc(sizeof(hypergraph_t));
+    Hypergraph_Alloc(hg,alloc_init);
+    return hg;
+  }
+  ~Hypergraph() {
+    Hypergraph_Destroy($self);
+    free($self);
+  }
+  Push_Edge(int l_edge, hypervertex_t * verts);
+  
+};
+%pythoncode %{
+Hypergraph = hypergraph_t
+%}
+*/
+
+/*
+ * Extra Wrappers
+ */
+%inline %{  
   /*
    * Other wrappers
    */
@@ -245,6 +424,8 @@
 		 u2, x2, nu2,
 		 du1, dx1, rad);
   }
+
+  
   /*
    * Assembly wrappers
    */
@@ -330,7 +511,7 @@
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
       // BEEN FIXED
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
@@ -355,6 +536,8 @@
       }
     }
   }
+
+  
   void fill_sparsity_np(kernel_t * ke, hypergraph_t * hg,
 			PyObject * dofmaplist,
 			PyObject * targetlist)
@@ -369,7 +552,7 @@
     dofmap_t * dofmaps[ndofmap];
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
     }
 
     /* Step 2: Create the target array */
@@ -389,6 +572,8 @@
     /* Step 3: Make the call */
     fill_sparsity(ke,hg, dofmaps, att);
   }
+
+  
   void assemble_np(kernel_t * ke, hypergraph_t * hg,
 		   PyObject * dofmaplist,
 		   PyObject * datalist,
@@ -407,7 +592,7 @@
     dofmap_t * dofmaps[ndofmap];
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
     }
 
     /* Step 2: Create the target array */
@@ -450,6 +635,8 @@
       Py_DECREF(newobjs[i]);
     }
   }
+
+  
   void filter_np(kernel_t * ke, hypergraph_t * hg,
 		 PyObject * dofmaplist,
 		 PyObject * datalist,
@@ -490,7 +677,7 @@
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
       // BEEN FIXED
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}
@@ -509,6 +696,7 @@
     
   }
 
+  
   void Build_Proximity_Graph_Variable_np( hypergraph_t * hg,
 					  int Npart, int dim, real_t * x,
 					  int DIM1, real_t * IN_ARRAY1)
@@ -543,6 +731,7 @@
 					     Nparty,dimy,y,
 					     N_desired,cutoff, INPLACE_ARRAY1);
   }
+
   
   void Tie_Cells_and_Particles_np(hypergraph_t * hgnew,
 				  hypergraph_t * mesh,
@@ -584,7 +773,7 @@
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
       // BEEN FIXED
-      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_dofmap_t, 0);
+      const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
       //}

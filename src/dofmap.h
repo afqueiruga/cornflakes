@@ -7,7 +7,7 @@
 typedef struct _DOFMAP_VTABLE_t _DOFMAP_VTABLE_t;
 
 /* Structure. Using a union for now... Not extensible*/
-typedef struct dofmap_t {
+typedef struct Dofmap {
   //enum dofmap_type type;
   union {
     struct strided_t{

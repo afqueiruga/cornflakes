@@ -47,7 +47,7 @@ typedef struct hyperedges_t {
  * The hyperedges are sorted by their length for simplicity.
  * Does that make it simpler? It def. makes it cheaper...
  */
-typedef struct hypergraph_t {
+typedef struct Hypergraph {
   int n_types; // How many different collections are there?
   int n_alloc; // How many collections have we preallocated?
   hyperedges_t * he;
