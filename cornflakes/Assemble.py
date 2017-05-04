@@ -62,7 +62,7 @@ class CFTargets():
             self.targets.append(targ)
             
         # Fill in the sparsities
-        cflib.fill_sparsity_np(ke,H.hg, [ d for d in dofmaps ], self.targets)
+        cflib.fill_sparsity_np(ke,H.hg,  dofmaps, self.targets)
         
         # Finalize the sparsities
         for k in self.cfobjs:
@@ -89,7 +89,7 @@ class CFTargets():
 
 def Fill_Sparsity(ke, H, dofmaps, cftargets):
     att = _sanitize_targets(cftargets)    
-    cflib.fill_sparsity_np(ke, H.hg, [d.dm for d in dofmaps], att)
+    cflib.fill_sparsity_np(ke, H.hg, dofmaps, att)
     
 def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     if cftargets!=None:
@@ -103,7 +103,7 @@ def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     # call wipe
     if(wipe):
         cftargets.Wipe()
-    cflib.assemble_np(ke,H.hg, [ d for d in dofmaps], data, att)
+    cflib.assemble_np(ke,H.hg, dofmaps, data, att)
     if(wipe):
         cftargets.Finalize()
     if ret_np:
@@ -114,7 +114,7 @@ def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
 def Filter(ke,H, dofmaps,data):
     htrue = Hypergraph()
     hfalse = Hypergraph()
-    cflib.filter_np(ke,H.hg, [d for d in dofmaps], data, htrue.hg, hfalse.hg)
+    cflib.filter_np(ke,H.hg, dofmaps, data, htrue.hg, hfalse.hg)
     return htrue,hfalse
 
 def Apply_BC(dofs,vals, K=None,R=None):
@@ -151,7 +151,7 @@ def Assemble_Targets(ke,H, dofmaps,data, ndof):
                           np.zeros(matsize,dtype=np.intc),
                           np.zeros(matsize,dtype=np.intc)))
     
-    cflib.assemble_targets_np(forms, ke,H.hg, [ d for d in dofmaps], data)
+    cflib.assemble_targets_np(forms, ke,H.hg, dofmaps, data)
     
     for j in xrange(ke.noutp):
         if outps[j].rank==2:
