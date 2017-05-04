@@ -261,9 +261,10 @@ CFData.np = CFData.Default_View_np
 %pythoncode %{
 CFMat = cfmat_t
 def CFMat_np(mat):
+    import scipy.sparse
     " Wrap as a scipy csr matrix "
-    I,J,V = CFMat_CSR_View_np(self.mat)
-    return scipy.sparse.csr_matrix( (V,J,I) , shape=(self.mat.N, self.mat.N) )
+    I,J,V = CFMat_CSR_View_np(mat)
+    return scipy.sparse.csr_matrix( (V,J,I) , shape=(mat.N, mat.N) )
 CFMat.np=CFMat_np
 %}
 
