@@ -184,6 +184,17 @@ IndexMap = indexmap_t
     *VA = CFData_Default_Data(self);
     *NA = self->N;
   }
+  cfdata_t * CFData_BC(cfdata_t * R, indexmap_t * imap) {
+    cfdata_t * dat = malloc(sizeof(cfdata_t));
+    CFData_BC_New(dat,R,imap);
+    return dat;
+  }
+  cfdata_t * CFData_From_Ptr(int N, real_t * payload) {
+    cfdata_t * dat = malloc(sizeof(cfdata_t));
+    CFData_Default_New_From_Ptr(dat,N,payload);
+    return dat;
+  }
+  
 %}
 %extend CFData {
   CFData(int N) {
@@ -231,6 +242,12 @@ CFData.np = CFData.Default_View_np
     *JA    = CFMat_CSR_Data(self)->JA;
     *Vnnz = CFMat_CSR_Data(self)->nnz;
     *VA    = CFMat_CSR_Data(self)->V;
+  }
+  cfmat_t * CFMat_BC(cfmat_t * K, cfdata_t * R, cfdata_t * u,
+		     indexmap_t * map) {
+    cfmat_t * mat = malloc(sizeof(cfmat_t));
+    CFMat_BC_New(mat, K,R,u,map);
+    return mat;
   }
 %}
 %extend CFMat {

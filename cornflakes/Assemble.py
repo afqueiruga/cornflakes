@@ -6,7 +6,10 @@ from Hypergraph import Hypergraph
 
 IndexMap = cflib.IndexMap
 CFData = cflib.CFData
+CFData_BC = cflib.CFData_BC
+CFData_From_Ptr = cflib.CFData_From_Ptr
 CFMat = cflib.CFMat
+CFMat_BC = cflib.CFMat_BC
 
 def _sanitize_targets(cftargets):
     # Need to figure out what type cftargets is?

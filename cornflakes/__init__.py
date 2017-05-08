@@ -3,7 +3,8 @@
 #
 
 import cornflakes_library as cflib
-from Assemble import Assemble_Targets, Apply_BC, Filter, IndexMap,CFTargets,CFData,CFMat, Fill_Sparsity,Assemble
+from Assemble import Assemble_Targets,Apply_BC, Filter, Fill_Sparsity,Assemble
+from Assemble import IndexMap, CFData,CFData_BC,CFData_From_Ptr, CFMat,CFMat_BC
 from Hypergraph import Hypergraph
 from Dofmap import Dofmap, Dofmap_Strided, Dofmap_Tabled, Dofmap_From_Vertices
 import GraphIO
