@@ -22,17 +22,18 @@ def _sanitize_targets(cftargets):
         for cf in att:
             targ = cflib.target_t()
             try:
-                cf.mat
+                cf.sparse
                 rank = 2
             except AttributeError:           
                 rank = 1
-            cflib.Target_New_From_Ptr(targ,rank, cf.top() )
+            cflib.Target_New_From_Ptr(targ,rank, cf ) #.top() )
             att2.append(targ)
         att = att2
     return att
 
 
 class CFTargets():
+    " This helper is deprecated "
     def __init__(self, ke,H, dofmaps, ndof, bcs=None,bcvals=None):
         # First, if there are BCs, create the indexmap
         if False: #bcs is not None:
@@ -105,14 +106,16 @@ def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
         att = cftargets.targets
     # call wipe
     if(wipe):
-        cftargets.Wipe()
+        for targ in att:
+            targ.Wipe()
     cflib.assemble_np(ke,H.hg, dofmaps, data, att)
     if(wipe):
-        cftargets.Finalize()
+        for targ in att:
+            targ.Finalize()
     if ret_np:
-        return [ _.copy() for _ in cftargets.np() ]
+        return [ targ.np().copy() for targ in att ]
     else:
-        return cftargets.cfobjs
+        return att
 
 def Filter(ke,H, dofmaps,data):
     htrue = Hypergraph()
