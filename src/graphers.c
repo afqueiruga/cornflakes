@@ -461,6 +461,7 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
   free(list);
 
   /* Clean up */
+  CFData_Destroy(&hs);
   SpatialHash_destroy(&sh);
   Target_Destroy(att+0);
   free(found);
