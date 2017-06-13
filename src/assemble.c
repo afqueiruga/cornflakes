@@ -166,7 +166,7 @@ void collect2(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
   } // End loop over inps
 
 }
-void place_targets2(target_t * att,
+void place_targets2(void * targets,
                    kernel_t * ke,
                    real_t * ker_out, int len_ker_out,
                    dofmap_t ** dms,
@@ -209,13 +209,18 @@ void place_targets2(target_t * att,
     } // end map loop
     //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
     // Now assemble into att[t]:
-    ker_out_iter = Target_Place(att+t, nalldofs,alldofs, ker_out_iter);
+    if(ke->outp[t].rank==2) {
+	ker_out_iter = CFMat_Place((cfmat_t*)targets+t, nalldofs,alldofs, ker_out_iter);
+    } else {
+	ker_out_iter = CFData_Place((cfdata_t*)targets+t, nalldofs,alldofs, ker_out_iter);
+    }
   } // end target loop
 }
 
+
 void assemble2(kernel_t * ke, hypergraph_t * hg,
                cfdata_t ** data, dofmap_t ** idofmaps, // These are lined up
-               target_t * att, dofmap_t ** odofmaps) // These are also lined up
+               void * targets, dofmap_t ** odofmaps) // These are also lined up
 {
   int i,j, hex,hx;
   hyperedges_t * he;
@@ -242,7 +247,7 @@ void assemble2(kernel_t * ke, hypergraph_t * hg,
       //printf("out:"); for(i=0;i<len_ker_out;i++) printf("%lf ",ker_out[i]); printf("\n");
       //printf("eval\n");
       /* Push the data */
-      place_targets2(att, ke, ker_out,len_ker_out,
+      place_targets2(targets, ke, ker_out,len_ker_out,
                      odofmaps, edge, he->l_edge);
     }
   }
