@@ -19,10 +19,19 @@ HBond = Hypergraph()
 cflib.Build_Pair_Graph(HBond.hg, X, Rad)
 # Make more data
 v = np.zeros(X.shape,dtype=np.double)
+u = np.zeros(X.shape,dtype=np.double)
 params = np.array([ K, L0 ], dtype=np.double)
 # Make a Dofmap object to map vertices to DOFs that indices into x, v, R and K
 dmap_ptvec = Dofmap_Strided(gdim)
 dmap_params = Dofmap_Strided(2) 
+# Make the database
+fields = {
+    'X':(X,dmap_ptvec),
+    'v':(v,dmap_ptec),
+    'u',(u,dmap_ptvec),
+    'params',(params,dmap_params)
+    }
+
 
 # Now, we want some BCs. Let's look for all of the vertices new the bottom
 marked_bot = select_nodes(X, lambda x:x[1]<0.0001)
@@ -47,6 +56,11 @@ HBond = hfalse
 R,K = Assemble_Targets(kernel_linear_spring,HBond,
                        [dmap_ptvec,dmap_params],[X,v,params],
                        X.size)
+# Assemble will allocate a new array or matrix in the SciPy type if you don't provide a container
+R,K = Assemble2(kernel_linear_spring, HBond,
+                fields,
+                {'R':(dmap_ptvec,),
+                 'K':(dmap_ptvec,)})
 # Since its in scipy, you can now just do
 # from matplotlib import pylab as plt
 # plt.spy(K)
