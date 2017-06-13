@@ -19,6 +19,9 @@ void assemble(kernel_t * ke, hypergraph_t * hg,
 	      target_t * att);
 
 
+void assemble2(kernel_t * ke, hypergraph_t * hg,
+               cfdata_t ** data, dofmap_t ** idofmaps, // These are lined up
+               target_t * att, dofmap_t ** odofmaps); // These are also lined up
 /*
 typedef struct assemble_target_t {
   int rank;

@@ -653,6 +653,75 @@ Hypergraph = hypergraph_t
     }
   }
 
+
+  void assemble2_np(kernel_t * ke, hypergraph_t * hg,
+		    PyObject * datadict,
+		    PyObject * outpdict)
+  {
+    if(!PyDict_Check(datadict)) return;
+    if(!PyDict_Check(outpdict)) return;
+
+    /* We may need to allocate new numpy arrays */
+    int isnewobj, n_newobj;
+    PyArrayObject *newobjs[ke->ninp];;
+
+    /* Extract the input signature from the data dictionary */
+    cfdata_t data[ke->ninp];
+    cfdata_t *data_ptrs[ke->ninp];
+    dofmap_t * idofmaps[ke->ninp];
+    for(int i=0; i<ke->ninp; i++) {
+      PyObject *pair, *obj_dat, *obj_dm;
+      PyArrayObject *arrobj;
+      pair = PyDict_GetItemString(datadict, ke->inp[i].name);
+      /* Get the CFData */
+      obj_dat = PySequence_GetItem(pair,0);
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
+      if(isnewobj) {
+	newobjs[n_newobj] = arrobj;
+	n_newobj++;
+      }
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
+      data_ptrs[i] = data+i;
+      /* Get the dofmap */
+      obj_dm  = PySequence_GetItem(pair,1);
+      const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
+
+    }
+
+    /* Extract the output signature from the data dicctionary.
+       The python layer of Assemble is reponsible for initializing empty
+       output targets and calling fill_sparsity if needed. */
+    target_t targets[ke->noutp];
+    dofmap_t * odofmaps[ke->noutp*KERNEL_OUT_MAP_MAX]; // Yup, making a giant argument.
+    for(int i=0; i<ke->noutp; i++) {
+      PyObject *pair, *obj_targ, *seq_dms, *obj_dm;
+      pair = PyDict_GetItemString(outpdict, ke->outp[i].name);
+      /* Get the target */
+      obj_targ = PySequence_GetItem(pair,0);
+      target_t * t;
+      const int rest = SWIG_ConvertPtr(obj_targ, (void**)(&t), SWIGTYPE_p_target_t, 0);
+      targets[i].rank = t->rank;
+      if(targets[i].rank==2) targets[i].K = t->K;
+      else targets[i].R = t->R;
+      /* Get the list of dofmaps */
+      seq_dms = PySequence_GetItem(pair,1);
+      for(int j=0; j<ke->outp[i].nmap; j++) {
+	obj_dm = PySequence_GetItem(seq_dms,j);
+	const int rest = SWIG_ConvertPtr(obj_dm,
+					 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
+					 SWIGTYPE_p_Dofmap, 0);
+      }
+    }
+
+    /* Make the call */
+    assemble2(ke,hg,  data_ptrs, idofmaps, targets,odofmaps);
+    
+    /* Decrease reference counts. n_newobjs hasn't been observed to be >0 yet */
+    for(int i=0;i<n_newobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
+  }
   
   void filter_np(kernel_t * ke, hypergraph_t * hg,
 		 PyObject * dofmaplist,
