@@ -94,7 +94,67 @@ class CFTargets():
 def Fill_Sparsity(ke, H, dofmaps, cftargets):
     att = _sanitize_targets(cftargets)    
     cflib.fill_sparsity_np(ke, H.hg, dofmaps, att)
+
+def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
+    """
+    Assemble a kernel across a graph with specified input data.
+
+    This is the meat-and-potatos of cornflakes. 
+    Example Usage:
+    --------------
+
+    1) Passing preallocated cfmat/cfdata objects:
+    Assemble(Kernal, Hypergraph,
+             {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+             {'R':( cfdat_R, dm_u), 'K':( cfmat_K, dm_u ) })
+    2) Multiple dofmaps to the outputs (e.g. monolithic systems):
+    xAssemble(Kernal, Hypergraph,
+    x         {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+    x         {'R':( cfmat_R, (dm_u,dm_p)), 'K':( cfmat_K, (dm_u,dm_p)  ) })
+    xor
+    Assemble(Kernal, Hypergraph,
+             {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+             {'R':( cfmat_R, dm_u,dm_p), 'K':( cfmat_K, dm_u,dm_p  ) })
+    3) Allocate for me:
+    R,K = Assemble(Kernal, Hypergraph,
+             {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+             {'R':(dm_u), 'K':( dm_u ) })
     
+    Always returns the output objects in the order that the kernel defines them.
+
+    """
+    # Sanitize the output dictionary
+    outps = cflib.outpArray_frompointer(ke.outp)
+    onames = [ outps[j].name for j in xrange(ke.noutp) ]
+    need_to_sparsify = False
+    for  j in xrange(ke.noutp):
+        name = outps[j].name
+        # Do we need to make it for it?
+        if not hasattr(cftargets[name][0],'Place'):
+            if outps.rank==2:
+                cft = CFMat(ndof)
+            else:
+                cft = CFData(ndof)
+            cftargets[name] = [ cft ] + cftargets[name]
+            need_to_sparsify = True
+    if need_to_sparsify:
+        cflib.fill_sparsity2_np(ke,H.hg, dofmaps, self.targets)
+        for o in onames:
+            try:
+                cftargets[o].Finalize_Sparsity()
+            except AttributeError:
+                pass
+    
+    # Wipe them if needed
+    if(wipe):
+        for o in onames:
+            cftargets[o][0].wipe()
+    # Call the C routines
+    cflib.assemble2_np(ke,H.hg, data, cftargets)
+    
+    # Return numpy handles
+    return [ cftargets[o][0].np() for o in onames ]
+
 def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     if cftargets!=None:
         att = _sanitize_targets(cftargets)

@@ -709,9 +709,9 @@ Hypergraph = hypergraph_t
       //if(targets[i].rank==2) targets[i].K = t->K;
       //else targets[i].R = t->R;
       /* Get the list of dofmaps */
-      seq_dms = PySequence_GetItem(pair,1);
+      // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
-	obj_dm = PySequence_GetItem(seq_dms,j);
+	obj_dm = PySequence_GetItem(seq_dms,1 + j);
 	const int rest = SWIG_ConvertPtr(obj_dm,
 					 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
 					 SWIGTYPE_p_Dofmap, 0);
