@@ -70,7 +70,6 @@ void fill_sparsity2(kernel_t * ke, hypergraph_t * hg,
       edge = Hyperedges_Get_Edge(he, hex);
 
       for(int onum=0; onum < ke->noutp; onum++) {
-		printf("onum : %d\n", onum);
 		/* Only for cfmat */
 		if(ke->outp[onum].rank != 2) continue;
 		/* Collect the dofs for this output*/

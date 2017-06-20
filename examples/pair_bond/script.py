@@ -27,9 +27,9 @@ dmap_params = Dofmap_Strided(2)
 # Make the database
 fields = {
     'X':(X,dmap_ptvec),
-    'v':(v,dmap_ptec),
-    'u',(u,dmap_ptvec),
-    'params',(params,dmap_params)
+    'v':(v,dmap_ptvec),
+    'u':(u,dmap_ptvec),
+    'params':(params,dmap_params)
     }
 
 

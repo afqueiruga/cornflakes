@@ -137,18 +137,19 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
                 cft = CFData(ndof)
             cftargets[name] = [ cft ] + list(cftargets[name])
             need_to_sparsify = True
+    from IPython import embed ; embed()
     if need_to_sparsify:
         cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
         for o in onames:
             try:
-                cftargets[o].Finalize_Sparsity()
+                cftargets[o][0].Finalize_Sparsity()
             except AttributeError:
                 pass
     
     # Wipe them if needed
     if(wipe):
         for o in onames:
-            cftargets[o][0].wipe()
+            cftargets[o][0].Wipe()
     # Call the C routines
     cflib.assemble2_np(ke,H.hg, data, cftargets)
     

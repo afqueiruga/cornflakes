@@ -210,9 +210,9 @@ void place_targets2(void * targets,
     //for(m=0;m<nalldofs;m++) printf("%d ",alldofs[m]); printf("\n");
     // Now assemble into att[t]:
     if(ke->outp[t].rank==2) {
-	ker_out_iter = CFMat_Place((cfmat_t*)targets+t, nalldofs,alldofs, ker_out_iter);
+		ker_out_iter = CFMat_Place(((cfmat_t**)targets)[t], nalldofs,alldofs, ker_out_iter);
     } else {
-	ker_out_iter = CFData_Place((cfdata_t*)targets+t, nalldofs,alldofs, ker_out_iter);
+		ker_out_iter = CFData_Place(((cfdata_t**)targets)[t], nalldofs,alldofs, ker_out_iter);
     }
   } // end target loop
 }
