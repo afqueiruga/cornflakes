@@ -710,7 +710,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the list of dofmaps */
       // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
-		obj_dm = PySequence_GetItem(seq_dms,1 + j);
+		obj_dm = PySequence_GetItem(pair,1 + j);
 		const int rest = SWIG_ConvertPtr(obj_dm,
 										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
 										 SWIGTYPE_p_Dofmap, 0);
@@ -769,8 +769,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     }
   }  
   void fill_sparsity2_np(kernel_t * ke, hypergraph_t * hg,
-						 		    PyObject * datadict,
-		    PyObject * outpdict)
+						 PyObject * datadict,
+						 PyObject * outpdict)
   {
     if(!PyDict_Check(datadict)) return;
     if(!PyDict_Check(outpdict)) return;
@@ -824,7 +824,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the list of dofmaps */
       // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
-		obj_dm = PySequence_GetItem(seq_dms,1 + j);
+		obj_dm = PySequence_GetItem(pair,1 + j);
 		const int rest = SWIG_ConvertPtr(obj_dm,
 										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
 										 SWIGTYPE_p_Dofmap, 0);

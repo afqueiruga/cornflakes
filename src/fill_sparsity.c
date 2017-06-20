@@ -70,6 +70,7 @@ void fill_sparsity2(kernel_t * ke, hypergraph_t * hg,
       edge = Hyperedges_Get_Edge(he, hex);
 
       for(int onum=0; onum < ke->noutp; onum++) {
+		printf("onum : %d\n", onum);
 		/* Only for cfmat */
 		if(ke->outp[onum].rank != 2) continue;
 		/* Collect the dofs for this output*/
@@ -86,7 +87,7 @@ void fill_sparsity2(kernel_t * ke, hypergraph_t * hg,
 		  k_map_t kmap = ke->maps[ mnum ];
 		  kmap(edge,he->l_edge, select,&nselect, &dim);
 		  
-		  dmap = odofmaps[ onum*KERNEL_OUT_MAP_MAX* m];
+		  dmap = odofmaps[ onum*KERNEL_OUT_MAP_MAX + m];
 		  maxlen = Dofmap_Max_Len(dmap);
 		  int dofs[maxlen], ndof;
 		  hypervertex_t V;
@@ -100,7 +101,7 @@ void fill_sparsity2(kernel_t * ke, hypergraph_t * hg,
 		  }
 		}
 		/* Push the sparsity pattern to the matrix */
-		CFMat_Add_Sparsity((cfmat_t*)(targets+onum), nalldofs,alldofs);
+		CFMat_Add_Sparsity( ((cfmat_t**)targets)[onum], nalldofs,alldofs);
 		
       } // end of onum loop
     } //  end hex loop
