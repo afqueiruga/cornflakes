@@ -138,7 +138,7 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
             cftargets[name] = [ cft ] + list(cftargets[name])
             need_to_sparsify = True
     if need_to_sparsify:
-        cflib.fill_sparsity2_np(ke,H.hg, dofmaps, self.targets)
+        cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
         for o in onames:
             try:
                 cftargets[o].Finalize_Sparsity()

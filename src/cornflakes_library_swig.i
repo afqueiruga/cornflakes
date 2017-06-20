@@ -232,9 +232,9 @@ CFData.np = CFData.Default_View_np
  */
 %inline %{
   void CFMat_CSR_View_np(cfmat_t * self,
-			 int** IA, int* Ni,
-			 int** JA, int* Jnnz,
-			 int* Vnnz, real_t** VA)
+						 int** IA, int* Ni,
+						 int** JA, int* Jnnz,
+						 int* Vnnz, real_t** VA)
   {
     *Ni  = self->N+1;
     *IA    = CFMat_CSR_Data(self)->IA;
@@ -244,12 +244,12 @@ CFData.np = CFData.Default_View_np
     *VA    = CFMat_CSR_Data(self)->V;
   }
   cfmat_t * CFMat_BC(cfmat_t * K, cfdata_t * R, cfdata_t * u,
-		     indexmap_t * map) {
+					 indexmap_t * map) {
     cfmat_t * mat = malloc(sizeof(cfmat_t));
     CFMat_BC_New(mat, K,R,u,map);
     return mat;
   }
-%}
+  %}
 %extend CFMat {
   CFMat(int N) {
     cfmat_t * mat = malloc(sizeof(cfmat_t));
@@ -269,16 +269,16 @@ CFData.np = CFData.Default_View_np
   void Finalize();
 
   void CSR_View_np(int** IA, int* Ni,
-		   int** JA, int* Jnnz,
-		   int* Vnnz, real_t** VA);
-};
+				   int** JA, int* Jnnz,
+				   int* Vnnz, real_t** VA);
+ };
 %pythoncode %{
 CFMat = cfmat_t
 def CFMat_np(mat):
-    import scipy.sparse
-    " Wrap as a scipy csr matrix "
-    I,J,V = CFMat_CSR_View_np(mat)
-    return scipy.sparse.csr_matrix( (V,J,I) , shape=(mat.N, mat.N) )
+  import scipy.sparse
+  " Wrap as a scipy csr matrix "
+  I,J,V = CFMat_CSR_View_np(mat)
+  return scipy.sparse.csr_matrix( (V,J,I) , shape=(mat.N, mat.N) )
 CFMat.np=CFMat_np
 %}
 
@@ -316,7 +316,7 @@ CFMat.np=CFMat_np
     Dofmap_Tabled(dmap, Nentry,stride,table,offset);
     return dmap;
   }
-%}
+  %}
 %extend Dofmap {
   Dofmap(int stride, int offset) {
     dofmap_t * dmap = malloc(sizeof(dofmap_t));
@@ -336,22 +336,22 @@ CFMat.np=CFMat_np
   
   int  Max_Len();
   void Destroy();
-};
+ };
 %pythoncode %{
 Dofmap = dofmap_t
 Dofmap.Get = Dofmap.Get_np
 Dofmap.Get_List = Dofmap.Get_List_np
 
 def Dofmap_Strided(stride,offset=0):
-    return Dofmap(stride,offset)
+  return Dofmap(stride,offset)
 
 def Dofmap_From_Vertices(stride, vertices, offset=0):
-    start = int(vertices.min())
-    stop =  int(vertices.max())+1
-    table = np.zeros(stop-start, dtype=np.intc)
-    for i,l in enumerate(vertices):
-        table[ l-start ] = i + offset
-    return new_Dofmap_Tabled(table.reshape((table.size/stride,stride)), -start )
+  start = int(vertices.min())
+  stop =  int(vertices.max())+1
+  table = np.zeros(stop-start, dtype=np.intc)
+  for i,l in enumerate(vertices):
+    table[ l-start ] = i + offset
+  return new_Dofmap_Tabled(table.reshape((table.size/stride,stride)), -start )
 %}
 
 
@@ -364,54 +364,54 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
    */
   void Hyperedges_Push_Edge_np(hyperedges_t * he, int nvert, int * verts) {
     if (nvert < he->l_edge) {
-        PyErr_Format(PyExc_ValueError,
-                     "Array of insufficent length (verts %d < edge length %d)",
-                     nvert, he->l_edge);
-        return;
+	  PyErr_Format(PyExc_ValueError,
+				   "Array of insufficent length (verts %d < edge length %d)",
+				   nvert, he->l_edge);
+	  return;
     }
     Hyperedges_Push_Edge(he,verts);
   }
   void Hyperedges_Get_Edge_np(hyperedges_t * he, int i,
-			      int * DIM1,int** ARGOUTVIEW_ARRAY1) {
+							  int * DIM1,int** ARGOUTVIEW_ARRAY1) {
     if(i<0 || i>=he->n_edge) {
-        PyErr_Format(PyExc_ValueError,
-                     "Bad index: require 0<%d<%d",
-                     i, he->n_edge);
-        return;
+	  PyErr_Format(PyExc_ValueError,
+				   "Bad index: require 0<%d<%d",
+				   i, he->n_edge);
+	  return;
     }
     *DIM1 = he->l_edge;
     *ARGOUTVIEW_ARRAY1 = Hyperedges_Get_Edge(he,i);
   }
 
   void Hyperedges_Get_View_np(hyperedges_t * he,
-			       int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
+							  int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
     *DIM1 = he->n_edge;
     *DIM2 = he->l_edge;
     *ARGOUTVIEW_ARRAY2 = he->edges;
   }
 
   void Hypergraph_Get_Edge_View_np(hypergraph_t * hg, int i,
-				int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
+								   int * DIM1, int *DIM2, int** ARGOUTVIEW_ARRAY2) {
     Hyperedges_Get_View_np(hg->he+i, DIM1,DIM2,ARGOUTVIEW_ARRAY2);
   }
-%}
+  %}
 /* TODO: Hypergraph needs to be redone anyways
-%extend Hypergraph {
-  Hypergraph(int alloc_init) {
-    hypergraph_t * hg = malloc(sizeof(hypergraph_t));
-    Hypergraph_Alloc(hg,alloc_init);
-    return hg;
-  }
-  ~Hypergraph() {
-    Hypergraph_Destroy($self);
-    free($self);
-  }
-  Push_Edge(int l_edge, hypervertex_t * verts);
+   %extend Hypergraph {
+   Hypergraph(int alloc_init) {
+   hypergraph_t * hg = malloc(sizeof(hypergraph_t));
+   Hypergraph_Alloc(hg,alloc_init);
+   return hg;
+   }
+   ~Hypergraph() {
+   Hypergraph_Destroy($self);
+   free($self);
+   }
+   Push_Edge(int l_edge, hypervertex_t * verts);
   
-};
-%pythoncode %{
-Hypergraph = hypergraph_t
-%}
+   };
+   %pythoncode %{
+   Hypergraph = hypergraph_t
+   %}
 */
 
 /*
@@ -422,24 +422,24 @@ Hypergraph = hypergraph_t
    * Other wrappers
    */
   void Interpolate_np(int nu1, int du1, real_t * u1,
-		      int nx1, int dx1, real_t * x1,
-		      int nu2, int du2, real_t * u2,
-		      int nx2, int dx2, real_t * x2,
-		      real_t rad)
+					  int nx1, int dx1, real_t * x1,
+					  int nu2, int du2, real_t * u2,
+					  int nx2, int dx2, real_t * x2,
+					  real_t rad)
   {
     Interpolate( u1, x1, nu1,
-		 u2, x2, nu2,
-		 du1, dx1, rad);
+				 u2, x2, nu2,
+				 du1, dx1, rad);
   }
   void Interpolate_Closest_np(int nu1, int du1, real_t * u1,
-		      int nx1, int dx1, real_t * x1,
-		      int nu2, int du2, real_t * u2,
-		      int nx2, int dx2, real_t * x2,
-		      real_t rad)
+							  int nx1, int dx1, real_t * x1,
+							  int nu2, int du2, real_t * u2,
+							  int nx2, int dx2, real_t * x2,
+							  real_t rad)
   {
     Interpolate_Closest( u1, x1, nu1,
-		 u2, x2, nu2,
-		 du1, dx1, rad);
+						 u2, x2, nu2,
+						 du1, dx1, rad);
   }
 
   
@@ -447,9 +447,9 @@ Hypergraph = hypergraph_t
    * Assembly wrappers
    */
   void assemble_targets_np(PyObject * targetlist,
-		   kernel_t * ke, hypergraph_t * hg,
-		   PyObject * dofmaplist,
-		   PyObject * datalist)
+						   kernel_t * ke, hypergraph_t * hg,
+						   PyObject * dofmaplist,
+						   PyObject * datalist)
   {
     int i=0, isnewobj=0;
     PyObject *obj, *subobj;
@@ -474,38 +474,38 @@ Hypergraph = hypergraph_t
     for(i=0;i<ntarget;i++) {
       obj = PyList_GetItem(targetlist, i);
       if(PyTuple_Check(obj)) {
-	real_t *VV;
-	int *II,*JJ;
-	// 0: Get KK
-	subobj = PyTuple_GetItem(obj,0);
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_DOUBLE,&isnewobj);
+		real_t *VV;
+		int *II,*JJ;
+		// 0: Get KK
+		subobj = PyTuple_GetItem(obj,0);
+		isnewobj = 0;
+		arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_DOUBLE,&isnewobj);
         VV = array_data(arrobj);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	// 1: Get II
-	subobj = PyTuple_GetItem(obj,1);
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	II = array_data(arrobj);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	// 2: Get JJ
-	subobj = PyTuple_GetItem(obj,2);
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
-	JJ = array_data(arrobj);
+		if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+		// 1: Get II
+		subobj = PyTuple_GetItem(obj,1);
+		isnewobj = 0;
+		arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
+		II = array_data(arrobj);
+		if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+		// 2: Get JJ
+		subobj = PyTuple_GetItem(obj,2);
+		isnewobj = 0;
+		arrobj = obj_to_array_contiguous_allow_conversion(subobj,NPY_INT,&isnewobj);
+		JJ = array_data(arrobj);
 
-	cfmat_t * mat = malloc(sizeof(cfmat_t));
-	CFMat_Default_From_Array(mat,-1/*don't know N!*/, VV,II,JJ);
-	Target_New_From_Ptr(att+i,2,mat);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+		cfmat_t * mat = malloc(sizeof(cfmat_t));
+		CFMat_Default_From_Array(mat,-1/*don't know N!*/, VV,II,JJ);
+		Target_New_From_Ptr(att+i,2,mat);
+		if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
       }
       else { //  obj is (BETTER BE) a ndarray
-	isnewobj = 0;
-	arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
-	if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
-	cfdata_t * dat = malloc(sizeof(cfdata_t));
-	CFData_Default_New_From_Ptr(dat, array_size(arrobj,0), array_data(arrobj) );
-	Target_New_From_Ptr(att+i,1,dat);
+		isnewobj = 0;
+		arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
+		if(isnewobj) { newobjs[nnewobj] = arrobj; nnewobj++; }
+		cfdata_t * dat = malloc(sizeof(cfdata_t));
+		CFData_Default_New_From_Ptr(dat, array_size(arrobj,0), array_data(arrobj) );
+		Target_New_From_Ptr(att+i,1,dat);
 
 
       }
@@ -519,8 +519,8 @@ Hypergraph = hypergraph_t
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
       CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0),  array_data(arrobj));
       if(isnewobj) {
-	newobjs[nnewobj] = arrobj;
-	nnewobj++;
+		newobjs[nnewobj] = arrobj;
+		nnewobj++;
       }
     }
 
@@ -530,7 +530,7 @@ Hypergraph = hypergraph_t
       // BEEN FIXED
       const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
-      //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
+      //    SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");    
       //}
     }
 
@@ -547,17 +547,17 @@ Hypergraph = hypergraph_t
     for(i=0;i<ntarget;i++) {
       //Target_Destroy(att+i);
       if(att[i].rank==2) {
-	free(att[i].K);
+		free(att[i].K);
       } else {
-	free(att[i].R);
+		free(att[i].R);
       }
     }
   }
 
   
   void fill_sparsity_np(kernel_t * ke, hypergraph_t * hg,
-			PyObject * dofmaplist,
-			PyObject * targetlist)
+						PyObject * dofmaplist,
+						PyObject * targetlist)
   {
     int i;
     PyObject *obj;
@@ -581,9 +581,9 @@ Hypergraph = hypergraph_t
       const int rest = SWIG_ConvertPtr(obj, (void**)(&t),SWIGTYPE_p_target_t, 0);
       att[i].rank = t->rank;
       if(att[i].rank==2)
-	att[i].K = t->K;
+		att[i].K = t->K;
       else
-	att[i].R = t->R;
+		att[i].R = t->R;
     }
 
     /* Step 3: Make the call */
@@ -592,9 +592,9 @@ Hypergraph = hypergraph_t
 
   
   void assemble_np(kernel_t * ke, hypergraph_t * hg,
-		   PyObject * dofmaplist,
-		   PyObject * datalist,
-		   PyObject * targetlist)
+				   PyObject * dofmaplist,
+				   PyObject * datalist,
+				   PyObject * targetlist)
   {
     int i, isnewobj;
     PyObject *obj;
@@ -621,9 +621,9 @@ Hypergraph = hypergraph_t
       const int rest = SWIG_ConvertPtr(obj, (void**)(&t),SWIGTYPE_p_target_t, 0);
       att[i].rank = t->rank;
       if(att[i].rank==2)
-	att[i].K = t->K;
+		att[i].K = t->K;
       else
-	att[i].R = t->R;
+		att[i].R = t->R;
     }
 
     /* Step 3: Collect the data ptrs */
@@ -638,8 +638,8 @@ Hypergraph = hypergraph_t
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
       CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0),  array_data(arrobj));
       if(isnewobj) {
-	newobjs[nnewobj] = arrobj;
-	nnewobj++;
+		newobjs[nnewobj] = arrobj;
+		nnewobj++;
       }
     }
     for(i=0;i<ndata;i++) data_ptrs[i] = data+i;
@@ -678,15 +678,14 @@ Hypergraph = hypergraph_t
       isnewobj = 0;
       arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
       if(isnewobj) {
-	newobjs[n_newobj] = arrobj;
-	n_newobj++;
+		newobjs[n_newobj] = arrobj;
+		n_newobj++;
       }
       CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
       data_ptrs[i] = data+i;
       /* Get the dofmap */
       obj_dm  = PySequence_GetItem(pair,1);
       const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
-
     }
 
     /* Extract the output signature from the data dicctionary.
@@ -711,10 +710,10 @@ Hypergraph = hypergraph_t
       /* Get the list of dofmaps */
       // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
-	obj_dm = PySequence_GetItem(seq_dms,1 + j);
-	const int rest = SWIG_ConvertPtr(obj_dm,
-					 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
-					 SWIGTYPE_p_Dofmap, 0);
+		obj_dm = PySequence_GetItem(seq_dms,1 + j);
+		const int rest = SWIG_ConvertPtr(obj_dm,
+										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
+										 SWIGTYPE_p_Dofmap, 0);
       }
     }
 
@@ -726,11 +725,125 @@ Hypergraph = hypergraph_t
       Py_DECREF(newobjs[i]);
     }
   }
+
+  void filter2_np(kernel_t * ke, hypergraph_t * hg,
+		    PyObject * datadict,
+		    hypergraph_t * htrue, hypergraph_t * hfalse)
+  {
+	if(!PyDict_Check(datadict)) return;
+
+    /* We may need to allocate new numpy arrays */
+    int isnewobj, n_newobj;
+    PyArrayObject *newobjs[ke->ninp];;
+
+    /* Extract the input signature from the data dictionary */
+    cfdata_t data[ke->ninp];
+    cfdata_t *data_ptrs[ke->ninp];
+    dofmap_t * idofmaps[ke->ninp];
+    for(int i=0; i<ke->ninp; i++) {
+      PyObject *pair, *obj_dat, *obj_dm;
+      PyArrayObject *arrobj;
+      pair = PyDict_GetItemString(datadict, ke->inp[i].name);
+      /* Get the CFData */
+      obj_dat = PySequence_GetItem(pair,0);
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
+      if(isnewobj) {
+		newobjs[n_newobj] = arrobj;
+		n_newobj++;
+      }
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
+      data_ptrs[i] = data+i;
+      /* Get the dofmap */
+      obj_dm  = PySequence_GetItem(pair,1);
+      const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
+    }
+
+    /* Make the call */
+	printf("FINISH ME!\n");
+    //filter2(ke,hg,  data_ptrs, idofmaps, targets,odofmaps);
+    
+    /* Decrease reference counts. n_newobjs hasn't been observed to be >0 yet */
+    for(int i=0;i<n_newobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
+  }  
+  void fill_sparsity2_np(kernel_t * ke, hypergraph_t * hg,
+						 		    PyObject * datadict,
+		    PyObject * outpdict)
+  {
+    if(!PyDict_Check(datadict)) return;
+    if(!PyDict_Check(outpdict)) return;
+	
+    /* We may need to allocate new numpy arrays */
+    int isnewobj, n_newobj;
+    PyArrayObject *newobjs[ke->ninp];;
+	
+    /* Extract the input signature from the data dictionary */
+    cfdata_t data[ke->ninp];
+    cfdata_t *data_ptrs[ke->ninp];
+    dofmap_t * idofmaps[ke->ninp];
+    for(int i=0; i<ke->ninp; i++) {
+      PyObject *pair, *obj_dat, *obj_dm;
+      PyArrayObject *arrobj;
+      pair = PyDict_GetItemString(datadict, ke->inp[i].name);
+      /* Get the CFData */
+      obj_dat = PySequence_GetItem(pair,0);
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
+      if(isnewobj) {
+		newobjs[n_newobj] = arrobj;
+		n_newobj++;
+      }
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
+      data_ptrs[i] = data+i;
+      /* Get the dofmap */
+      obj_dm  = PySequence_GetItem(pair,1);
+      const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
+    }
+
+    /* Extract the output signature from the data dicctionary.
+       The python layer of Assemble is reponsible for initializing empty
+       output targets and calling fill_sparsity if needed. */
+    //target_t targets[ke->noutp];
+    void * targets[ke->noutp];
+    dofmap_t * odofmaps[ke->noutp*KERNEL_OUT_MAP_MAX]; // Yup, making a giant argument.
+    for(int i=0; i<ke->noutp; i++) {
+      PyObject *pair, *obj_targ, *seq_dms, *obj_dm;
+      pair = PyDict_GetItemString(outpdict, ke->outp[i].name);
+      /* Get the target */
+      obj_targ = PySequence_GetItem(pair,0);
+      if(ke->outp[i].rank==2) {
+		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
+      } else {
+		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
+      }
+      //targets[i].rank = t->rank;
+      //if(targets[i].rank==2) targets[i].K = t->K;
+      //else targets[i].R = t->R;
+      /* Get the list of dofmaps */
+      // seq_dms = PySequence_GetItem(pair,1);
+      for(int j=0; j<ke->outp[i].nmap; j++) {
+		obj_dm = PySequence_GetItem(seq_dms,1 + j);
+		const int rest = SWIG_ConvertPtr(obj_dm,
+										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
+										 SWIGTYPE_p_Dofmap, 0);
+      }
+    }
+
+    /* Make the call */
+    fill_sparsity2(ke,hg, targets,odofmaps);
+    
+    /* Decrease reference counts. n_newobjs hasn't been observed to be >0 yet */
+    for(int i=0;i<n_newobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
+  }
   
   void filter_np(kernel_t * ke, hypergraph_t * hg,
-		 PyObject * dofmaplist,
-		 PyObject * datalist,
-		 hypergraph_t * htrue, hypergraph_t * hfalse)
+				 PyObject * dofmaplist,
+				 PyObject * datalist,
+				 hypergraph_t * htrue, hypergraph_t * hfalse)
   {
     int i=0, isnewobj=0;
     PyObject *obj, *subobj;
@@ -758,8 +871,8 @@ Hypergraph = hypergraph_t
       arrobj = obj_to_array_contiguous_allow_conversion(obj,NPY_DOUBLE,&isnewobj);
       CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0),  array_data(arrobj));
       if(isnewobj) {
-	newobjs[nnewobj] = arrobj;
-	nnewobj++;
+		newobjs[nnewobj] = arrobj;
+		nnewobj++;
       }
     }
 
