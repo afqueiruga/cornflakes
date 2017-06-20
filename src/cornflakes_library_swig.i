@@ -662,7 +662,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     if(!PyDict_Check(outpdict)) return;
 
     /* We may need to allocate new numpy arrays */
-    int isnewobj, n_newobj;
+    int isnewobj, n_newobj=0;
     PyArrayObject *newobjs[ke->ninp];;
 
     /* Extract the input signature from the data dictionary */
@@ -733,7 +733,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 	if(!PyDict_Check(datadict)) return;
 
     /* We may need to allocate new numpy arrays */
-    int isnewobj, n_newobj;
+    int isnewobj, n_newobj=0;
     PyArrayObject *newobjs[ke->ninp];;
 
     /* Extract the input signature from the data dictionary */
@@ -776,7 +776,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     if(!PyDict_Check(outpdict)) return;
 	
     /* We may need to allocate new numpy arrays */
-    int isnewobj, n_newobj;
+    int isnewobj, n_newobj=0;
     PyArrayObject *newobjs[ke->ninp];;
 	
     /* Extract the input signature from the data dictionary */
