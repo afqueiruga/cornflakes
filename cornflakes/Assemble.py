@@ -131,11 +131,11 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         name = outps[j].name
         # Do we need to make it for it?
         if not hasattr(cftargets[name][0],'Place'):
-            if outps.rank==2:
+            if outps[j].rank==2:
                 cft = CFMat(ndof)
             else:
                 cft = CFData(ndof)
-            cftargets[name] = [ cft ] + cftargets[name]
+            cftargets[name] = [ cft ] + list(cftargets[name])
             need_to_sparsify = True
     if need_to_sparsify:
         cflib.fill_sparsity2_np(ke,H.hg, dofmaps, self.targets)
