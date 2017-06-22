@@ -132,6 +132,9 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
     Always returns the output objects in the order that the kernel defines them.
 
     """
+    if not isinstance(data, dict):
+        from itertools import chain
+        data = dict(chain(*[f.items() for f in data]))
     # Sanitize the output dictionary
     outps = cflib.outpArray_frompointer(ke.outp)
     onames = [ outps[j].name for j in xrange(ke.noutp) ]
