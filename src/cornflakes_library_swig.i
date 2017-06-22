@@ -700,9 +700,9 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the target */
       obj_targ = PySequence_GetItem(pair,0);
       if(ke->outp[i].rank==2) {
-	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
+		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
       } else {
-	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
+		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
       }
       //targets[i].rank = t->rank;
       //if(targets[i].rank==2) targets[i].K = t->K;

@@ -95,6 +95,15 @@ def Fill_Sparsity(ke, H, dofmaps, cftargets):
     att = _sanitize_targets(cftargets)    
     cflib.fill_sparsity_np(ke, H.hg, dofmaps, att)
 
+def Fill_Sparsity2(ke, H, data, cftargets):
+    cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
+    outps = cflib.outpArray_frompointer(ke.outp)
+    onames = [ outps[j].name for j in xrange(ke.noutp) ]
+    # for o in onames:
+		# try:
+		# cftargets[o][0].Finalize_Sparsity()
+            # except AttributeError:
+                # pass
 def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
     """
     Assemble a kernel across a graph with specified input data.
@@ -137,7 +146,7 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
                 cft = CFData(ndof)
             cftargets[name] = [ cft ] + list(cftargets[name])
             need_to_sparsify = True
-    from IPython import embed ; embed()
+    # from IPython import embed ; embed()
     if need_to_sparsify:
         cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
         for o in onames:
@@ -152,9 +161,11 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
             cftargets[o][0].Wipe()
     # Call the C routines
     cflib.assemble2_np(ke,H.hg, data, cftargets)
-    
-    # Return numpy handles
-    return [ cftargets[o][0].np() for o in onames ]
+
+    if (wipe):
+        for o in onames:
+            cftargets[o][0].Finalize()
+        return [ cftargets[o][0].np() for o in onames ]
 
 def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     if cftargets!=None:
