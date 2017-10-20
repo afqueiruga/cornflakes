@@ -127,7 +127,7 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
     3) Allocate for me:
     R,K = Assemble(Kernal, Hypergraph,
              {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
-             {'R':(dm_u), 'K':( dm_u ) })
+             {'R':(dm_u), 'K':( dm_u ) },ndof=1000)
     
     Always returns the output objects in the order that the kernel defines them.
 
@@ -136,6 +136,7 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         from itertools import chain
         data = dict(chain(*[f.items() for f in data]))
     # Sanitize the output dictionary
+	# from IPython import embed ; embed()
     outps = cflib.outpArray_frompointer(ke.outp)
     onames = [ outps[j].name for j in xrange(ke.noutp) ]
     need_to_sparsify = False
