@@ -673,6 +673,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       PyObject *pair, *obj_dat, *obj_dm;
       PyArrayObject *arrobj;
       pair = PyDict_GetItemString(datadict, ke->inp[i].name);
+	  
       /* Get the CFData */
       obj_dat = PySequence_GetItem(pair,0);
       isnewobj = 0;
@@ -686,6 +687,9 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the dofmap */
       obj_dm  = PySequence_GetItem(pair,1);
       const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
+	  
+	  Py_DECREF(obj_dat);
+	  Py_DECREF(obj_dm);
     }
 
     /* Extract the output signature from the data dicctionary.
@@ -714,7 +718,10 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 		const int rest = SWIG_ConvertPtr(obj_dm,
 										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
 										 SWIGTYPE_p_Dofmap, 0);
+		Py_DECREF(obj_dm);
       }
+	  
+	  Py_DECREF(obj_targ);
     }
 
     /* Make the call */
