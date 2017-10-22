@@ -204,6 +204,7 @@ IndexMap = indexmap_t
     return dat;
   }
   ~CFData() {
+    printf("I'm getting destroyed with size %d",$self->N);
     CFData_Destroy($self);
     free($self);
   }
@@ -687,9 +688,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the dofmap */
       obj_dm  = PySequence_GetItem(pair,1);
       const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
-	  
-	  Py_DECREF(obj_dat);
-	  Py_DECREF(obj_dm);
+      Py_DECREF(obj_dat);
+      Py_DECREF(obj_dm);
     }
 
     /* Extract the output signature from the data dicctionary.
@@ -704,9 +704,9 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the target */
       obj_targ = PySequence_GetItem(pair,0);
       if(ke->outp[i].rank==2) {
-		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
+	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
       } else {
-		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
+	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
       }
       //targets[i].rank = t->rank;
       //if(targets[i].rank==2) targets[i].K = t->K;
@@ -714,14 +714,13 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the list of dofmaps */
       // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
-		obj_dm = PySequence_GetItem(pair,1 + j);
-		const int rest = SWIG_ConvertPtr(obj_dm,
-										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
-										 SWIGTYPE_p_Dofmap, 0);
-		Py_DECREF(obj_dm);
+	obj_dm = PySequence_GetItem(pair,1 + j);
+	const int rest = SWIG_ConvertPtr(obj_dm,
+					 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
+					 SWIGTYPE_p_Dofmap, 0);
+	Py_DECREF(obj_dm);
       }
-	  
-	  Py_DECREF(obj_targ);
+      Py_DECREF(obj_targ);
     }
 
     /* Make the call */
@@ -767,7 +766,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     }
 
     /* Make the call */
-	printf("FINISH ME!\n");
+    printf("FINISH ME!\n");
     //filter2(ke,hg,  data_ptrs, idofmaps, targets,odofmaps);
     
     /* Decrease reference counts. n_newobjs hasn't been observed to be >0 yet */
@@ -807,6 +806,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the dofmap */
       obj_dm  = PySequence_GetItem(pair,1);
       const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
+      Py_DECREF(obj_dm);
+      Py_DECREF(obj_dat);
     }
 
     /* Extract the output signature from the data dicctionary.
@@ -820,10 +821,14 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       pair = PyDict_GetItemString(outpdict, ke->outp[i].name);
       /* Get the target */
       obj_targ = PySequence_GetItem(pair,0);
+      if(obj_targ==NULL) printf("WTF??\n");
+      printf("%lx\n",obj_targ);
       if(ke->outp[i].rank==2) {
-		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
+	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
+	printf("K was %d\n",rest);
       } else {
-		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
+	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
+	printf("R was %d\n",rest);
       }
       //targets[i].rank = t->rank;
       //if(targets[i].rank==2) targets[i].K = t->K;
@@ -831,17 +836,22 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the list of dofmaps */
       // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
-		obj_dm = PySequence_GetItem(pair,1 + j);
-		const int rest = SWIG_ConvertPtr(obj_dm,
-										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
-										 SWIGTYPE_p_Dofmap, 0);
+	obj_dm = PySequence_GetItem(pair,1 + j);
+	if(obj_dm==NULL) printf("WTF??\n");
+	const int rest = SWIG_ConvertPtr(obj_dm,
+					 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
+					 SWIGTYPE_p_Dofmap, 0);
+	Py_DECREF(obj_dm);
       }
+      printf("%lx : %d\n",obj_targ, obj_targ->ob_refcnt);
+      Py_DECREF(obj_targ);
     }
 
     /* Make the call */
     fill_sparsity2(ke,hg, targets,odofmaps);
     
     /* Decrease reference counts. n_newobjs hasn't been observed to be >0 yet */
+    if(n_newobj>0) printf("There were %d new objects in fill_sparsity2\n",n_newobj);
     for(int i=0;i<n_newobj;i++) {
       Py_DECREF(newobjs[i]);
     }

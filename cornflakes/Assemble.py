@@ -140,10 +140,16 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
     outps = cflib.outpArray_frompointer(ke.outp)
     onames = [ outps[j].name for j in xrange(ke.noutp) ]
     need_to_sparsify = False
+    made_new = False
     for  j in xrange(ke.noutp):
         name = outps[j].name
-        # Do we need to make it for it?
+        try:
+            cftargets[name]
+        except:
+            print "cornflakes runtime error: kernel ', ke.name,': You're missing key ", name, " in your target dict!"
+            # Do we need to make it for it?
         if not hasattr(cftargets[name][0],'Place'):
+            made_new = True
             if outps[j].rank==2:
                 cft = CFMat(ndof)
             else:
@@ -169,7 +175,10 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
     if (wipe):
         for o in onames:
             cftargets[o][0].Finalize()
-        return [ cftargets[o][0].np() for o in onames ]
+        if (made_new):
+            return [ cftargets[o][0].np().copy() for o in onames ]
+        else:
+            return [ cftargets[o][0].np() for o in onames ]
 
 def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):
     if cftargets!=None:
