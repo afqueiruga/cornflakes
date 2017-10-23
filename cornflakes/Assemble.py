@@ -145,9 +145,10 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         name = outps[j].name
         try:
             cftargets[name]
-        except:
+        except KeyError:
             print "cornflakes runtime error: kernel ', ke.name,': You're missing key ", name, " in your target dict!"
-            # Do we need to make it for it?
+            raise KeyError('kernel assembly error')
+        # Do we need to make it for it?
         if not hasattr(cftargets[name][0],'Place'):
             made_new = True
             if outps[j].rank==2:
@@ -176,8 +177,11 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         for o in onames:
             cftargets[o][0].Finalize()
         if (made_new):
-            return [ cftargets[o][0].np().copy() for o in onames ]
+            #print "Returning a copy for ", ke.name
+            l = [ np.copy(cftargets[o][0].np()) for o in onames ]
+            return l
         else:
+            #print "Returning the mask for ", ke.name
             return [ cftargets[o][0].np() for o in onames ]
 
 def Assemble(ke,H, dofmaps,data, cftargets=None, wipe=True,ndof=0):

@@ -204,7 +204,7 @@ IndexMap = indexmap_t
     return dat;
   }
   ~CFData() {
-    printf("I'm getting destroyed with size %d",$self->N);
+    /* printf("I'm getting destroyed with size %d",$self->N); */
     CFData_Destroy($self);
     free($self);
   }
@@ -822,19 +822,13 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the target */
       obj_targ = PySequence_GetItem(pair,0);
       if(obj_targ==NULL) printf("WTF??\n");
-      printf("%lx\n",obj_targ);
       if(ke->outp[i].rank==2) {
 	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
-	printf("K was %d\n",rest);
       } else {
 	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
-	printf("R was %d\n",rest);
       }
-      //targets[i].rank = t->rank;
-      //if(targets[i].rank==2) targets[i].K = t->K;
-      //else targets[i].R = t->R;
+
       /* Get the list of dofmaps */
-      // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
 	obj_dm = PySequence_GetItem(pair,1 + j);
 	if(obj_dm==NULL) printf("WTF??\n");
@@ -843,7 +837,6 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 					 SWIGTYPE_p_Dofmap, 0);
 	Py_DECREF(obj_dm);
       }
-      printf("%lx : %d\n",obj_targ, obj_targ->ob_refcnt);
       Py_DECREF(obj_targ);
     }
 
@@ -896,7 +889,6 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     /* Step 3: Create the dofmap list */
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
-      // BEEN FIXED
       const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
