@@ -30,11 +30,12 @@ set(SOURCES
   
   src/hypergraph.c
   src/assemble.c
-  src/assemble_omp.c
+  #src/assemble_omp.c
   src/filter.c
   src/fill_sparsity.c
   src/spatialhash.c
   src/graphers.c
+  src/tie_cells_and_particles.c
   src/util.c
   )
 set( HEADERS
@@ -63,11 +64,12 @@ set( HEADERS
 
   src/hypergraph.h
   src/assemble.h
-  src/assemble_omp.h
+  #src/assemble_omp.h
   src/filter.h
   src/fill_sparsity.h
   src/spatialhash.h
   src/graphers.h
+  src/tie_cells_and_particles.h
   src/util.h
   )
 set( PY_FILES

@@ -4,8 +4,8 @@ set(TESTS
   test_cfmat_bc
   test_index_set
   test_sparsity_pattern
-  test_fill_sparsity
-  test_assemble_csr
+  #test_fill_sparsity
+  #test_assemble_csr
   test_filter
   )
 

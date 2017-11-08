@@ -1,6 +1,7 @@
 #include "hypergraph.h"
 #include "spatialhash.h"
 #include "graphers.h"
+#include "tie_cells_and_particles.h"
 #include "kernel.h"
 #include "assemble.h"
 #include "filter.h"

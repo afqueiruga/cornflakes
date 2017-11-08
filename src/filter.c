@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+// TODO: Update this to new call signature
 void filter(kernel_t * ke, hypergraph_t * hg,
 	    dofmap_t ** dofmaps, cfdata_t ** data,
 	    hypergraph_t *htrue, hypergraph_t *hfalse)
@@ -26,7 +27,7 @@ void filter(kernel_t * ke, hypergraph_t * hg,
     for(hex=0; hex<he->n_edge; hex++) {
       edge = Hyperedges_Get_Edge(he, hex);
       /* Collect the data */
-      collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some overheard outside of loop
+      // collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some overheard outside of loop
       /* Calculate the kernel */
       for(i=0;i<len_ker_out;i++) ker_out[i] = 0.0;
       ke->eval(he->l_edge, ker_in, ker_out);
