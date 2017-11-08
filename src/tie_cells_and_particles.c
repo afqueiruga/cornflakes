@@ -1,5 +1,6 @@
 #include "tie_cells_and_particles.h"
 
+#include "target.h"
 #include "stdlib.h"
 #include "math.h"
 #include "spatialhash.h"

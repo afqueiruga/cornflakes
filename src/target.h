@@ -4,6 +4,8 @@
 #include "cfmat.h"
 #include "cfdata.h"
 
+// DEPRECATED
+
 /* A polymorphic class for targets with different backends */
 /*
  * NOTE: Is the target_t type obselete by CFMat/CFData?
