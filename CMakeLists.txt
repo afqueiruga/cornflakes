@@ -83,8 +83,6 @@ set( PY_FILES
   cornflakes/Graphers.py
   )
   
-# Add in kernels to be included in the distribution
-add_subdirectory(src/kernels)
 include_directories(src/)
 
 #
@@ -150,7 +148,7 @@ add_definitions( ${CORNFLAKES_DEFINITIONS} )
 set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast")
 
 target_link_libraries( cornflakes ${CORNFLAKES_STATIC_LIBRARIES} )
-target_link_libraries( cornflakes packaged_kernels m )
+target_link_libraries( cornflakes m )
 
 
 #
@@ -167,7 +165,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set_source_files_properties(src/cornflakes_library_swig.i PROPERTIES SWIG_FLAGS "-includeall")
 swig_add_module(cornflakes_library python src/cornflakes_library_swig.i ${SOURCES})
 
-swig_link_libraries(cornflakes_library packaged_kernels m ${PYTHON_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
+swig_link_libraries(cornflakes_library m ${PYTHON_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
 
 
 #
