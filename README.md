@@ -30,6 +30,13 @@ the kernel struct. The first DSL was already replaced (kerngen).
 It gets expensive. Some of my kernels take 5 mintues to run. The 
 production code should be given already compiled shared object files.
 
+The main idiom is that a single calculation  is at a minimum two files:
+1. method\_pop.py: the popcron file specifying one or more kernels
+2. simulation.py: the actual calculation that imports the husk,
+uses cornflakes to describe a hypergraph and assemble a result by
+applying the kernels to the hypergraph, and uses another library
+to solve the matrices of your choice.
+
 Example
 -------
 
