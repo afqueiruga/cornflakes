@@ -143,7 +143,7 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
       hmax = CFData_Default_Data(&hs)[i];
     }
   }
-  hmax = sqrt(hmax);
+  hmax = 2.0*sqrt(hmax);
   //printf("hmax: %lf\n",hmax);
   /* Build a hash using this circumradius and fill it with the particles */
   spatialhash_t sh;
@@ -173,12 +173,12 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
       /* build a list of all the particles _near_ a cell */
       int Nlist=0;
       void action(int FOO, int b) {
-	if (Nlist >= listbuf) {
-	  listbuf *= 2;
-	  list = realloc(list,sizeof(int)*listbuf);
-	}
-	list[Nlist] = b;
-	Nlist++;
+		if (Nlist >= listbuf) {
+		  listbuf *= 2;
+		  list = realloc(list,sizeof(int)*listbuf);
+		}
+		list[Nlist] = b;
+		Nlist++;
       }
       SpatialHash_ScanPt(&sh, centroid, action);
       //printf("nlist: %d\n", Nlist); 
@@ -188,9 +188,9 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
       // I just do it myself...
       for(i=0;i<len_ker_centroid;i++) ker_in_inside[i] = ker_in[i];
       for( i=0; i<Nlist;i++) {
-	for( j=0; j<dim; j++) {
-	  ker_in_inside[len_ker_centroid + dim*i + j] = x[ dim*list[i] + j];
-	}
+		for( j=0; j<dim; j++) {
+		  ker_in_inside[len_ker_centroid + dim*i + j] = x[ dim*list[i] + j];
+		}
       }
       /* for(i=0;i<len_ker_centroid+dim*Nlist;i++) printf("%lf ",ker_in_inside[i]); printf("\n"); */
       real_t testeval[Nlist];
@@ -203,16 +203,16 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
       hypervertex_t newedge[l_edge+Nlist];
       for(i=0;i<l_edge;i++) newedge[i] = edge[i];
       for(i=0;i<Nlist;i++) {
-	if (testeval[i]>0 && found[list[i]]==0) {
-	  newedge[l_edge+Naccept] = (PV? PV[list[i]] : list[i]);
-	  found[list[i]]=1;
-	  Naccept++;
-	}
+		if (testeval[i]>0 && found[list[i]]==0) {
+		  newedge[l_edge+Naccept] = (PV? PV[list[i]] : list[i]);
+		  found[list[i]]=1;
+		  Naccept++;
+		}
       }
 
       //printf("Naccept %d\n",Naccept);
       if(Naccept > 0) {
-	Hypergraph_Push_Edge(hgnew,  l_edge+Naccept, newedge);
+		Hypergraph_Push_Edge(hgnew,  l_edge+Naccept, newedge);
       }
     } // end edge loop
   } // end subgraph loop
