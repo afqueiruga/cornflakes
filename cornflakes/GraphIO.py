@@ -10,7 +10,7 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
         1:1,
         2:3,
         3:5,
-        4:9,
+        4:9 if X.shape[1]==2 else 10,
         #4:10,
         8:12}
     vecformatdict = {
