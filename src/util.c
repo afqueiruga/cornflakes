@@ -206,6 +206,8 @@ void load_gmsh(real_t ** x, int * N, int gdim,
     case 3: // Quad 2D
     case 4: // Tet  3D
       ledge=4; break;
+    case 15:
+      ledge=1; break;
     default:
       ledge=4;
     }

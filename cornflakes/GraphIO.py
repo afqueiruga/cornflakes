@@ -215,7 +215,7 @@ def write_gmsh_file(fname, H,X):
 def Load_gmsh(fname,gdim=3):
     H = Hypergraph()
     cflib.Hypergraph_Destroy(H.hg)
-    X = cflib.load_gmsh_np(2, H.hg, fname)
+    X = cflib.load_gmsh_np(gdim, H.hg, fname)
     return X,H
 def write_cloud(fname, X, nodefields):
     import cornflakes as cf
