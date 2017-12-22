@@ -83,7 +83,7 @@ Similarities to other packages
 
 The design of cornflakes is similar to the following libraries:
 
-1. [FEniCS](fenicsproject.org) - difficult to generalize past finite elements
+1. [FEniCS](http://fenicsproject.org) - difficult to generalize past finite elements
 1. [MOOSE](http://mooseframework.org) - No control over main; no DSL
 1. [PyOp2](https://github.com/OP2/PyOP2) - Assembler only. It seems great, but it was developed in parallel to cornflakes! It's only been used for FFC kernels.
 
