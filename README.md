@@ -29,11 +29,9 @@ Or, in pictures,
 ![bigA](
   http://latex.codecogs.com/gif.latex?\dpi{120}&space;\large&space;\mathbf{K}=\underset{\mathtt{edge}\in\mathcal{H}}&space;{\operatorname{\raisebox{-5pt}{\mbox{&space;\Huge&space;\textsf{\textbf{A}}}}}}&space;\mathbf{k}\left%28u\left[\mathtt{edge}\right]\right%29
   )  
-
-
 Cornflakes is designed to be run in parallel. (But, like many things,
 I haven't gotten to that part yet. I might just rewrite it
-all in Julia first.)
+all in Julia first.)  The hypergraph of the problem is used to distribute the computations in parallel by assigning edges to processors using the overlap of vertices to minimize the communication. The parallel vectors can then be distributed figuring out which vertices ended up where.
 
 Philosophy
 ----------
@@ -80,8 +78,8 @@ So far I've cornflakes and popcorn to program:
 1. FEM coupled to a linked finite difference code
 
 
-Similarities
-------------
+Similarities to other packages
+------------------------------
 
 The design of cornflakes is similar to the following libraries:
 
@@ -115,7 +113,7 @@ Installing
 --------
 
 1. mkdir build
-2. cd buid
+2. cd build
 3. ccmake ..
 4. set CMAKE_INSTALL_PREFIX to somewhere local
 5. Set USE_LIS or USE_PETSC
