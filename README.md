@@ -16,13 +16,24 @@ It's meant for super-quick prototyping for small problems
 allowing for interactivity and inspection of the matrices,
 etc.
 
+
+Computational science codes are often broken down into repetitive applications of a **kernel** to a small chunk of data, e.g., a finite difference stencil applied nine nodes. Cornflakes abstracts the organization of the individual operators into a **hypergraph**. Each **hyperedge** of the graph represents one instance of applying the kernel calculation to the data.
+Every **hypervertex** in the graph represents a location with associated data., e.g., the fields values on the finite difference grid points. The edge is the set of vertices containing data required to calculate the kernel. The value of the hypervertex is used to index into a global vector using a **DofMap** for each of the arguments of the kernels; e.g. vertex 2000 maps to degrees of freedom `{6000,6001,6002}` in the global vector. A large class of computations can be described by this abstraction, such as
+- Finite Element meshes - the edge is an element
+- Finite difference grids - the edge is a stencil
+- Particle methods - the edge is a neighbor list
+
+Or, in pictures,  
+![hypergraphs](doc/figures/hypergraphs.pdf)  
+ The result of each edge computation is a contribution to the global system whose local results are put together in the "big A" assembly:  
 ![bigA](
   http://latex.codecogs.com/gif.latex?\dpi{120}&space;\large&space;\mathbf{K}=\underset{\mathtt{edge}\in\mathcal{H}}&space;{\operatorname{\raisebox{-5pt}{\mbox{&space;\Huge&space;\textsf{\textbf{A}}}}}}&space;\mathbf{k}\left%28u\left[\mathtt{edge}\right]\right%29
-  )
+  )  
 
-It is designed to be run in parallel, but, like many things,
+
+Cornflakes is designed to be run in parallel. (But, like many things,
 I haven't gotten to that part yet. I might just rewrite it
-all in Julia first.
+all in Julia first.)
 
 Philosophy
 ----------
@@ -45,21 +56,21 @@ to solve the matrices of your choice.
 Motivations
 -----------
 
-Cornflakes is heavily inspired by FEniCS. (If you just need to do FEM, use FEniCS! 
-Cornflakes isn't ready for you.) My dissertation involved extensive modifications 
-to FEniCS in both Dolphin and FFC to express the multiphysics, nonlinear contacts 
+Cornflakes is heavily inspired by FEniCS. (If you just need to do FEM, use FEniCS!
+Cornflakes isn't ready for you.) My dissertation involved extensive modifications
+to FEniCS in both Dolphin and FFC to express the multiphysics, nonlinear contacts
 between elements. I managed to express the integrals in the DSL but saw the limitations
-to express anything further. With dolhpin, I had to copy-and-paste a lot of code, and 
+to express anything further. With dolphin, I had to copy-and-paste a lot of code, and
 felt that I could make it more general.
-I was further working on coupling Disrete Elements to FEniCS for particle-laden flow,
+I was further working on coupling Discrete Elements to FEniCS for particle-laden flow,
 but I realized there must be a better way.
 
-Cornflakes and popcorn were first written to perform the studies in 
+Cornflakes and popcorn were first written to perform the studies in
 "Numerical experiments on the convergence properties of state-based peridynamic laws...",
-where I needed a new DSL system to describe, automatically derive, and differentiate 
-general Peridynamic calculations. 
+where I needed a new DSL system to describe, automatically derive, and differentiate
+general Peridynamic calculations.
 
-So far I've cornflakes and popcorn to express:
+So far I've cornflakes and popcorn to program:
 
 1. Finite Elements
 1. Peridynamics
@@ -72,17 +83,19 @@ So far I've cornflakes and popcorn to express:
 Similarities
 ------------
 
-1. FEniCS - difficult to generalize past finite elements
-1. MOOSE - No control over main; no DSL
-1. pyOp2 - Assembler only. It seems great, but it was developed in parallel! It's only been used for FFC kernels, though.
+The design of cornflakes is similar to the following libraries:
+
+1. [FEniCS](fenicsproject.org) - difficult to generalize past finite elements
+1. [MOOSE](http://mooseframework.org) - No control over main; no DSL
+1. [PyOp2](https://github.com/OP2/PyOP2) - Assembler only. It seems great, but it was developed in parallel to cornflakes! It's only been used for FFC kernels.
 
 
 A distinction to TensorFlow is what graph entities represent. Each Hypergraph represents
 kernel calculations that _can happen in parallel_, with the graph connectivity representing
-how small bits of data overlap. The purpose of the cornflakes description is to facilitate 
-communication-minimizing graph partitioning across HPC systems. E.g., the use case is to 
+how small bits of data overlap. The purpose of the cornflakes description is to facilitate
+communication-minimizing graph partitioning across HPC systems. E.g., the use case is to
 distribute tens of millions of calculations representing elements of a mesh across an HPC system,
-which will have to be evaluated millions of times. In TensorFlow, the graph entities are chained 
+which will have to be evaluated millions of times. In TensorFlow, the graph entities are chained
 together in a Directed Acyclic Graph, which describes _the interdependencies for the ordering_ for
 the calculations. The concepts are not mutually exclusive. (On another goal, I'm currently
 trying to write a TensorFlow node for calling cornflakes assemblies.)
