@@ -29,9 +29,11 @@ Or, in pictures,
 ![bigA](
   http://latex.codecogs.com/gif.latex?\dpi{120}&space;\large&space;\mathbf{K}=\underset{\mathtt{edge}\in\mathcal{H}}&space;{\operatorname{\raisebox{-5pt}{\mbox{&space;\Huge&space;\textsf{\textbf{A}}}}}}&space;\mathbf{k}\left%28u\left[\mathtt{edge}\right]\right%29
   )  
-Cornflakes is designed to be run in parallel. (But, like many things,
+A scientific program is repeated applications of `Assemble` and solutions of the resulting system of equations.
+
+Cornflakes is designed to be run in parallel (but, like many things,
 I haven't gotten to that part yet. I might just rewrite it
-all in Julia first.)  The hypergraph of the problem is used to distribute the computations in parallel by assigning edges to processors using the overlap of vertices to minimize the communication. The parallel vectors can then be distributed figuring out which vertices ended up where.
+all in Julia first.)  The hypergraph of the problem is used to distribute the computations in parallel by assigning edges to processors using the overlap of vertices to minimize the communication. The parallel vectors can then be distributed figuring out where vertices ended up. The popcorn DSL is agnostic to the target processor, and the architecture is also designed with GPU execution in mind. (However, the architecture is still in flux enough that I cannot commit the manhours to actually implementing this yet.)
 
 Philosophy
 ----------
