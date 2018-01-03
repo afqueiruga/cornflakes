@@ -8,13 +8,18 @@ Lawrence Berkeley Lab
 Intro
 -----
 
-Cornflakes is a simple library for assembling
+Cornflakes and [popcorn]() are a new general purpose scientific package.
+It's designed to enable super-quick design of standard 
+scientific codes with a flexible architecture suitable for both
+prototyping and deployable code.
+It supports the Scipy backend for interactively designing problems,
+inspecting matrices, etc., and then the same code can be used with
+a PETSc or LIS backend for high performance execution.
+Cornflakes contains the methods for assembling
 vectors and matrices from the kernels created by the accompanying
-Domain Specific Language popcorn. In a sense, cornflakes
-is the runtime to the popcorn DSL.
-It's meant for super-quick prototyping for small problems
-allowing for interactivity and inspection of the matrices,
-etc.
+Domain Specific Language popcorn. In that sense, cornflakes
+is the runtime to the popcorn DSL. The popcorn repository can be found at
+[https://bitbucket.org/afqueiruga/popcorn](https://bitbucket.org/afqueiruga/popcorn).
 
 
 Computational science codes are often broken down into repetitive applications of a **kernel** to a small chunk of data, e.g., a finite difference stencil applied nine nodes. Cornflakes abstracts the organization of the individual operators into a **hypergraph**. Each **hyperedge** of the graph represents one instance of applying the kernel calculation to the data.
@@ -95,7 +100,8 @@ The design of cornflakes is similar to the following libraries:
 1. [MOOSE](https://mooseframework.org) - No control over main; no DSL
 1. [PyOp2](https://github.com/OP2/PyOP2) - Assembler only. It seems great, but it was developed in parallel to cornflakes! It's only been used for FFC kernels.
 
-[Tensorflow](https://tensorflow.org) has a similar idea to describing calculations as a graph, but the graph entities represent different things.
+[Tensorflow](https://tensorflow.org) has a similar idea to describing calculations as a graph, 
+but the graph entities represent different things.
 In cornflakes, each Hypergraph represents
 kernel calculations that _can happen in parallel_, with the graph connectivity representing
 how small bits of data overlap. The purpose of the cornflakes description is to facilitate
@@ -112,12 +118,12 @@ cornflakes assemblies.
 Example
 -------
 
-TBD
+TODO
 
 Requirements
 ------------
 
-Popcorn in path, scipy, numpy. Output is to vtk files.
+Popcorn in path, scipy, numpy. Output is to vtk or silo files. PETSc and LIS support is optional.
 
 Installing
 --------
