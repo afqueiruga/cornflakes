@@ -23,6 +23,19 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
         2:"{0} {1} 0\n{2} {3} 0\n0 0 0\n",
         3:"{0} {1} {2}\n{3} {4} {5}\n{6} {7} {8}\n"
         }
+    # yes, I know, eyerollemoji
+    variformatdict = {
+        1:"{0} 0 0\n0 0 0\n0 0 0\n",
+        2:"{0} {1} 0\n0 0 0\n0 0 0\n",
+        3:"{0} {1} {2}\n0 0 0\n0 0 0\n",
+        4:"{0} {1} {2}\n{3} 0 0\n0 0 0\n",
+        5:"{0} {1} {2}\n{3} {4} 0\n0 0 0\n",
+        6:"{0} {1} {2}\n{3} {4} {5}\n0 0 0\n",
+        7:"{0} {1} {2}\n{3} {4} {5}\n{6} 0 0\n",
+        8:"{0} {1} {2}\n{3} {4} {5}\n{6} {7} 0\n",
+        9:"{0} {1} {2}\n{3} {4} {5}\n{6} {7} {8}\n"
+        }
+        
     elems = H.view()[0]
     vecfmt = vecformatdict[X.shape[1]]
     tenfmt = tenformatdict[X.shape[1]]
@@ -63,8 +76,9 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
                 fh.write(vecfmt.format(*l))
         else:
             fh.write("TENSORS {0} double\n".format(n))
+            fmt=variformatdict[len(f[0])]
             for l in f:
-                fh.write(tenfmt.format(*l))
+                fh.write(fmt.format(*l))
     # Dump all of the node fields
     if nodefields:
         fh.write("POINT_DATA {0}\n".format(X.shape[0]))
