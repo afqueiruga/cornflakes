@@ -320,9 +320,9 @@ CFMat.np=CFMat_np
   }
   %}
 %extend Dofmap {
-  Dofmap(int stride, int offset) {
+  Dofmap(int length, int offset, int stride) {
     dofmap_t * dmap = malloc(sizeof(dofmap_t));
-    Dofmap_Strided(dmap, stride,offset);
+    Dofmap_Strided(dmap, length,offset,stride);
     return dmap;
   }
   ~Dofmap() {
@@ -344,8 +344,10 @@ Dofmap = dofmap_t
 Dofmap.Get = Dofmap.Get_np
 Dofmap.Get_List = Dofmap.Get_List_np
 
-def Dofmap_Strided(stride,offset=0):
-  return Dofmap(stride,offset)
+def Dofmap_Strided(length,offset=0,stride=-1):
+  if stride==-1:
+    stride=length
+  return Dofmap(length,offset,stride)
 
 def Dofmap_From_Vertices(stride, vertices, offset=0):
   start = int(vertices.min())

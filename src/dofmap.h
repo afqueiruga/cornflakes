@@ -11,6 +11,7 @@ typedef struct Dofmap {
   //enum dofmap_type type;
   union {
     struct strided_t{
+      int length;
       int stride;
       int offset;
     }  strided ;
@@ -24,7 +25,7 @@ typedef struct Dofmap {
 } dofmap_t;
 
 /* Constructors */
-void Dofmap_Strided(dofmap_t * dm, int stride, int offset);
+void Dofmap_Strided(dofmap_t * dm, int length, int offset, int stride);
 void Dofmap_Tabled(dofmap_t * dm, int Nentry, int stride, int * table, int offset);
 /* Methods */
 void Dofmap_Get_List(dofmap_t * dm, int nvert, hypervertex_t * Vs, int * dofs, int * ndofs);

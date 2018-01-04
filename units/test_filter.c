@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
 #undef ADDPAIR
 
   /* Setup dmaps */
-  Dofmap_Strided(&NodeVec, 2,0);
-  Dofmap_Strided(&Global, 2,0);
+  Dofmap_Strided(&NodeVec, 2,0,2);
+  Dofmap_Strided(&Global, 2,0,2);
   
   /* Initialize CFData */
   CFData_Default_New(&x,ndof);
