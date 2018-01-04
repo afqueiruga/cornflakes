@@ -8,28 +8,39 @@ Lawrence Berkeley Lab
 Intro
 -----
 
-Cornflakes is a simple library for assembling
+Cornflakes and [popcorn]() are a new general purpose scientific package.
+It's designed to enable super-quick design of standard 
+scientific codes with a flexible architecture suitable for both
+prototyping and deployable code.
+It supports the Scipy backend for interactively designing problems,
+inspecting matrices, etc., and then the same code can be used with
+a PETSc or LIS backend for high performance execution.
+Cornflakes contains the methods for assembling
 vectors and matrices from the kernels created by the accompanying
-Domain Specific Language popcorn. In a sense, cornflakes
-is the runtime to the popcorn DSL.
-It's meant for super-quick prototyping for small problems
-allowing for interactivity and inspection of the matrices,
-etc.
+Domain Specific Language popcorn. In that sense, cornflakes
+is the runtime to the popcorn DSL. The popcorn repository can be found at
+[https://bitbucket.org/afqueiruga/popcorn](https://bitbucket.org/afqueiruga/popcorn).
 
 
 Computational science codes are often broken down into repetitive applications of a **kernel** to a small chunk of data, e.g., a finite difference stencil applied nine nodes. Cornflakes abstracts the organization of the individual operators into a **hypergraph**. Each **hyperedge** of the graph represents one instance of applying the kernel calculation to the data.
 Every **hypervertex** in the graph represents a location with associated data., e.g., the fields values on the finite difference grid points. The edge is the set of vertices containing data required to calculate the kernel. The value of the hypervertex is used to index into a global vector using a **DofMap** for each of the arguments of the kernels; e.g. vertex 2000 maps to degrees of freedom `{6000,6001,6002}` in the global vector. A large class of computations can be described by this abstraction, such as
-- Finite Element meshes - the edge is an element
-- Finite difference grids - the edge is a stencil
-- Particle methods - the edge is a neighbor list
 
-Or, in pictures,  
+- Finite Element meshes: the edge is an element
+- Finite difference grids: the edge is a stencil
+- Particle methods: the edge is a neighbor list
+
+Or, in pictures, comparing each of those typical ideas on the left to the abstract hypergraph on the right,
 ![hypergraphs](doc/figures/hypergraphs.pdf)  
  The result of each edge computation is a contribution to the global system whose local results are put together in the "big A" assembly:  
 ![bigA](
   http://latex.codecogs.com/gif.latex?\dpi{120}&space;\large&space;\mathbf{K}=\underset{\mathtt{edge}\in\mathcal{H}}&space;{\operatorname{\raisebox{-5pt}{\mbox{&space;\Huge&space;\textsf{\textbf{A}}}}}}&space;\mathbf{k}\left%28u\left[\mathtt{edge}\right]\right%29
   )  
+The $\mathbf{K}$ is usually something like the stiffness matrix, a load vector, or even some set of properties
+based on the state of the system. $u[\mathtt{edge}]$ are the important variables that correspond to the
+vertices included in the edge, e.g. the pressures, temperatures, and material properties of the grid points.
 A scientific program is repeated applications of `Assemble` and solutions of the resulting system of equations.
+Cornflakes also includes helpers for forming graphs by loading from a finite element mesh or building a 
+neighbor list for a particle cloud, and writing out data to VTK or silo files.
 
 Cornflakes is designed to be run in parallel (but, like many things,
 I haven't gotten to that part yet. I might just rewrite it
@@ -85,31 +96,34 @@ Similarities to other packages
 
 The design of cornflakes is similar to the following libraries:
 
-1. [FEniCS](http://fenicsproject.org) - difficult to generalize past finite elements
-1. [MOOSE](http://mooseframework.org) - No control over main; no DSL
+1. [FEniCS](https://fenicsproject.org) - difficult to generalize past finite elements
+1. [MOOSE](https://mooseframework.org) - No control over main; no DSL
 1. [PyOp2](https://github.com/OP2/PyOP2) - Assembler only. It seems great, but it was developed in parallel to cornflakes! It's only been used for FFC kernels.
 
-
-A distinction to TensorFlow is what graph entities represent. Each Hypergraph represents
+[Tensorflow](https://tensorflow.org) has a similar idea to describing calculations as a graph, 
+but the graph entities represent different things.
+In cornflakes, each Hypergraph represents
 kernel calculations that _can happen in parallel_, with the graph connectivity representing
 how small bits of data overlap. The purpose of the cornflakes description is to facilitate
 communication-minimizing graph partitioning across HPC systems. E.g., the use case is to
 distribute tens of millions of calculations representing elements of a mesh across an HPC system,
-which will have to be evaluated millions of times. In TensorFlow, the graph entities are chained
-together in a Directed Acyclic Graph, which describes _the interdependencies for the ordering_ for
-the calculations. The concepts are not mutually exclusive. (On another goal, I'm currently
-trying to write a TensorFlow node for calling cornflakes assemblies.)
+which will have to be evaluated millions of times. In TensorFlow, the graph nodes represent
+larger computations that are chained together in a Directed Acyclic Graph, whose edges
+describes _the interdependencies for the ordering_ for the calculations. The concepts are not
+mutually exclusive. On another front, I'm interested in writing a TensorFlow op for calling
+cornflakes assemblies.
 
 
 
 Example
 -------
 
+TODO
 
 Requirements
 ------------
 
-Popcorn in path, scipy, numpy. Output is to vtk files.
+Popcorn in path, scipy, numpy. Output is to vtk or silo files. PETSc and LIS support is optional.
 
 Installing
 --------
