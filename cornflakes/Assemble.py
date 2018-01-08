@@ -95,7 +95,8 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
             cftargets[o][0].Finalize()
         if (made_new):
             #print "Returning a copy for ", ke.name
-            l = [ np.copy(cftargets[o][0].np()) for o in onames ]
+            # l = [ np.copy(cftargets[o][0].np()) for o in onames ]
+            l = [ cftargets[o][0].np().copy() for o in onames ]
             return l
         else:
             #print "Returning the mask for ", ke.name
@@ -110,10 +111,10 @@ def Filter(ke,H, dofmaps,data):
     return htrue,hfalse
 
 def Apply_BC(dofs,vals, K=None,R=None):
-    if K!=None:
+    if K is not None:
         for i in dofs:
             K.data[K.indptr[i]:K.indptr[i+1]] = 0.0
             K[i,i] = 1.0
-    if R!=None:
+    if R is not None:
         R[dofs]=vals
 
