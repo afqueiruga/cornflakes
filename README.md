@@ -8,7 +8,7 @@ Lawrence Berkeley Lab
 Intro
 -----
 
-Cornflakes and [popcorn]() are a new general purpose scientific package.
+Cornflakes and [popcorn](https://bitbucket.org/afqueiruga/popcorn) are a new general purpose scientific package.
 It's designed to enable super-quick design of standard 
 scientific codes with a flexible architecture suitable for both
 prototyping and deployable code.
@@ -45,6 +45,72 @@ neighbor list for a particle cloud, and writing out data to VTK or silo files.
 Cornflakes is designed to be run in parallel (but, like many things,
 I haven't gotten to that part yet. I might just rewrite it
 all in Julia first.)  The hypergraph of the problem is used to distribute the computations in parallel by assigning edges to processors using the overlap of vertices to minimize the communication. The parallel vectors can then be distributed figuring out where vertices ended up. The popcorn DSL is agnostic to the target processor, and the architecture is also designed with GPU execution in mind. (However, the architecture is still in flux enough that I cannot commit the manhours to actually implementing this yet.)
+
+Quick Preview
+-------
+
+What does that mean? Well, this is the smallest viable kernel:
+```python
+from popcorn import *
+Vector = DofSpace(2,0,2) # vector on each vertex
+Param  = DofSpace(1,-1) # global
+i_x = Input('x',Vector) # original position
+i_y = Input('y',Vector) # new position
+i_k = Input('k',Param) # stiffness
+x0,x1 = i_x.Vertex_Split()
+y0,y1 = i_y.Vertex_Split()
+norm = lambda a : sqrt( (a.T*a)[0,0] )
+f = i_k[0] * (norm(y0-y1)-norm(x0-x1))/(norm(y0-y1) * (y1-y0)
+R = Matrix([f,-f])
+K = R.jacobian(i_y)
+o_R = Output('R',[Vector],1)
+o_K = Output('K',[Vector],2)
+Kernel("spring_force",
+      listing=[
+          Asgn(o_R,R,'='),
+          Asgn(o_K,K,'=')
+      ])
+Husk('spring')
+```
+
+and this is the shortest possible problem:
+
+```python
+import cornflakes as cf
+import numpy as np
+import husk_spring
+dm_scalar = cf.Dofmap_Strided(1)
+dm_vector = cf.Dofmap_Strided(2)
+x = cf.PP.init_grid(10,10,[0,0],[1,0],[0,1])
+y = x.copy()
+H = cf.Graphers.Build_Pair_Graph(x,0.2)
+data = {
+    'x':(x,dm_vector),
+    'y':(y,dm_vector),
+    'k':(np.array([1.0]),dm_scalar)
+	}
+K,R = cf.Assemble2(husk_spring.kernel_spring_force,
+                   H,data,
+                   {'R':(dm_vector,),'K':(dm_vector,)},
+                   ndof=x.size)
+marked_bot = cf.select_nodes(x, lambda a:a[1]<0.0001)
+bcdofs = dm_vector.Get_List(marked_bot)
+bcvals = np.zeros(bcdofs.shape,dtype=np.double)
+cf.Apply_BC(bcdofs,bcvals,  K,R)
+marked_top = cf.select_nodes(x, lambda a:a[1]>1.0-0.0001)
+loaddofs = dm_vector.Get_List(marked_top).reshape(len(marked_top),2)[:,1] # Just the y's
+R[loaddofs] -= 0.5
+import scipy.sparse.linalg as splin
+u = splin.spsolve(K,R)
+y -= u.reshape(y.shape)
+```
+That's all the code it takes to solve (one Newton iteration) of a nonlinear spring network.
+
+[See the example notebook for a walk through:  /examples/spring_example.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/afqueiruga/cornflakes/raw/5aa3b33210a61951d923846e2747c52076471f33/examples/spring_example.ipynb)
+
+More examples can be found in the examples directory. Those are split
+up into two files, the popcorn specification and the cornflakes script.
+
 
 Philosophy
 ----------
@@ -87,8 +153,8 @@ So far I've cornflakes and popcorn to program:
 1. Peridynamics
 1. Bonded Particles
 1. Reproducing Kernel Particle Method
-1. Fully coupled Peridynamics + 2D FEM + 1D dynamically mesh FEM all in cornflakes
-1. FEM coupled to a linked finite difference code
+1. Fully coupled Peridynamics + 2D FEM + 1D dynamically mesh FEM, all in cornflakes
+1. FEM in cornflakes coupled to an externally linked finite difference code
 
 
 Similarities to other packages
@@ -98,7 +164,7 @@ The design of cornflakes is similar to the following libraries:
 
 1. [FEniCS](https://fenicsproject.org) - difficult to generalize past finite elements
 1. [MOOSE](https://mooseframework.org) - No control over main; no DSL
-1. [PyOp2](https://github.com/OP2/PyOP2) - Assembler only. It seems great, but it was developed in parallel to cornflakes! It's only been used for FFC kernels.
+1. [PyOp2](https://github.com/OP2/PyOP2) - Assembler only. It seems great, but it was developed in parallel to cornflakes! It's only been used for FEniCS kernels, and seems married to the interpretation as a physical mesh.
 
 [Tensorflow](https://tensorflow.org) has a similar idea to describing calculations as a graph, 
 but the graph entities represent different things.
@@ -114,12 +180,6 @@ mutually exclusive. On another front, I'm interested in writing a TensorFlow op 
 cornflakes assemblies.
 
 
-
-Example
--------
-
-TODO
-
 Requirements
 ------------
 
@@ -128,25 +188,38 @@ Popcorn in path, scipy, numpy. Output is to vtk or silo files. PETSc and LIS sup
 Installing
 --------
 
+Cornflakes uses cmake to compile.
+The wrappers to LIS and PETSc are optional; use the options in the configuration
+to point cmake to their install locations.
+A superbuild and a dockerfile is coming soon.
+
+
 1. mkdir build
 2. cd build
-3. ccmake ..
-4. set CMAKE_INSTALL_PREFIX to somewhere local
-5. Set USE_LIS or USE_PETSC
+3. ccmake /path/to/cornflakes/repository
+4. set CMAKE\_INSTALL\_PREFIX to somewhere local
+5. Set USE\_LIS or USE\_PETSC
 6. make
 7. make test
 8. make install
 
+After installing cornflakes, use lazyinstall.sh in popcorn to copy it over to the install prefix.
+Cornflakes installs an `env.bash.conf` and an `env.csh.conf` to the install prefix. Source the one
+corresponding to your terminal to load cornflakes into the path.
+
 ### OSX Specific:
 
-Things on OSX are tricky. You'll need to know where to link things:
+Things on OSX are tricky. You'll need to know where to link things. Here is how to determine
+the locations for a macports based system:
 
-1. set CMAKE_C_COMPILER and CMAKE_CXX_COMPILER gcc-mp-5
-2. set SWIG_EXECUTABLE:
+1. set CMAKE\_C\_COMPILER and CMAKE\_CXX\_COMPILER gcc-mp-5
+2. set SWIG_EXECUTABLE:  
 /opt/local/bin/swig
-3. Set EXTRA_INCLUDES:
+3. Set EXTRA\_INCLUDES:  
 port contents numpy | grep include
-4. Set PYTHON_INCLUDE_DIR
+4. Set PYTHON\_INCLUDE\_DIR  
 port contents python27 | grep include
-5. Set PYTHON_LIBRARY
+5. Set PYTHON\_LIBRARY  
 port contents python27 | grep libpython2.7
+
+The macports and homebrew toolchains will be included with the aforementioned superbuild.
