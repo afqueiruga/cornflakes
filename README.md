@@ -1,9 +1,9 @@
 Cornflakes
 ==========
 
-2015-2017 Alejandro F Queiruga
-
-Lawrence Berkeley Lab
+Alejandro F Queiruga  
+Lawrence Berkeley Lab  
+2015-2018
 
 Intro
 -----
@@ -49,7 +49,7 @@ all in Julia first.)  The hypergraph of the problem is used to distribute the co
 Quick Preview
 -------
 
-What does that mean? Well, this is the smallest viable kernel:
+What does that mean? Well, this is a very simple kernel:
 ```python
 from popcorn import *
 Vector = DofSpace(2,0,2) # vector on each vertex
@@ -62,7 +62,7 @@ y0,y1 = i_y.Vertex_Split()
 norm = lambda a : sqrt( (a.T*a)[0,0] )
 f = i_k[0] * (norm(y0-y1)-norm(x0-x1))/(norm(y0-y1) * (y1-y0)
 R = Matrix([f,-f])
-K = R.jacobian(i_y)
+K = R.jacobian(i_y) # <---- Take a symbolic derivative!
 o_R = Output('R',[Vector],1)
 o_K = Output('K',[Vector],2)
 Kernel("spring_force",
@@ -73,7 +73,7 @@ Kernel("spring_force",
 Husk('spring')
 ```
 
-and this is the shortest possible problem:
+and this is a script that uses it to solve problem:
 
 ```python
 import cornflakes as cf
@@ -115,6 +115,29 @@ up into two files, the popcorn specification and the cornflakes script.
 Philosophy
 ----------
 
+The computational kernels (like `"spring_force"`) are the building blocks of
+scientific programs. Popcorn solves the problem of both doing the mathematical derivations
+and writing the code for complex equations. Note how above we just took the tangent
+of the residual in one line. We can even make $\mathbf{f}$ extremely nonlinear and nothing
+would change. That type of law took me three weeks to get the tangent right five years
+ago doing the derivation and implementation by hand! Getting derivatives is one of the
+biggest barriers to using high order implicit methods.
+
+Cornflakes assembles those computational kernels into the things we need, systems of
+equations. Cornflakes does not tell you how to layout data nor does it help you
+solve the systems of equations. (That's PETSc's job.) The data layout is seperate from the
+kernel implementation. It is possible to reuse the same popcorn kernels and change the
+`Dofmap` objects to assemble kernels from different projects with different numerical
+methods into the same linear system, with an interwoven layout for cache optimization and
+fill-reducing ordering.
+
+Cornflakes also does not care about the underlying data types.
+The `CFData` and `CFMat` objects wrap numpy, scipy, PETSc, and LIS objects, and are
+extensible. At the Python level, it is possible to seemlessly use Numpy and Scipy types.
+
+
+These are the current guiding points to the architecture design:
+
 1. The user must retain control of main.
 2. Agnostic to how the kernel was written. It just has to have
 the kernel struct. The first DSL was already replaced (kerngen).
@@ -122,7 +145,7 @@ the kernel struct. The first DSL was already replaced (kerngen).
 It gets expensive. Some of my kernels take 5 minutes to run. The
 production code should be given already compiled shared object files.
 
-The main idiom is that a single calculation  is at a minimum two files:  
+The main idiom is that a single calculation  is at a minimum two files:
 
 1. method\_pop.py: the popcron file specifying one or more kernels
 2. simulation.py: the actual calculation that imports the husk,
@@ -186,13 +209,12 @@ Requirements
 Popcorn in path, scipy, numpy. Output is to vtk or silo files. PETSc and LIS support is optional.
 
 Installing
---------
+----------
 
 Cornflakes uses cmake to compile.
 The wrappers to LIS and PETSc are optional; use the options in the configuration
 to point cmake to their install locations.
-A superbuild and a dockerfile is coming soon.
-
+A superbuild and a dockerfile is coming soon. This is the general build process:
 
 1. mkdir build
 2. cd build
@@ -223,3 +245,8 @@ port contents python27 | grep include
 port contents python27 | grep libpython2.7
 
 The macports and homebrew toolchains will be included with the aforementioned superbuild.
+
+License
+-------
+
+TBD. Cite this repository if you refer to the code or, unlikely, use it.
