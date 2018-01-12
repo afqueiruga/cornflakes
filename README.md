@@ -30,7 +30,7 @@ Every **hypervertex** in the graph represents a location with associated data., 
 - Particle methods: the edge is a neighbor list
 
 Or, in pictures, comparing each of those typical ideas on the left to the abstract hypergraph on the right,
-![hypergraphs](doc/figures/hypergraphs.pdf)  
+![hypergraphs](doc/figures/hypergraphs.png)  
  The result of each edge computation is a contribution to the global system whose local results are put together in the "big A" assembly:  
 ![bigA](
   http://latex.codecogs.com/gif.latex?\dpi{120}&space;\large&space;\mathbf{K}=\underset{\mathtt{edge}\in\mathcal{H}}&space;{\operatorname{\raisebox{-5pt}{\mbox{&space;\Huge&space;\textsf{\textbf{A}}}}}}&space;\mathbf{k}\left%28u\left[\mathtt{edge}\right]\right%29
