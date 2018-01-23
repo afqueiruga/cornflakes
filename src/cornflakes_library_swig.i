@@ -539,7 +539,6 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     /* Extract the output signature from the data dicctionary.
        The python layer of Assemble is reponsible for initializing empty
        output targets and calling fill_sparsity if needed. */
-    //target_t targets[ke->noutp];
     void * targets[ke->noutp];
     dofmap_t * odofmaps[ke->noutp*KERNEL_OUT_MAP_MAX]; // Yup, making a giant argument.
     for(int i=0; i<ke->noutp; i++) {
@@ -552,11 +551,8 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       } else {
 	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
       }
-      //targets[i].rank = t->rank;
-      //if(targets[i].rank==2) targets[i].K = t->K;
-      //else targets[i].R = t->R;
+
       /* Get the list of dofmaps */
-      // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
 		obj_dm = PySequence_GetItem(pair,1 + j);
 		const int rest = SWIG_ConvertPtr(obj_dm,
@@ -617,31 +613,13 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     cfdata_t data[ke->ninp];
     cfdata_t *data_ptrs[ke->ninp];
     dofmap_t * idofmaps[ke->ninp];
-    for(int i=0; i<ke->ninp; i++) {
-      PyObject *pair, *obj_dat, *obj_dm;
-      PyArrayObject *arrobj;
-      pair = PyDict_GetItemString(datadict, ke->inp[i].name);
-      /* Get the CFData */
-      obj_dat = PySequence_GetItem(pair,0);
-      isnewobj = 0;
-      arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
-      if(isnewobj) {
-		newobjs[n_newobj] = arrobj;
-		n_newobj++;
-      }
-      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
-      data_ptrs[i] = data+i;
-      /* Get the dofmap */
-      obj_dm  = PySequence_GetItem(pair,1);
-      const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
-      Py_DECREF(obj_dm);
-      Py_DECREF(obj_dat);
-    }
+	extract_data_ptrs(ke,datadict,
+					  data,data_ptrs,idofmaps,
+					  &n_newobj, newobjs);
 
     /* Extract the output signature from the data dicctionary.
        The python layer of Assemble is reponsible for initializing empty
        output targets and calling fill_sparsity if needed. */
-    //target_t targets[ke->noutp];
     void * targets[ke->noutp];
     dofmap_t * odofmaps[ke->noutp*KERNEL_OUT_MAP_MAX]; // Yup, making a giant argument.
     for(int i=0; i<ke->noutp; i++) {
@@ -651,19 +629,19 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       obj_targ = PySequence_GetItem(pair,0);
       if(obj_targ==NULL) printf("WTF??\n");
       if(ke->outp[i].rank==2) {
-	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
+		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFMat, 0);
       } else {
-	const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
+		const int rest = SWIG_ConvertPtr(obj_targ, (void**)(targets+i), SWIGTYPE_p_CFData, 0);
       }
 
       /* Get the list of dofmaps */
       for(int j=0; j<ke->outp[i].nmap; j++) {
-	obj_dm = PySequence_GetItem(pair,1 + j);
-	if(obj_dm==NULL) printf("WTF??\n");
-	const int rest = SWIG_ConvertPtr(obj_dm,
-					 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
-					 SWIGTYPE_p_Dofmap, 0);
-	Py_DECREF(obj_dm);
+		obj_dm = PySequence_GetItem(pair,1 + j);
+		if(obj_dm==NULL) printf("WTF??\n");
+		const int rest = SWIG_ConvertPtr(obj_dm,
+										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
+										 SWIGTYPE_p_Dofmap, 0);
+		Py_DECREF(obj_dm);
       }
       Py_DECREF(obj_targ);
     }

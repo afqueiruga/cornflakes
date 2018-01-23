@@ -16,7 +16,7 @@ void filter(kernel_t * ke, hypergraph_t * hg,
     /* Allocate the local vectors for this size edge */
     int len_ker_in = kernel_inps_len(ke, he->l_edge);
     int len_ker_out = kernel_outps_len(ke, he->l_edge);
-    if(len_ker_out != 1) printf("This is not valid kernel for fitlering!\n");
+    if(len_ker_out != 1) printf("This is not valid kernel for fitlering!\n(But I'm giving you the benefit of the doubt and doing it anyways...\n");
     
     real_t ker_in[ len_ker_in];
     real_t ker_out[len_ker_out];
@@ -26,7 +26,7 @@ void filter(kernel_t * ke, hypergraph_t * hg,
     for(hex=0; hex<he->n_edge; hex++) {
       edge = Hyperedges_Get_Edge(he, hex);
       /* Collect the data */
-      collect2(ker_in, ke, edge,he->l_edge, idofmaps,data);
+      collect2(ke, edge,he->l_edge ,data,idofmaps, ker_in);
       /* Calculate the kernel */
       for(i=0;i<len_ker_out;i++) ker_out[i] = 0.0;
       ke->eval(he->l_edge, ker_in, ker_out);
