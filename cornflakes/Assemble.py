@@ -11,6 +11,20 @@ CFData_From_Ptr = cflib.CFData_From_Ptr
 CFMat = cflib.CFMat
 CFMat_BC = cflib.CFMat_BC
 
+def Collect2(ke, edge, data):
+    if not isinstance(data, dict):
+        from itertools import chain
+        data = dict(chain(*[f.items() for f in data]))
+    # Check the input dictionary
+    inps = cflib.inpArray_frompointer(ke.inp)
+    for i in xrange(ke.ninp):
+        try:
+            data[inps[i].name]
+        except KeyError:
+            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
+            raise KeyError('kernel assembly error')
+            
+    return cflib.collect2_np(ke,edge,data)
 def Fill_Sparsity2(ke, H, data, cftargets):
     cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
     outps = cflib.outpArray_frompointer(ke.outp)
@@ -52,8 +66,16 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
     if not isinstance(data, dict):
         from itertools import chain
         data = dict(chain(*[f.items() for f in data]))
+    # Check the input dictionary
+    inps = cflib.inpArray_frompointer(ke.inp)
+    for i in xrange(ke.ninp):
+        try:
+            data[inps[i].name]
+        except KeyError:
+            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
+            raise KeyError('kernel assembly error')
+            
     # Sanitize the output dictionary
-	# from IPython import embed ; embed()
     outps = cflib.outpArray_frompointer(ke.outp)
     onames = [ outps[j].name for j in xrange(ke.noutp) ]
     need_to_sparsify = False
@@ -63,7 +85,7 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         try:
             cftargets[name]
         except KeyError:
-            print "cornflakes runtime error: kernel ', ke.name,': You're missing key ", name, " in your target dict!"
+            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your target dict!"
             raise KeyError('kernel assembly error')
         # Do we need to make it for it?
         if not hasattr(cftargets[name][0],'Place'):
