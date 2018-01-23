@@ -3,11 +3,14 @@ import numpy as np
 
 class Hypergraph():
 
-    def __init__(self, alloc_init=1):
+    def __init__(self, alloc_init=1, fname=None):
         self.hg = cflib.hypergraph_t()
         if alloc_init:
             cflib.Hypergraph_Alloc(self.hg, alloc_init)
-
+        if fname is not None:
+            with open(fname,'r') as f:
+                for l in f:
+                    self.Push_Edge([int(_) for _ in l.split() ])
     def __del__(self):
         cflib.Hypergraph_Destroy(self.hg)
 
@@ -32,4 +35,7 @@ class Hypergraph():
         cflib.Hypergraph_Destroy(self.hg)
         self.hg = hgnew
 
-        
+    def Write_To_File(self,fname):
+        with open(fname,'w') as f:
+            for e in self:
+                f.write(" ".join([str(_) for _ in e])+"\n")
