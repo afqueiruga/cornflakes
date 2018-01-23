@@ -535,29 +535,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 	extract_data_ptrs(ke,datadict,
 					  data,data_ptrs,idofmaps,
 					  &n_newobj, newobjs);
-#if 0
-    for(int i=0; i<ke->ninp; i++) {
-      PyObject *pair, *obj_dat, *obj_dm;
-      PyArrayObject *arrobj;
-      pair = PyDict_GetItemString(datadict, ke->inp[i].name);
-	  
-      /* Get the CFData */
-      obj_dat = PySequence_GetItem(pair,0);
-      isnewobj = 0;
-      arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
-      if(isnewobj) {
-		newobjs[n_newobj] = arrobj;
-		n_newobj++;
-      }
-      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
-      data_ptrs[i] = data+i;
-      /* Get the dofmap */
-      obj_dm  = PySequence_GetItem(pair,1);
-      const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
-      Py_DECREF(obj_dat);
-      Py_DECREF(obj_dm);
-    }
-#endif
+
     /* Extract the output signature from the data dicctionary.
        The python layer of Assemble is reponsible for initializing empty
        output targets and calling fill_sparsity if needed. */
@@ -612,28 +590,12 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     cfdata_t data[ke->ninp];
     cfdata_t *data_ptrs[ke->ninp];
     dofmap_t * idofmaps[ke->ninp];
-    for(int i=0; i<ke->ninp; i++) {
-      PyObject *pair, *obj_dat, *obj_dm;
-      PyArrayObject *arrobj;
-      pair = PyDict_GetItemString(datadict, ke->inp[i].name);
-      /* Get the CFData */
-      obj_dat = PySequence_GetItem(pair,0);
-      isnewobj = 0;
-      arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
-      if(isnewobj) {
-		newobjs[n_newobj] = arrobj;
-		n_newobj++;
-      }
-      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
-      data_ptrs[i] = data+i;
-      /* Get the dofmap */
-      obj_dm  = PySequence_GetItem(pair,1);
-      const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
-    }
+	extract_data_ptrs(ke,datadict,
+					  data,data_ptrs,idofmaps,
+					  &n_newobj, newobjs);
 
     /* Make the call */
-    printf("FINISH ME!\n");
-    //filter2(ke,hg,  data_ptrs, idofmaps, targets,odofmaps);
+    filter(ke,hg,  data_ptrs, idofmaps, htrue,hfalse);
     
     /* Decrease reference counts. n_newobjs hasn't been observed to be >0 yet */
     for(int i=0;i<n_newobj;i++) {
