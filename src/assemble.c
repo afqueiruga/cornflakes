@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void collect2(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
-             dofmap_t ** dms, cfdata_t ** data)
+void collect2(kernel_t * ke, hypervertex_t* edge, int l_edge,
+			  cfdata_t ** data, dofmap_t ** dms, 
+			  real_t * ker_in)
 {
   hypervertex_t V;
   int i, j, k, fnum, mnum, maxlen;
@@ -113,7 +114,7 @@ void assemble2(kernel_t * ke, hypergraph_t * hg,
       edge = Hyperedges_Get_Edge(he, hex);
       //printf("e %d\n",hex);
       /* Collect the data */
-      collect2(ker_in, ke, edge,he->l_edge, idofmaps,data); // TODO: Optimize by moving some overheard outside of loop
+      collect2(ke, edge,he->l_edge,data,idofmaps, ker_in); // TODO: Optimize by moving some overheard outside of loop
       //printf("did\n");
       /* Calculate the kernel */
       //printf("in:"); for(i=0;i<len_ker_in;i++) printf("%lf ",ker_in[i]); printf("\n");

@@ -90,10 +90,20 @@
 }
 
 %inline %{
+
 PyObject * make_np_copy_i(int len, int * arr) {
     npy_intp dims[1] = { len };
     PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, NPY_INT, arr);
     PyObject * npret = PyArray_SimpleNew        (1,dims, NPY_INT);
+    PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
+    Py_DECREF(cpy);
+    return npret;
+  }
+#define CF_NPY_REAL NPY_DOUBLE
+PyObject * make_np_copy_r(int len, real_t * arr) {
+    npy_intp dims[1] = { len };
+    PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, CF_NPY_REAL, arr);
+    PyObject * npret = PyArray_SimpleNew        (1,dims, CF_NPY_REAL);
     PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
     Py_DECREF(cpy);
     return npret;
@@ -450,7 +460,63 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
   /*
    * Assembly wrappers
    */
-
+  void extract_data_ptrs(kernel_t * ke,
+						 PyObject * datadict,
+						 cfdata_t data[], cfdata_t * data_ptrs[],
+						 dofmap_t * idofmaps[],
+						 int * n_newobj,
+						 PyArrayObject *newobjs[])
+  {
+	int isnewobj;
+	for(int i=0; i<ke->ninp; i++) {
+      PyObject *pair, *obj_dat, *obj_dm;
+      PyArrayObject *arrobj;
+      pair = PyDict_GetItemString(datadict, ke->inp[i].name);
+	  
+      /* Get the CFData */
+      obj_dat = PySequence_GetItem(pair,0);
+      isnewobj = 0;
+      arrobj = obj_to_array_contiguous_allow_conversion(obj_dat,NPY_DOUBLE,&isnewobj);
+      if(isnewobj) {
+		newobjs[*n_newobj] = arrobj;
+		(*n_newobj)++;
+      }
+      CFData_Default_New_From_Ptr(data+i, array_size(arrobj,0), array_data(arrobj));
+      data_ptrs[i] = data+i;
+      /* Get the dofmap */
+      obj_dm  = PySequence_GetItem(pair,1);
+      const int rest = SWIG_ConvertPtr(obj_dm, (void**)(idofmaps+i),SWIGTYPE_p_Dofmap, 0);
+      Py_DECREF(obj_dat);
+      Py_DECREF(obj_dm);
+    }
+  }
+  PyObject * collect2_np(kernel_t * ke, int l_edge,hypervertex_t *verts,
+						 PyObject * datadict)
+  {
+    if(!PyDict_Check(datadict)) return NULL;
+	int n_newobj=0; PyArrayObject *newobjs[ke->ninp];
+	/* Extract the input signature from the data dictionary */
+    cfdata_t data[ke->ninp];
+    cfdata_t *data_ptrs[ke->ninp];
+    dofmap_t * idofmaps[ke->ninp];
+	extract_data_ptrs(ke,datadict,
+					  data,data_ptrs,idofmaps,
+					  &n_newobj, newobjs);
+	/* Make me a buffer. If it can't fit on the
+	   stack, you're using cornflakes wrong! */
+	int len_ker_in = kernel_inps_len(ke, l_edge);
+	real_t ker_in[len_ker_in];
+	/* Get the stuffs */
+	collect2(ke, verts,l_edge, data_ptrs, idofmaps,
+			 ker_in);
+	/* Copy it into a numpy array */
+	PyObject * npret = make_np_copy_r(len_ker_in, ker_in);
+	/* Delete new objs in our context*/
+	for(int i=0;i<n_newobj;i++) {
+      Py_DECREF(newobjs[i]);
+    }
+	return npret;
+  }
   void assemble2_np(kernel_t * ke, hypergraph_t * hg,
 		    PyObject * datadict,
 		    PyObject * outpdict)
@@ -460,12 +526,16 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 
     /* We may need to allocate new numpy arrays */
     int isnewobj, n_newobj=0;
-    PyArrayObject *newobjs[ke->ninp];;
+    PyArrayObject *newobjs[ke->ninp];
 
     /* Extract the input signature from the data dictionary */
     cfdata_t data[ke->ninp];
     cfdata_t *data_ptrs[ke->ninp];
     dofmap_t * idofmaps[ke->ninp];
+	extract_data_ptrs(ke,datadict,
+					  data,data_ptrs,idofmaps,
+					  &n_newobj, newobjs);
+#if 0
     for(int i=0; i<ke->ninp; i++) {
       PyObject *pair, *obj_dat, *obj_dm;
       PyArrayObject *arrobj;
@@ -487,7 +557,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       Py_DECREF(obj_dat);
       Py_DECREF(obj_dm);
     }
-
+#endif
     /* Extract the output signature from the data dicctionary.
        The python layer of Assemble is reponsible for initializing empty
        output targets and calling fill_sparsity if needed. */
@@ -510,11 +580,11 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
       /* Get the list of dofmaps */
       // seq_dms = PySequence_GetItem(pair,1);
       for(int j=0; j<ke->outp[i].nmap; j++) {
-	obj_dm = PySequence_GetItem(pair,1 + j);
-	const int rest = SWIG_ConvertPtr(obj_dm,
-					 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
-					 SWIGTYPE_p_Dofmap, 0);
-	Py_DECREF(obj_dm);
+		obj_dm = PySequence_GetItem(pair,1 + j);
+		const int rest = SWIG_ConvertPtr(obj_dm,
+										 (void**)(odofmaps+i*KERNEL_OUT_MAP_MAX+j),
+										 SWIGTYPE_p_Dofmap, 0);
+		Py_DECREF(obj_dm);
       }
       Py_DECREF(obj_targ);
     }
