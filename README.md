@@ -21,6 +21,8 @@ Domain Specific Language popcorn. In that sense, cornflakes
 is the runtime to the popcorn DSL. The popcorn repository can be found at
 [https://bitbucket.org/afqueiruga/popcorn](https://bitbucket.org/afqueiruga/popcorn).
 
+Overview
+--------
 
 Computational science codes are often broken down into repetitive applications of a **kernel** to a small chunk of data, e.g., a finite difference stencil applied nine nodes. Cornflakes abstracts the organization of the individual operators into a **hypergraph**. Each **hyperedge** of the graph represents one instance of applying the kernel calculation to the data.
 Every **hypervertex** in the graph represents a location with associated data., e.g., the fields values on the finite difference grid points. The edge is the set of vertices containing data required to calculate the kernel. The value of the hypervertex is used to index into a global vector using a **DofMap** for each of the arguments of the kernels; e.g. vertex 2000 maps to degrees of freedom `{6000,6001,6002}` in the global vector. A large class of computations can be described by this abstraction, such as
