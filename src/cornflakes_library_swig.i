@@ -90,21 +90,20 @@
 }
 
 %inline %{
-
-PyObject * make_np_copy_i(int len, int * arr) {
-    npy_intp dims[1] = { len };
-    PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, NPY_INT, arr);
-    PyObject * npret = PyArray_SimpleNew        (1,dims, NPY_INT);
-    PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
-    Py_DECREF(cpy);
-    return npret;
+  PyObject * make_np_copy_i(int len, int * arr) {
+	npy_intp dims[1] = { len };
+	PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, NPY_INT, arr);
+	PyObject * npret = PyArray_SimpleNew        (1,dims, NPY_INT);
+	PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
+	Py_DECREF(cpy);
+	return npret;
   }
 #define CF_NPY_REAL NPY_DOUBLE
-PyObject * make_np_copy_r(int len, real_t * arr) {
-    npy_intp dims[1] = { len };
-    PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, CF_NPY_REAL, arr);
-    PyObject * npret = PyArray_SimpleNew        (1,dims, CF_NPY_REAL);
-    PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
+  PyObject * make_np_copy_r(int len, real_t * arr) {
+	npy_intp dims[1] = { len };
+	PyObject * cpy   = PyArray_SimpleNewFromData(1,dims, CF_NPY_REAL, arr);
+	PyObject * npret = PyArray_SimpleNew        (1,dims, CF_NPY_REAL);
+	PyArray_CopyInto((PyArrayObject*)npret,(PyArrayObject*)cpy);
     Py_DECREF(cpy);
     return npret;
   }
@@ -428,6 +427,14 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
    %}
 */
 
+%inline %{
+PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
+  int len_ker_out = kernel_outps_len(ke, l_edge);
+  real_t ker_out[len_ker_out];
+  ke->eval(l_edge, IN_ARRAY1, ker_out);
+  return make_np_copy_r(len_ker_out,ker_out);
+}}
+ %}
 /*
  * Extra Wrappers
  */
@@ -580,7 +587,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 
     /* We may need to allocate new numpy arrays */
     int isnewobj, n_newobj=0;
-    PyArrayObject *newobjs[ke->ninp];;
+    PyArrayObject *newobjs[ke->ninp];
 
     /* Extract the input signature from the data dictionary */
     cfdata_t data[ke->ninp];
@@ -607,7 +614,7 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
 	
     /* We may need to allocate new numpy arrays */
     int isnewobj, n_newobj=0;
-    PyArrayObject *newobjs[ke->ninp];;
+    PyArrayObject *newobjs[ke->ninp];
 	
     /* Extract the input signature from the data dictionary */
     cfdata_t data[ke->ninp];
@@ -732,7 +739,6 @@ def Dofmap_From_Vertices(stride, vertices, offset=0):
     /* Step 3: Create the dofmap list */
     for(i=0;i<ndofmap;i++) {
       obj = PyList_GetItem(dofmaplist,i);
-      // BEEN FIXED
       const int rest = SWIG_ConvertPtr(obj, (void**)(dofmaps+i),SWIGTYPE_p_Dofmap, 0);
       //if (!SWIG_IsOK(res)) {
       //	SWIG_exception_fail(SWIG_ArgError(res), "error in dofmaptlist");	
