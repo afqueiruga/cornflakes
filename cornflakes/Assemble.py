@@ -18,8 +18,9 @@ def Collect2(ke, edge, data):
     # Check the input dictionary
     inps = cflib.inpArray_frompointer(ke.inp)
     for i in xrange(ke.ninp):
+        name = inps[i].name
         try:
-            data[inps[i].name]
+            data[name]
         except KeyError:
             print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
             raise KeyError('kernel assembly error')
@@ -69,8 +70,9 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
     # Check the input dictionary
     inps = cflib.inpArray_frompointer(ke.inp)
     for i in xrange(ke.ninp):
+        name = inps[i].name
         try:
-            data[inps[i].name]
+            data[name]
         except KeyError:
             print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
             raise KeyError('kernel assembly error')
