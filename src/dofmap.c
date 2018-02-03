@@ -37,12 +37,12 @@ void Dofmap_Destroy(dofmap_t * dm) {
  * Strided implementation
  */
 int Dofmap_Strided_Max_Len(dofmap_t * dm) {
-  return dm->U.strided.stride;
+  return dm->U.strided.length;
 }
 void Dofmap_Strided_Get(dofmap_t * dm, hypervertex_t V, int * dofs, int * ndofs) {
   int i;
-  *ndofs = dm->U.strided.stride;
-  for(i=0;i<dm->U.strided.stride; i++) {
+  *ndofs = dm->U.strided.length;
+  for(i=0;i<dm->U.strided.length; i++) {
     dofs[i] =  dm->U.strided.offset + dm->U.strided.stride * ( (int)V ) + i;
   }
 }
@@ -54,8 +54,10 @@ const _DOFMAP_VTABLE_t Dofmap_Strided_vtable = {
   .Get = Dofmap_Strided_Get,
   .Destroy = Dofmap_Strided_Destroy
 };
-void Dofmap_Strided(dofmap_t * dm, int stride, int offset) {
+void Dofmap_Strided(dofmap_t * dm, int length, int offset, int stride) {
   dm->vtable = &Dofmap_Strided_vtable;
+  dm->U.strided.length = length;
+
   dm->U.strided.stride = stride;
   dm->U.strided.offset = offset;
 }

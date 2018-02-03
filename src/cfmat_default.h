@@ -19,4 +19,9 @@ void CFMat_Default_New(cfmat_t * self, int onum,
 			kernel_t * ke, hypergraph_t * hg, int ndof);
 void CFMat_Default_From_Array(cfmat_t * self, int ndof,
 			      real_t * V, int * II, int * JJ);
+
+// Some of his members can be accessed by other implementations.
+void CFMat_Default_Add_Sparsity(cfmat_t * self, int n, int *dofs);
+void CFMat_Default_Finalize_Sparsity(cfmat_t * self);
+void CFMat_Default_Finalize(cfmat_t * self);
 #endif

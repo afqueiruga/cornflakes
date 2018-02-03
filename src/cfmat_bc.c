@@ -4,6 +4,23 @@
 
 #define data(x) CFMat_BC_Data(x)
 
+void CFMat_BC_Add_Sparsity(cfmat_t * self, int n, int *dofs) {
+    int i,j;
+    index_t dofs_sub[n];
+    int n_sub = 0;
+    for(i=0;i<n;i++) {
+      int mapped = IndexMap_Get(data(self)->map, dofs[i]);
+      if(mapped>=0) {
+	dofs_sub[n_sub] = mapped;
+	n_sub++;
+      }
+    }
+    CFMat_Add_Sparsity(data(self)->K,n_sub,dofs_sub);
+}
+void CFMat_BC_Finalize_Sparsity(cfmat_t * self) {
+  CFMat_Finalize_Sparsity(data(self)->K);
+}
+
 real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
   int i,j;
   // I need to extract the square block to call CFMat_Place on the sub mat
@@ -65,6 +82,29 @@ real_t * CFMat_BC_Place(cfmat_t * self, int n, int * dofs, real_t * vals) {
   }
   return vals + n*n;
 }
+void CFMat_BC_Set_Value(cfmat_t * self, int i, int j, real_t v) {
+  // TODO THIS IS WHERE YOU ARE WORKING
+  int mi,mj;
+  mi = IndexMap_Get(data(self)->map, i);
+  if(mi>=0) {
+    mj = IndexMap_Get(data(self)->map, j);
+    if(mj>=0) {
+      // Add to Kij
+      CFMat_Set_Value(data(self)->K, mi,mj,v);
+    } else {
+
+    }
+  } else {
+    // Add to Ri += Kij uj
+    mj = IndexMap_Get(data(self)->map, j);
+    if(mj>=0) {
+      real_t ubar;
+      CFData_Get_Values(data(self)->u,1,&i,&ubar);
+      ubar *= v;
+      CFData_Place(data(self)->R, 1,&mj,&ubar);
+    }
+  }
+}
 void CFMat_BC_Wipe(cfmat_t * self) {
   CFMat_Wipe(data(self)->K);
   CFData_Wipe(data(self)->R);
@@ -77,14 +117,16 @@ void CFMat_BC_Destroy(cfmat_t * self) {
   // I don't own K and R, but I do own the map
   // Nope, I don't even own the map
   free(self->data);
-  //IndexMap_Destroy(&self->map);
 }
 
 const _CFMAT_VTABLE_t CFMat_BC_vtable = {
-  .Place = &CFMat_BC_Place,
-  .Destroy = &CFMat_BC_Destroy,
-  .Wipe = &CFMat_BC_Wipe,
-  .Finalize = &CFMat_BC_Finalize
+  .Add_Sparsity = CFMat_BC_Add_Sparsity,
+  .Finalize_Sparsity = CFMat_BC_Finalize_Sparsity,
+  .Place = CFMat_BC_Place,
+  .Set_Value = CFMat_BC_Set_Value,
+  .Destroy = CFMat_BC_Destroy,
+  .Wipe = CFMat_BC_Wipe,
+  .Finalize = CFMat_BC_Finalize
 };
 
 void CFMat_BC_New(cfmat_t * self,
@@ -96,4 +138,6 @@ void CFMat_BC_New(cfmat_t * self,
   data(self)->K = K;
   data(self)->R = R;
   data(self)->u = u;
+  self->N = imap->end - imap->start;
+  self->own = 0;
 }

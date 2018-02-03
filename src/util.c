@@ -69,6 +69,70 @@ void Interpolate_Closest(real_t * uold, real_t * Xold, int Nold,
 }
 
 
+#ifndef SQ
+#define SQ(x) ((x)*(x))
+#define MIN(A,B) ((A)>(B)?(B):(A))
+#define MAX(A,B) ((A)>(B)?(A):(B))
+#endif
+
+void Remove_Duplicate_Particles(int Npart, int dim, real_t * x,
+				int * Naccept, real_t * y,
+				real_t cutoff, real_t binsize)
+{
+  spatialhash_t sh;
+  int A,i;
+
+  // 
+  //Build_New_Hash(&sh, 1,dim,x, hashsize);
+  real_t start[dim], end[dim], h[dim];
+  for(i=0; i<dim; i++) {
+    start[i] = 1e10;
+    end[i] = -1e10;
+    h[i] = binsize;
+  }
+  for(A=0; A<Npart ;A++) {
+    for(i=0; i<dim; i++) {
+      start[i] = MIN(start[i],x[A*dim + i]);
+      end[i] = MAX(end[i],x[A*dim + i]);
+    }
+  }
+  for(i=0;i<dim;i++) {
+    start[i] -= 1.0*binsize;
+    end[i] += 2.0*binsize;
+  }
+  SpatialHash_init(&sh, Npart,dim,
+		   start,end,h);
+
+  // First Particle
+  SpatialHash_Push(&sh, 0, x);
+  for(i=0;i<dim;i++) y[ i ] = x[  i ];
+  *Naccept = 1;
+  
+  // Push them all in one-by-one
+  int accept;
+  void action(int FOO, int b) {
+    if( dist(dim, x+dim*A, y+dim*b) <= cutoff ) accept = 0;
+  }
+  for(A=1;A<Npart;A++) {
+    accept = 1;
+    SpatialHash_ScanPt(&sh, x+dim*A, action);
+    if(accept) {
+      // Copy into the new array
+      for(i=0;i<dim;i++) y[ *Naccept * dim + i ] = x[ A*dim + i ];
+      // Add him to the hash      
+      SpatialHash_Push(&sh, *Naccept, y+dim*(*Naccept));
+      // Increment the count
+      (*Naccept)+=1;
+    }
+    
+  }
+
+  
+  SpatialHash_destroy(&sh);
+  
+}
+
+
 
 void load_gmsh(real_t ** x, int * N, int gdim,
 	       hypergraph_t ** hg,
@@ -89,20 +153,15 @@ void load_gmsh(real_t ** x, int * N, int gdim,
   int nn, ne, i,k,A;
   /* Read in the header */
   fgets( buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
 
   /* The nodes block */
   fgets(buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
 
   sscanf(buf,"%d\n",&nn);
-  printf("There are %d nodes\n",nn);
+  //printf("There are %d nodes\n",nn);
   *N = nn;
   *x = malloc(sizeof(real_t)*gdim* *N);
   #define IX(A,i) (gdim*(A)+(i))
@@ -127,12 +186,10 @@ void load_gmsh(real_t ** x, int * N, int gdim,
   Hypergraph_Alloc(hg[0],1);
   
   fgets(buf,1024,fh);
-  printf("%s",buf);
   fgets(buf,1024,fh);
-  printf("%s",buf);
 
   sscanf(buf,"%d\n",&ne);
-  printf("There are %d elements\n",ne);
+  //printf("There are %d elements\n",ne);
   for(A=0; A<ne; A++) {
     int eid, etype,ntag, groupnum;
     //fgets(buf,1024, fh);
@@ -149,6 +206,8 @@ void load_gmsh(real_t ** x, int * N, int gdim,
     case 3: // Quad 2D
     case 4: // Tet  3D
       ledge=4; break;
+    case 15:
+      ledge=1; break;
     default:
       ledge=4;
     }
@@ -228,18 +287,45 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
     case 3: // A 3D vector
       fprintf(fh,"VECTORS %c double\n",names[dnum]);
       for(A=0;A<N;A++) {
-	fprintf(fh,"%e %e %e\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1],data[dnum][gdim*A+2]);
+	fprintf(fh,"%e %e %e\n",data[dnum][l_data[dnum]*A+0],
+		                data[dnum][l_data[dnum]*A+1],
+		                data[dnum][l_data[dnum]*A+2]);
       }
       break;
     case 2: // A 2D vector
       fprintf(fh,"VECTORS %c double\n",names[dnum]);
       for(A=0;A<N;A++) {
-	fprintf(fh,"%e %e 0\n",data[dnum][gdim*A+0],data[dnum][gdim*A+1]);
+	fprintf(fh,"%e %e 0\n",data[dnum][l_data[dnum]*A+0],
+		               data[dnum][l_data[dnum]*A+1]);
       }
       break;
     case 9: // A 3D tensor
+      fprintf(fh,"TENSORS %c double\n",names[dnum]);
+      for(A=0;A<N;A++) {
+	fprintf(fh,"%e %e %e\n%e %e %e\n%e %e %e\n\n",
+		data[dnum][l_data[dnum]*A+0],
+		data[dnum][l_data[dnum]*A+1],
+		data[dnum][l_data[dnum]*A+2],
+		data[dnum][l_data[dnum]*A+3],
+		data[dnum][l_data[dnum]*A+4],
+		data[dnum][l_data[dnum]*A+5],
+		data[dnum][l_data[dnum]*A+6],
+		data[dnum][l_data[dnum]*A+7],
+		data[dnum][l_data[dnum]*A+8]
+		);
+      }
+      break;
     case 4: // A 2D tensor
-      // TODO: fill in
+      fprintf(fh,"TENSORS %c double\n",names[dnum]);
+      for(A=0;A<N;A++) {
+	fprintf(fh,"%e %e 0\n%e %e 0\n0 0 0\n\n",
+		data[dnum][l_data[dnum]*A+0],
+		data[dnum][l_data[dnum]*A+1],
+		data[dnum][l_data[dnum]*A+2],
+		data[dnum][l_data[dnum]*A+3]
+		);
+      }
+      break;
     case 1: // A scalar
     default: // The default case is scalar field of the first component
       fprintf(fh,"SCALARS %c double\nLOOKUP_TABLE default\n",names[dnum]);
@@ -257,18 +343,45 @@ void write_vtk(real_t * x, int gdim, int N, hypergraph_t * hg,
     case 3: // A 3D vector
       fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
       for(A=0;A<Nelem;A++) {
-	fprintf(fh,"%e %e %e\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1],cdata[dnum][gdim*A+2]);
+	fprintf(fh,"%e %e %e\n",cdata[dnum][l_cdata[dnum]*A+0],
+		                cdata[dnum][l_cdata[dnum]*A+1],
+		                cdata[dnum][l_cdata[dnum]*A+2]);
       }
       break;
     case 2: // A 2D vector
       fprintf(fh,"VECTORS %c double\n",cnames[dnum]);
       for(A=0;A<Nelem;A++) {
-	fprintf(fh,"%e %e 0\n",cdata[dnum][gdim*A+0],cdata[dnum][gdim*A+1]);
+	fprintf(fh,"%e %e 0\n",cdata[dnum][l_cdata[dnum]*A+0],
+		               cdata[dnum][l_cdata[dnum]*A+1]);
       }
       break;
     case 9: // A 3D tensor
+      fprintf(fh,"TENSORS %c double\n",cnames[dnum]);
+      for(A=0;A<Nelem;A++) {
+	fprintf(fh,"%e %e %e\n%e %e %e\n%e %e %e\n\n",
+		cdata[dnum][l_cdata[dnum]*A+0],
+		cdata[dnum][l_cdata[dnum]*A+1],
+		cdata[dnum][l_cdata[dnum]*A+2],
+		cdata[dnum][l_cdata[dnum]*A+3],
+		cdata[dnum][l_cdata[dnum]*A+4],
+		cdata[dnum][l_cdata[dnum]*A+5],
+		cdata[dnum][l_cdata[dnum]*A+6],
+		cdata[dnum][l_cdata[dnum]*A+7],
+		cdata[dnum][l_cdata[dnum]*A+8]
+		);
+      }
+      break;
     case 4: // A 2D tensor
-      // TODO: fill in
+      fprintf(fh,"TENSORS %c double\n",cnames[dnum]);
+      for(A=0;A<Nelem;A++) {
+	fprintf(fh,"%e %e 0\n%e %e 0\n0 0 0\n\n",
+		cdata[dnum][l_cdata[dnum]*A+0],
+		cdata[dnum][l_cdata[dnum]*A+1],
+		cdata[dnum][l_cdata[dnum]*A+2],
+		cdata[dnum][l_cdata[dnum]*A+3]
+		);
+      }
+      break;
     case 1: // A scalar
     default: // The default case is scalar field of the first component
       fprintf(fh,"SCALARS %c double\nLOOKUP_TABLE default\n",cnames[dnum]);

@@ -13,6 +13,9 @@ real_t * CFMat_LIS_Place(cfmat_t * self,
   }
   return ker_out + n*n;
 }
+void CFMat_LIS_Set_Value(cfmat_t * self,int i, int j, real_t v) {
+  lis_matrix_set_value(LIS_ADD_VALUE, i,j,v, data(self));
+}
 void CFMat_LIS_Destroy(cfmat_t * self) {
   if(self->own) {
     lis_matrix_unset(data(self));
@@ -30,6 +33,7 @@ void CFMat_LIS_Finalize(cfmat_t * self) {
 
 const _CFMAT_VTABLE_t CFMat_LIS_vtable = {
   .Place = &CFMat_LIS_Place,
+  .Set_Value = CFMat_LIS_Set_Value,
   .Destroy = &CFMat_LIS_Destroy,
   .Wipe = &CFMat_LIS_Wipe,
   .Finalize = &CFMat_LIS_Finalize
@@ -40,6 +44,7 @@ void CFMat_LIS_New(cfmat_t * self, int N) {
   self->own = 1;
   // TODO
   lis_matrix_create(/*MPI_COMM_WORLD*/0, (LIS_MATRIX*)&self->data);
+
   lis_matrix_set_size(data(self), 0,N);
   lis_matrix_set_type(data(self), LIS_MATRIX_CSR);
 }

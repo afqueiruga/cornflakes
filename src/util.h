@@ -16,6 +16,11 @@ void Interpolate_Closest(real_t * uold, real_t * Xold, int Nold,
 			 real_t * unew, real_t * Xnew, int Nnew,
 			 int udim, int xdim, real_t rad);
 
+void Remove_Duplicate_Particles(int Npart, int dim, real_t * x,
+				int * Naccept, real_t * y,
+				real_t cutoff, real_t binsize);
+
+
 void load_gmsh(real_t ** x, int * N, int gdim,
 	       hypergraph_t ** hg,
 	       char * fname, ...);

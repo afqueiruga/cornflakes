@@ -3,10 +3,14 @@ import numpy as np
 
 class Hypergraph():
 
-    def __init__(self, alloc_init=1):
+    def __init__(self, alloc_init=1, fname=None):
         self.hg = cflib.hypergraph_t()
-        cflib.Hypergraph_Alloc(self.hg, alloc_init)
-
+        if alloc_init:
+            cflib.Hypergraph_Alloc(self.hg, alloc_init)
+        if fname is not None:
+            with open(fname,'r') as f:
+                for l in f:
+                    self.Push_Edge([int(_) for _ in l.split() ])
     def __del__(self):
         cflib.Hypergraph_Destroy(self.hg)
 
@@ -19,9 +23,19 @@ class Hypergraph():
             cflib.Hypergraph_Get_Edge_View_np(self.hg,i)
             for i in xrange(self.hg.n_types)
         ]
-
+    def __iter__(self):
+        for i in xrange(self.hg.n_types):
+            ev = cflib.Hypergraph_Get_Edge_View_np(self.hg,i)
+            for e in ev:
+                yield e
+                
     def Add_Edge_Vertex(self,offset=0):
         hgnew = cflib.hypergraph_t()
         cflib.Add_Edge_Vertex(hgnew, self.hg, offset)
         cflib.Hypergraph_Destroy(self.hg)
         self.hg = hgnew
+
+    def Write_To_File(self,fname):
+        with open(fname,'w') as f:
+            for e in self:
+                f.write(" ".join([str(_) for _ in e])+"\n")

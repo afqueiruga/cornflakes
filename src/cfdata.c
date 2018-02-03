@@ -3,6 +3,9 @@
 void CFData_Get_Values(cfdata_t * self, int ndof,int * dofs, real_t * vals) {
   self->vtable->Get_Values(self,ndof,dofs,vals);
 }
+void CFData_Set_Values(cfdata_t * self, int ndof,int * dofs, real_t * vals) {
+  self->vtable->Set_Values(self,ndof,dofs,vals);
+}
 real_t * CFData_Place(cfdata_t * self, int n, int * dofs, real_t * vals) {
   return self->vtable->Place(self,n,dofs,vals);
 }

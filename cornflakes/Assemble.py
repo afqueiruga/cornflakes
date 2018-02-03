@@ -1,109 +1,144 @@
 import numpy as np
 import scipy.sparse
 import cornflakes_library as cflib
+from Hypergraph import Hypergraph
 
 
+IndexMap = cflib.IndexMap
+CFData = cflib.CFData
+CFData_BC = cflib.CFData_BC
+CFData_From_Ptr = cflib.CFData_From_Ptr
+CFMat = cflib.CFMat
+CFMat_BC = cflib.CFMat_BC
 
-def Assemble_Targets(ke,H, dofmaps,data, ndof):
-    he = cflib.hyperedgesArray_frompointer(H.hg.he)
-    n_edges = np.sum([ he[i].n_edge for i in xrange(H.hg.n_types) ])
-    
-
+def Collect2(ke, edge, data):
+    if not isinstance(data, dict):
+        from itertools import chain
+        data = dict(chain(*[f.items() for f in data]))
+    # Check the input dictionary
+    inps = cflib.inpArray_frompointer(ke.inp)
+    for i in xrange(ke.ninp):
+        name = inps[i].name
+        try:
+            data[name]
+        except KeyError:
+            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
+            raise KeyError('kernel assembly error')
+            
+    return cflib.collect2_np(ke,edge,data)
+def Fill_Sparsity2(ke, H, data, cftargets):
+    cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
     outps = cflib.outpArray_frompointer(ke.outp)
-    forms = []
-    for j in xrange(ke.noutp):
-        op = outps[j]
-        if op.rank==0:
-            forms.append(np.zeros(1,dtype=np.double))
-        elif op.rank==1:
-            forms.append(np.zeros(ndof,dtype=np.double))
+    onames = [ outps[j].name for j in xrange(ke.noutp) ]
+    # for o in onames:
+		# try:
+		# cftargets[o][0].Finalize_Sparsity()
+            # except AttributeError:
+                # pass
+
+def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
+    """
+    Assemble a kernel across a graph with specified input data.
+
+    This is the meat-and-potatos of cornflakes. 
+    Example Usage:
+    --------------
+
+    1) Passing preallocated cfmat/cfdata objects:
+    Assemble(Kernal, Hypergraph,
+             {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+             {'R':( cfdat_R, dm_u), 'K':( cfmat_K, dm_u ) })
+    2) Multiple dofmaps to the outputs (e.g. monolithic systems):
+    xAssemble(Kernal, Hypergraph,
+    x         {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+    x         {'R':( cfmat_R, (dm_u,dm_p)), 'K':( cfmat_K, (dm_u,dm_p)  ) })
+    xor
+    Assemble(Kernal, Hypergraph,
+             {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+             {'R':( cfmat_R, dm_u,dm_p), 'K':( cfmat_K, dm_u,dm_p  ) })
+    3) Allocate for me:
+    R,K = Assemble(Kernal, Hypergraph,
+             {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
+             {'R':(dm_u), 'K':( dm_u ) },ndof=1000)
+    
+    Always returns the output objects in the order that the kernel defines them.
+
+    """
+    if not isinstance(data, dict):
+        from itertools import chain
+        data = dict(chain(*[f.items() for f in data]))
+    # Check the input dictionary
+    inps = cflib.inpArray_frompointer(ke.inp)
+    for i in xrange(ke.ninp):
+        name = inps[i].name
+        try:
+            data[name]
+        except KeyError:
+            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
+            raise KeyError('kernel assembly error')
+            
+    # Sanitize the output dictionary
+    outps = cflib.outpArray_frompointer(ke.outp)
+    onames = [ outps[j].name for j in xrange(ke.noutp) ]
+    need_to_sparsify = False
+    made_new = False
+    for  j in xrange(ke.noutp):
+        name = outps[j].name
+        try:
+            cftargets[name]
+        except KeyError:
+            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your target dict!"
+            raise KeyError('kernel assembly error')
+        # Do we need to make it for it?
+        if not hasattr(cftargets[name][0],'Place'):
+            made_new = True
+            if outps[j].rank==2:
+                cft = CFMat(ndof)
+            else:
+                cft = CFData(ndof)
+            cftargets[name] = [ cft ] + list(cftargets[name])
+            need_to_sparsify = True
+    # from IPython import embed ; embed()
+    if need_to_sparsify:
+        cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
+        for o in onames:
+            try:
+                cftargets[o][0].Finalize_Sparsity()
+            except AttributeError:
+                pass
+    
+    # Wipe them if needed
+    if(wipe):
+        for o in onames:
+            cftargets[o][0].Wipe()
+    # Call the C routines
+    cflib.assemble2_np(ke,H.hg, data, cftargets)
+
+    if (wipe):
+        for o in onames:
+            cftargets[o][0].Finalize()
+        if (made_new):
+            #print "Returning a copy for ", ke.name
+            # l = [ np.copy(cftargets[o][0].np()) for o in onames ]
+            l = [ cftargets[o][0].np().copy() for o in onames ]
+            return l
         else:
-            matsize = 0
-            for i in xrange(H.hg.n_types):
-                oplen = cflib.kernel_outp_len(ke,op,he[i].l_edge)
-                matsize += he[i].n_edge*oplen
-            forms.append((np.zeros(matsize,dtype=np.double),
-                          np.zeros(matsize,dtype=np.intc),
-                          np.zeros(matsize,dtype=np.intc)))
-    
-    cflib.assemble_targets_np(forms, ke,H.hg, [ d.dm for d in dofmaps], data)
-    
-    for j in xrange(ke.noutp):
-        if outps[j].rank==2:
-            Kcoo = scipy.sparse.coo_matrix((forms[j][0],(forms[j][1],forms[j][2])), (ndof,ndof))
-            K = Kcoo.tocsr()
-            forms[j]=K
-    return forms
+            #print "Returning the mask for ", ke.name
+            return [ cftargets[o][0].np() for o in onames ]
 
 
-
-
-
-
-
-def Assemble_Targets_dep(ranks, ke,hg, dofmap,ndof, data):
-    #ranks=(1,2,2)
-    len_loc_out = cflib.kernel_outp_len(ke,hg.l_edge)
-    matsize = len_loc_out*len_loc_out*hg.n_edge
-    allocator = {
-        0:(lambda : np.zeros(1,dtype=np.double)),
-        1:(lambda : np.zeros(ndof,dtype=np.double)),
-        2:(lambda : (np.zeros(matsize,dtype=np.double),
-                     np.zeros(matsize,dtype=np.intc),
-                     np.zeros(matsize,dtype=np.intc)))
-    }
-    forms = [ allocator[r]() for r in ranks ]
-    from IPython import embed
-    #print "ayuuup"
-    cflib.assemble_targets_np(forms,
-                                  ke,hg,dofmap,
-                                  data)
-    #print "anoope"
-    for i,r in enumerate(ranks):
-        if r==2:
-            Kcoo = scipy.sparse.coo_matrix((forms[i][0],(forms[i][1],forms[i][2])), (ndof,ndof))
-            K = Kcoo.tocsr()
-            forms[i]=K
-    return forms
+# Deprecated call signature
+def Filter(ke,H, dofmaps,data):
+    htrue = Hypergraph()
+    hfalse = Hypergraph()
+    cflib.filter_np(ke,H.hg, dofmaps, data, htrue.hg, hfalse.hg)
+    return htrue,hfalse
 
 def Apply_BC(dofs,vals, K=None,R=None):
-    if K!=None:
+    if K is not None:
         for i in dofs:
             K.data[K.indptr[i]:K.indptr[i+1]] = 0.0
             K[i,i] = 1.0
-    if R!=None:
+    if R is not None:
         R[dofs]=vals
-
-
-
-def Assemble_Matrix(ke,hg, dofmap,ndof, data):
-    len_loc_out = cflib.kernel_outp_len(ke,hg.l_edge)
-    II = np.zeros( len_loc_out*len_loc_out*hg.n_edge , dtype=np.intc)
-    JJ = np.zeros( len_loc_out*len_loc_out*hg.n_edge , dtype=np.intc)
-    KK = np.zeros( len_loc_out*len_loc_out*hg.n_edge , dtype=np.double)
-    cflib.assemble_matrix_np(II,JJ,KK,
-                              ke,hg,dofmap,
-                              data)
-    Kcoo = scipy.sparse.coo_matrix((KK,(II,JJ)),(ndof,ndof))
-    
-    K = Kcoo.tocsr()
-    return K
-
-def Assemble_Vector_Matrix(ke,hg, dofmap,ndof, data):
-    R = np.zeros( ndof, dtype=np.double)
-
-    len_loc_out = cflib.kernel_outp_len(ke,hg.l_edge)
-    II = np.zeros( len_loc_out*len_loc_out*hg.n_edge , dtype=np.intc)
-    JJ = np.zeros( len_loc_out*len_loc_out*hg.n_edge , dtype=np.intc)
-    KK = np.zeros( len_loc_out*len_loc_out*hg.n_edge , dtype=np.double)
-    cflib.assemble_vector_matrix_np(R,
-                                 II,JJ,KK,
-                                 ke,hg,dofmap,
-                                 data)
-    
-    Kcoo = scipy.sparse.coo_matrix((KK,(II,JJ)),(ndof,ndof))
-    
-    K = Kcoo.tocsr()
-
-    return R,K
 
