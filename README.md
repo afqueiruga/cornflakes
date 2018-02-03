@@ -251,6 +251,8 @@ The macports and homebrew toolchains will be included with the aforementioned su
 License
 -------
 
+Copyright (C) Alejandro Francisco Queiruga, 2015-2018
+
 Cornflakes is released under version 3 of the GNU Lesser General Public License, as per LICENSE.txt.
 
-Cite this repository if you refer to the code or, unlikely, use it.
+Cite this repository if you refer to the code or use it.
