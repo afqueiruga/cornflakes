@@ -7,7 +7,7 @@
 #include "assemble.h"
 
 void filter(kernel_t * ke, hypergraph_t * hg,
-	    dofmap_t ** dofmaps, cfdata_t ** data,
-	    hypergraph_t *htrue, hypergraph_t *hfalse);
+			cfdata_t ** data, dofmap_t ** idofmaps,
+			hypergraph_t *htrue, hypergraph_t *hfalse);
 
 #endif
