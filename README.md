@@ -8,7 +8,7 @@ Lawrence Berkeley Lab
 Intro
 -----
 
-Cornflakes and [popcorn](https://bitbucket.org/afqueiruga/popcorn) are a new general purpose scientific package.
+Cornflakes and [popcorn](https://github.com/afqueiruga/popcorn) are a new general purpose scientific package.
 It's designed to enable super-quick design of standard 
 scientific codes with a flexible architecture suitable for both
 prototyping and deployable code.
@@ -19,7 +19,7 @@ Cornflakes contains the methods for assembling
 vectors and matrices from the kernels created by the accompanying
 Domain Specific Language popcorn. In that sense, cornflakes
 is the runtime to the popcorn DSL. The popcorn repository can be found at
-[https://bitbucket.org/afqueiruga/popcorn](https://bitbucket.org/afqueiruga/popcorn).
+[https://github.com/afqueiruga/popcorn](https://github.com/afqueiruga/popcorn).
 
 Overview
 --------
