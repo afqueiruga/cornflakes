@@ -26,7 +26,7 @@ void filter(kernel_t * ke, hypergraph_t * hg,
     for(hex=0; hex<he->n_edge; hex++) {
       edge = Hyperedges_Get_Edge(he, hex);
       /* Collect the data */
-      collect2(ke, edge,he->l_edge ,data,idofmaps, ker_in);
+      collect(ke, edge,he->l_edge ,data,idofmaps, ker_in);
       /* Calculate the kernel */
       for(i=0;i<len_ker_out;i++) ker_out[i] = 0.0;
       ke->eval(he->l_edge, ker_in, ker_out);

@@ -11,7 +11,7 @@ CFData_From_Ptr = cflib.CFData_From_Ptr
 CFMat = cflib.CFMat
 CFMat_BC = cflib.CFMat_BC
 
-def Collect2(ke, edge, data):
+def Collect(ke, edge, data):
     if not isinstance(data, dict):
         from itertools import chain
         data = dict(chain(*[f.items() for f in data]))
@@ -25,9 +25,9 @@ def Collect2(ke, edge, data):
             print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
             raise KeyError('kernel assembly error')
             
-    return cflib.collect2_np(ke,edge,data)
-def Fill_Sparsity2(ke, H, data, cftargets):
-    cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
+    return cflib.collect_np(ke,edge,data)
+def Fill_Sparsity(ke, H, data, cftargets):
+    cflib.fill_sparsity_np(ke,H.hg, data, cftargets)
     outps = cflib.outpArray_frompointer(ke.outp)
     onames = [ outps[j].name for j in xrange(ke.noutp) ]
     # for o in onames:
@@ -36,7 +36,7 @@ def Fill_Sparsity2(ke, H, data, cftargets):
             # except AttributeError:
                 # pass
 
-def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
+def Assemble(ke,H, data, cftargets, wipe=True, ndof=0):
     """
     Assemble a kernel across a graph with specified input data.
 
@@ -100,7 +100,7 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
             need_to_sparsify = True
     # from IPython import embed ; embed()
     if need_to_sparsify:
-        cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
+        cflib.fill_sparsity_np(ke,H.hg, data, cftargets)
         for o in onames:
             try:
                 cftargets[o][0].Finalize_Sparsity()
@@ -112,7 +112,7 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         for o in onames:
             cftargets[o][0].Wipe()
     # Call the C routines
-    cflib.assemble2_np(ke,H.hg, data, cftargets)
+    cflib.assemble_np(ke,H.hg, data, cftargets)
 
     if (wipe):
         for o in onames:
