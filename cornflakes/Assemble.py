@@ -11,7 +11,7 @@ CFData_From_Ptr = cflib.CFData_From_Ptr
 CFMat = cflib.CFMat
 CFMat_BC = cflib.CFMat_BC
 
-def Collect2(ke, edge, data):
+def Collect(ke, edge, data):
     if not isinstance(data, dict):
         from itertools import chain
         data = dict(chain(*[f.items() for f in data]))
@@ -25,9 +25,9 @@ def Collect2(ke, edge, data):
             print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
             raise KeyError('kernel assembly error')
             
-    return cflib.collect2_np(ke,edge,data)
-def Fill_Sparsity2(ke, H, data, cftargets):
-    cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
+    return cflib.collect_np(ke,edge,data)
+def Fill_Sparsity(ke, H, data, cftargets):
+    cflib.fill_sparsity_np(ke,H.hg, data, cftargets)
     outps = cflib.outpArray_frompointer(ke.outp)
     onames = [ outps[j].name for j in xrange(ke.noutp) ]
     # for o in onames:
@@ -36,7 +36,7 @@ def Fill_Sparsity2(ke, H, data, cftargets):
             # except AttributeError:
                 # pass
 
-def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
+def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
     """
     Assemble a kernel across a graph with specified input data.
 
@@ -49,10 +49,6 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
              {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
              {'R':( cfdat_R, dm_u), 'K':( cfmat_K, dm_u ) })
     2) Multiple dofmaps to the outputs (e.g. monolithic systems):
-    xAssemble(Kernal, Hypergraph,
-    x         {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
-    x         {'R':( cfmat_R, (dm_u,dm_p)), 'K':( cfmat_K, (dm_u,dm_p)  ) })
-    xor
     Assemble(Kernal, Hypergraph,
              {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
              {'R':( cfmat_R, dm_u,dm_p), 'K':( cfmat_K, dm_u,dm_p  ) })
@@ -74,8 +70,8 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         try:
             data[name]
         except KeyError:
-            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
-            raise KeyError('kernel assembly error')
+            raise RuntimeError("Cornflakes runtime error: kernel ", ke.name,\
+                               ": You're missing key ", name, " in your data dict.")
             
     # Sanitize the output dictionary
     outps = cflib.outpArray_frompointer(ke.outp)
@@ -87,10 +83,12 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         try:
             cftargets[name]
         except KeyError:
-            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your target dict!"
-            raise KeyError('kernel assembly error')
+            raise RuntimeError("Cornflakes runtime error: kernel ", ke.name,\
+                               ": You're missing key ", name, " in your target dict")
         # Do we need to make it for it?
         if not hasattr(cftargets[name][0],'Place'):
+            if ndof<=0:
+                raise RuntimeError('Cornflakes runtime error: You want Assemble to allocate new outputs, but ndof was not set.')
             made_new = True
             if outps[j].rank==2:
                 cft = CFMat(ndof)
@@ -98,9 +96,8 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
                 cft = CFData(ndof)
             cftargets[name] = [ cft ] + list(cftargets[name])
             need_to_sparsify = True
-    # from IPython import embed ; embed()
     if need_to_sparsify:
-        cflib.fill_sparsity2_np(ke,H.hg, data, cftargets)
+        cflib.fill_sparsity_np(ke,H.hg, data, cftargets)
         for o in onames:
             try:
                 cftargets[o][0].Finalize_Sparsity()
@@ -112,18 +109,15 @@ def Assemble2(ke,H, data, cftargets, wipe=True, ndof=0):
         for o in onames:
             cftargets[o][0].Wipe()
     # Call the C routines
-    cflib.assemble2_np(ke,H.hg, data, cftargets)
+    cflib.assemble_np(ke,H.hg, data, cftargets)
 
     if (wipe):
         for o in onames:
             cftargets[o][0].Finalize()
         if (made_new):
-            #print "Returning a copy for ", ke.name
-            # l = [ np.copy(cftargets[o][0].np()) for o in onames ]
             l = [ cftargets[o][0].np().copy() for o in onames ]
             return l
         else:
-            #print "Returning the mask for ", ke.name
             return [ cftargets[o][0].np() for o in onames ]
 
 

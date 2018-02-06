@@ -497,7 +497,7 @@ PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
       Py_DECREF(obj_dm);
     }
   }
-  PyObject * collect2_np(kernel_t * ke, int l_edge,hypervertex_t *verts,
+  PyObject * collect_np(kernel_t * ke, int l_edge,hypervertex_t *verts,
 						 PyObject * datadict)
   {
     if(!PyDict_Check(datadict)) return NULL;
@@ -514,8 +514,8 @@ PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
 	int len_ker_in = kernel_inps_len(ke, l_edge);
 	real_t ker_in[len_ker_in];
 	/* Get the stuffs */
-	collect2(ke, verts,l_edge, data_ptrs, idofmaps,
-			 ker_in);
+	collect(ke, verts,l_edge, data_ptrs, idofmaps,
+			ker_in);
 	/* Copy it into a numpy array */
 	PyObject * npret = make_np_copy_r(len_ker_in, ker_in);
 	/* Delete new objs in our context*/
@@ -524,7 +524,7 @@ PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
     }
 	return npret;
   }
-  void assemble2_np(kernel_t * ke, hypergraph_t * hg,
+  void assemble_np(kernel_t * ke, hypergraph_t * hg,
 		    PyObject * datadict,
 		    PyObject * outpdict)
   {
@@ -571,7 +571,7 @@ PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
     }
 
     /* Make the call */
-    assemble2(ke,hg,  data_ptrs, idofmaps, targets,odofmaps);
+    assemble(ke,hg,  data_ptrs, idofmaps, targets,odofmaps);
     
     /* Decrease reference counts. n_newobjs hasn't been observed to be >0 yet */
     for(int i=0;i<n_newobj;i++) {
@@ -579,7 +579,7 @@ PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
     }
   }
 
-  void filter2_np(kernel_t * ke, hypergraph_t * hg,
+  void filter_np(kernel_t * ke, hypergraph_t * hg,
 		    PyObject * datadict,
 		    hypergraph_t * htrue, hypergraph_t * hfalse)
   {
@@ -605,7 +605,7 @@ PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
       Py_DECREF(newobjs[i]);
     }
   }  
-  void fill_sparsity2_np(kernel_t * ke, hypergraph_t * hg,
+  void fill_sparsity_np(kernel_t * ke, hypergraph_t * hg,
 						 PyObject * datadict,
 						 PyObject * outpdict)
   {
@@ -663,7 +663,9 @@ PyObject * call_kernel(kernel_t *ke, int l_edge, int DIM1, real_t *IN_ARRAY1) {{
     }
   }
   
-  
+  /*
+   * The graphers
+   */
   void Build_Proximity_Graph_Variable_np( hypergraph_t * hg,
 					  int Npart, int dim, real_t * x,
 					  int DIM1, real_t * IN_ARRAY1)

@@ -5,7 +5,7 @@
 #include "math.h"
 #include "spatialhash.h"
 // Old code is packed in here for just the one version...
-void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
+void collect_dep(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
              dofmap_t ** dms, cfdata_t ** data)
 {
   hypervertex_t V;
@@ -34,7 +34,7 @@ void collect(real_t * ker_in, kernel_t * ke, hypervertex_t* edge, int l_edge,
     }
   } // End loop over inps
 }
-void place_targets(target_t * att,
+void place_targets_dep(target_t * att,
                    kernel_t * ke,
                    real_t * ker_out, int len_ker_out,
                    dofmap_t ** dms,
@@ -73,7 +73,7 @@ void place_targets(target_t * att,
     }
   } // end target loop
 }
-void assemble(kernel_t * ke, hypergraph_t * hg,
+void assemble_dep(kernel_t * ke, hypergraph_t * hg,
               dofmap_t ** dofmaps, cfdata_t ** data,
               target_t * att)
 {
@@ -91,12 +91,12 @@ void assemble(kernel_t * ke, hypergraph_t * hg,
     for(hex=0; hex<he->n_edge; hex++) {
       edge = Hyperedges_Get_Edge(he, hex);
       /* Collect the data */
-      collect(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some oveheard outside of loop
+      collect_dep(ker_in, ke, edge,he->l_edge, dofmaps,data); // TODO: Optimize by moving some oveheard outside of loop
       /* Calculate the kernel */
       for(i=0;i<len_ker_out;i++) ker_out[i] = 0.0;
       ke->eval(he->l_edge, ker_in, ker_out);
       /* Push the data */
-      place_targets(att, ke, ker_out,len_ker_out,
+      place_targets_dep(att, ke, ker_out,len_ker_out,
                     dofmaps, edge, he->l_edge);
     }
   }
@@ -136,7 +136,7 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
   //setup_targets(ke_circum,att, mesh,n_cells);
   
   /* Calculate the maximum circum radius */
-  assemble(ke_circum,mesh, dofmaps,data, att);
+  assemble_dep(ke_circum,mesh, dofmaps,data, att);
   real_t hmax = 0.0;
   for(int i=0; i<n_cells; i++) {
     if(CFData_Default_Data(&hs)[i] > hmax) {
@@ -166,7 +166,7 @@ void Tie_Cells_and_Particles(hypergraph_t * hgnew,
       edge = Hyperedges_Get_Edge(he, hex);
 
       /* Calculate the centroid of the cell */
-      collect(ker_in,ke_centroid,edge,l_edge, dofmaps,data);
+      collect_dep(ker_in,ke_centroid,edge,l_edge, dofmaps,data);
       for(i=0;i<dim;i++) centroid[i]=0.0;
       ke_centroid->eval(l_edge, ker_in, centroid);
       //printf("center: %lf %lf  ",centroid[0],centroid[1]);
