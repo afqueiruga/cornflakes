@@ -49,10 +49,6 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
              {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
              {'R':( cfdat_R, dm_u), 'K':( cfmat_K, dm_u ) })
     2) Multiple dofmaps to the outputs (e.g. monolithic systems):
-    xAssemble(Kernal, Hypergraph,
-    x         {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
-    x         {'R':( cfmat_R, (dm_u,dm_p)), 'K':( cfmat_K, (dm_u,dm_p)  ) })
-    xor
     Assemble(Kernal, Hypergraph,
              {'u':( u, dm_u ), 'p':( p,dm_p ), 'params':(params, dm_params) },
              {'R':( cfmat_R, dm_u,dm_p), 'K':( cfmat_K, dm_u,dm_p  ) })
@@ -74,8 +70,8 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
         try:
             data[name]
         except KeyError:
-            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
-            raise KeyError('kernel assembly error')
+            raise RuntimeError("Cornflakes runtime error: kernel ", ke.name,\
+                               ": You're missing key ", name, " in your data dict.")
             
     # Sanitize the output dictionary
     outps = cflib.outpArray_frompointer(ke.outp)
@@ -87,10 +83,12 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
         try:
             cftargets[name]
         except KeyError:
-            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your target dict!"
-            raise KeyError('kernel assembly error')
+            raise RuntimeError("Cornflakes runtime error: kernel ", ke.name,\
+                               ": You're missing key ", name, " in your target dict")
         # Do we need to make it for it?
         if not hasattr(cftargets[name][0],'Place'):
+            if ndof<=0:
+                raise RuntimeError('Cornflakes runtime error: You want Assemble to allocate new outputs, but ndof was not set.')
             made_new = True
             if outps[j].rank==2:
                 cft = CFMat(ndof)
@@ -98,7 +96,6 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
                 cft = CFData(ndof)
             cftargets[name] = [ cft ] + list(cftargets[name])
             need_to_sparsify = True
-    # from IPython import embed ; embed()
     if need_to_sparsify:
         cflib.fill_sparsity_np(ke,H.hg, data, cftargets)
         for o in onames:
@@ -118,12 +115,9 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
         for o in onames:
             cftargets[o][0].Finalize()
         if (made_new):
-            #print "Returning a copy for ", ke.name
-            # l = [ np.copy(cftargets[o][0].np()) for o in onames ]
             l = [ cftargets[o][0].np().copy() for o in onames ]
             return l
         else:
-            #print "Returning the mask for ", ke.name
             return [ cftargets[o][0].np() for o in onames ]
 
 
