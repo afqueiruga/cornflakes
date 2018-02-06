@@ -36,7 +36,7 @@ def Fill_Sparsity(ke, H, data, cftargets):
             # except AttributeError:
                 # pass
 
-def Assemble(ke,H, data, cftargets, wipe=True, ndof=0):
+def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
     """
     Assemble a kernel across a graph with specified input data.
 
