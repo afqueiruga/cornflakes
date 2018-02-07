@@ -60,6 +60,8 @@ def surfplotly(Z, u):
 
     tri = scipy.spatial.Delaunay(Z)
     fig1 = FF.create_trisurf(x=Z[:,0], y=Z[:,1], z=u,
+                                 #width=400,height=400,
                          simplices=tri.simplices,
-                         title="Torus", aspectratio=dict(x=1, y=1, z=0.3))
-    ply.offline.iplot(fig1, filename="Torus")
+                         plot_edges=False,
+                         title="surface plot", aspectratio=dict(x=1, y=1, z=1))
+    ply.offline.plot(fig1, filename="Torus.html")

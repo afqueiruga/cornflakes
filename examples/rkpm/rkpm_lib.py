@@ -28,7 +28,6 @@ class RKPM_Basis():
         # Geoemetry
         rI = xI - y
         rJ = xJ - y
-        print rI
         rIabs = sqrt((rI.T*rI)[0,0])
         rJabs = sqrt((rJ.T*rJ)[0,0])
         self.y = y
