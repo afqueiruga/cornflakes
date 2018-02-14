@@ -1,5 +1,6 @@
 from popcorn import *
 import popcorn.libs.gsl_pop as gsl_pop
+from popcorn.functional import *
 #
 # The basis and influence function
 #
@@ -20,7 +21,7 @@ gdim=2
 II, JJ, l_edge = symbols('II JJ l_edge')
 Npt = l_edge -1
 class RKPM_Basis():
-    def __init__(self, i_x, y, SupRad, P, w):
+    def __init__(self, i_x, y, SupRad, P, w, grad="MLS"):
         self.i_x = i_x
 
         x0, xI, xJ = self.i_x.Vertex_Handles(0,II,JJ)
@@ -69,17 +70,15 @@ class RKPM_Basis():
             gsl_pop.mat_lu_cleanup(self.pv_M)
         ]
 
-        
-
         self.NI = self.wI*self.pv_c.as_matrix().dot(self.PI)
         self.NJ = self.wJ*self.pv_c.as_matrix().dot(self.PJ)
 
-        # self.Synchronized_Grad()
-        self.MLS_Grad()
+        if grad=="MLS":
+            self.MLS_Grad()
+        else:
+            self.Synchronized_Grad()
+
         
-    def Interpolate(self, u):
-        pass
-    
     def Synchronized_Grad(self):
         self.pv_d0_c = PopcornVariable('rkpm_d0_c', self.NP, 1 )
         self.pv_d1_c = PopcornVariable('rkpm_d1_c', self.NP, 1 )
@@ -110,6 +109,7 @@ class RKPM_Basis():
             self.pv_d0_c.as_matrix().T * self.wJ*self.PJ,
             self.pv_d1_c.as_matrix().T * self.wJ*self.PJ
         ])
+
         
     def MLS_Grad(self):
         d_M_expr = [ self.M_expr.diff(z) for z in self.y ]
@@ -137,3 +137,37 @@ class RKPM_Basis():
         #from IPython import embed ; embed()
         self.init_prgm += self.mls_grad_prgm
 
+        
+    def Interpolate(self, name, i_u, o_uy):
+        uI = i_u.Vertex_Handle(II)
+        Kernel(name,
+               listing = self.init_prgm + [
+                   Loop(II,0,Npt,[
+                       Asgn(o_uy, self.NI * uI, '+=')
+                   ]),
+               ] + self.close_prgm
+        )
+    
+    def Integral(self, name, P,tu,u, i_u,ospace, make_K=True):
+        o_R = Output('R', [ospace], 1)
+        o_K = Output('K', [ospace], 2)
+        R = gateaux(P, tu,   Matrix([self.NI]),self.grad_NI)
+        #R.simplify()
+        K = gateaux(R,  u,   Matrix([self.NJ]),self.grad_NJ)
+        uI = i_u.Vertex_Handle(II)
+        Kernel(name,
+               listing = self.init_prgm + [
+                   u,
+                   grad(u),
+                   Loop(II,0,Npt,[
+                       Asgn(u,      self.NI * uI, '+='),
+                       Asgn(grad(u), self.grad_NI * uI, '+=')
+                   ]),
+                   Loop(II,0,Npt,[
+                       Asgn(o_R.View((II,)), Matrix([R]),"+="),
+                       Loop(JJ,0,Npt,[
+                           Asgn(o_K.View((II,JJ)), Matrix([K]),"+=")
+                       ])
+                   ]),
+               ] + self.close_prgm
+        )
