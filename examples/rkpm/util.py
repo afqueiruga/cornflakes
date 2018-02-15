@@ -1,5 +1,28 @@
 import numpy as np
 
+def Anal_Square_Poisson(X):
+    panal = np.empty(X.shape[0])
+    t = lambda k,x,y : np.sin(k*np.pi*(1.0+x)/2.0)/( k*k*k * np.sinh( k*np.pi )) * \
+        ( np.sinh( k*np.pi*(1.0+y)/2.0 ) + np.sinh( k*np.pi*(1.0-y)/2.0) )
+    for i,y in enumerate(X):
+        panal[i] = (1.0-y[0]**2.0)/2.0 - 16.0/(np.pi)**3 * \
+          sum([t(k,y[0],y[1]) for k in xrange(1,101,2) ])
+    return panal
+def Anal_Parabolic(X):
+    panal = np.empty(X.shape[0])
+    for i,y in enumerate(X):
+        panal[i] = 1 + y[0]*y[0] + 2*y[1]*y[1]
+    return panal
+def Anal_Linear(X):
+    panal = np.empty(X.shape[0])
+    for i,y in enumerate(X):
+        panal[i] = 1 + 2*y[1]
+    return panal
+Problems = {
+    'Parabolic':(Anal_Parabolic,6.0),
+    'Square':(Anal_Square_Poisson,1.0),
+    'Linear':(Anal_Linear,0.0)
+    }
 #
 # Generation a Quadrature background mesh
 #
@@ -38,7 +61,7 @@ def GaussQuadGrid(Nrx,Nry, Nptx, Npty, start, L,H):
     return w,x
 
 #
-# Evaluating the RKPM method
+# Evaluating the RKPM method. These don't work
 #
 def eval_rkpm(X,u, y, grad=False):
     #H,r = cf.Graphers.Build_Proximity_Graph_Given_Length(X,Ndesired, cutoff , y)
