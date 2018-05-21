@@ -4,6 +4,17 @@ import cornflakes_library as cflib
 #
 # IO Routines
 #
+def make_path_and_open(fname,*args,**kwargs):
+    import os, errno
+    path=os.path.dirname(fname)
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+    fh = open(fname,*args,**kwargs)
+    return fh
 
 def write_graph(fname, H, X, nodefields=None,edgefields=None):
     celltypekey = {
@@ -39,7 +50,7 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
     elems = H.view()[0]
     vecfmt = vecformatdict[X.shape[1]]
     tenfmt = tenformatdict[X.shape[1]]
-    fh = open(fname,"w")
+    fh = make_path_and_open(fname,"w")
     fh.write("# vtk DataFile Version 2.0\nGraph connectivity\nASCII\n")
     fh.write("DATASET UNSTRUCTURED_GRID\n")
     
@@ -199,7 +210,7 @@ def write_gmsh_file(fname, H,X):
     }
     vecfmt = nodeformatdict[X.shape[1]]
     
-    fh = open(fname,"w")
+    fh = make_path_and_open(fname,"w")
     fh.write("$MeshFormat\n2.2 0 8\n&EndMeshFormat\n")
 
     fh.write("$Nodes\n")
