@@ -28,7 +28,10 @@ class Hypergraph():
             ev = cflib.Hypergraph_Get_Edge_View_np(self.hg,i)
             for e in ev:
                 yield e
-                
+    def __len__(self):
+        # TODO: Optimize this
+        return sum([ _.shape[0] for _ in self.view()])
+    
     def Add_Edge_Vertex(self,offset=0):
         hgnew = cflib.hypergraph_t()
         cflib.Add_Edge_Vertex(hgnew, self.hg, offset)
