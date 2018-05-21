@@ -213,6 +213,25 @@ Popcorn in path, scipy, numpy. Output is to vtk or silo files. PETSc and LIS sup
 Installing
 ----------
 
+### Docker
+
+The easiest way is to just pull the docker image, which is automatically built by the docker cloud:
+```bash
+docker pull afqu/cornflakes
+```
+Then, run it with
+```bash
+docker run -ti -v `pwd`:/home/user afqu/cornflakes
+```
+
+### Superbuild
+
+The directory superbuild contains another CMakeLists.txt, which will automatically install and download LIS, PETSc, and popcorn, and install them alongisde cornflakes.
+This makes it easy to keep environments the same for the multiply linked environments.
+I use the superbuild provided by cornflakes to derive the superbuild for a much larger suite that is built upon cornflakes, as well as to manage the Dockerfile.
+
+### Directly
+
 Cornflakes uses cmake to compile.
 The wrappers to LIS and PETSc are optional; use the options in the configuration
 to point cmake to their install locations.
