@@ -12,7 +12,7 @@ RUN apt-get -y install libgsl-dev
 WORKDIR /opt_cornflakes
 
 # Copy the current directory contents into the container at /app
-ADD cornflakes/ /opt_cornflakes/source
+ADD . /opt_cornflakes/source
 
 RUN mkdir -p build ; \
     cd build ; \
