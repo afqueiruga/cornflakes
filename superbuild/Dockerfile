@@ -8,6 +8,9 @@ RUN apt-get -y install openmpi-bin openmpi-common libopenmpi-dev libopenmpi2
 RUN apt-get -y install swig python-numpy python-scipy python-matplotlib python-sympy
 RUN apt-get -y install ipython
 RUN apt-get -y install libgsl-dev
+RUN apt-get -y install python-pip
+
+RUN pip install oset
 
 # Set the working directory
 WORKDIR /opt_cornflakes
