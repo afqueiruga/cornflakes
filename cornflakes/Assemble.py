@@ -121,11 +121,28 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
             return [ cftargets[o][0].np() for o in onames ]
 
 
+        
+
 # Deprecated call signature
-def Filter(ke,H, dofmaps,data):
+def Filter(ke,H, data):
+    # Check sanity of arguments
+    if not isinstance(data, dict):
+        from itertools import chain
+        data = dict(chain(*[f.items() for f in data]))
+    # Check the input dictionary
+    inps = cflib.inpArray_frompointer(ke.inp)
+    for i in xrange(ke.ninp):
+        name = inps[i].name
+        try:
+            data[name]
+        except KeyError:
+            raise RuntimeError("Cornflakes runtime error: kernel ", ke.name,\
+                               ": You're missing key ", name, " in your data dict.")
+
+    # Make the new graphs and call C. No clean up required
     htrue = Hypergraph()
     hfalse = Hypergraph()
-    cflib.filter_np(ke,H.hg, dofmaps, data, htrue.hg, hfalse.hg)
+    cflib.filter_np(ke,H.hg, data, htrue.hg, hfalse.hg)
     return htrue,hfalse
 
 def Apply_BC(dofs,vals, K=None,R=None):
