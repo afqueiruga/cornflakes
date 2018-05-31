@@ -25,6 +25,7 @@ RUN mkdir -p build ; \
 
 # Download some fun examples
 RUN git clone https://github.com/afqueiruga/PeriFlakes
+RUN git clone https://github.com/afqueiruga/SimDataDB /usr/local/lib/pythonlib/SimDataDB
 
 # Define environment variable
 ENV LD_LIBRARY_PATH /usr/local/lib
@@ -32,5 +33,4 @@ ENV LD_LIBRARY_PATH /usr/local/lib
 #ENTRYPOINT ["bash"]
 WORKDIR /home/user
 
-#ENTRYPOINT bash --rcfile /usr/local/env.bash.conf
 ENTRYPOINT bash --rcfile /opt_cornflakes/source/superbuild/welcome.sh
