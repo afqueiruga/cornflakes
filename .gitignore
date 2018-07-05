@@ -9,3 +9,6 @@
 *.o
 
 cornflakes_library.py
+
+.DS_Store
+.ipynb_checkpoints
