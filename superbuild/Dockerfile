@@ -3,12 +3,9 @@ FROM debian:latest
 
 RUN apt-get update
 RUN apt-get -y install cmake make g++ gfortran git python
-RUN apt-get -y install libblas-dev liblapack-dev
+RUN apt-get -y install libblas-dev liblapack-dev libgsl-dev
 RUN apt-get -y install openmpi-bin openmpi-common libopenmpi-dev libopenmpi2
-RUN apt-get -y install swig python-numpy python-scipy python-matplotlib python-sympy
-RUN apt-get -y install ipython
-RUN apt-get -y install libgsl-dev
-RUN apt-get -y install python-pip
+RUN apt-get -y install swig python-numpy python-scipy python-matplotlib python-sympy ipython python-pip
 
 RUN pip install oset
 

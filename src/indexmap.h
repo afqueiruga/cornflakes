@@ -6,7 +6,7 @@
   This class does mapping from indices to BC-ified indicies to help 
   CFMat_BC and CF_Data BC.
  */
-typedef int index_t ;
+typedef int index_t;
 typedef struct IndexMap {
   int start,end; // Of the inputs
   int Nsys; // Of the output

@@ -31,8 +31,9 @@ class Hypergraph():
     def __len__(self):
         # TODO: Optimize this
         return sum([ _.shape[0] for _ in self.view()])
-    
+
     def Add_Edge_Vertex(self,offset=0):
+        # TODO I hate this method. Cornflakes graphs should be immutable
         hgnew = cflib.hypergraph_t()
         cflib.Add_Edge_Vertex(hgnew, self.hg, offset)
         cflib.Hypergraph_Destroy(self.hg)
