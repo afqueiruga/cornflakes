@@ -7,12 +7,13 @@ import cornflakes_library as cflib
 def make_path_and_open(fname,*args,**kwargs):
     import os, errno
     path=os.path.dirname(fname)
-    try:
-        os.makedirs(path)
-    except OSError as exc: # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else: raise
+    if path:
+        try:
+            os.makedirs(path)
+        except OSError as exc: # Python >2.5
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else: raise
     fh = open(fname,*args,**kwargs)
     return fh
 
