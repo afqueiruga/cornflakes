@@ -44,9 +44,14 @@ A scientific program is repeated applications of `Assemble` and solutions of the
 Cornflakes also includes helpers for forming graphs by loading from a finite element mesh or building a
 neighbor list for a particle cloud, and writing out data to VTK or silo files.
 
-Cornflakes is designed to be run in parallel (but, like many things,
-I haven't gotten to that part yet. I might just rewrite it
-all in Julia first.)  The hypergraph of the problem is used to distribute the computations in parallel by assigning edges to processors using the overlap of vertices to minimize the communication. The parallel vectors can then be distributed figuring out where vertices ended up. The popcorn DSL is agnostic to the target processor, and the architecture is also designed with GPU execution in mind. (However, the architecture is still in flux enough that I cannot commit the manhours to actually implementing this yet.)
+Cornflakes is designed to be run in parallel, but, like many things, I haven't gotten to that part yet. (I might just rewrite it all in Julia first.)
+The architecture is designed to force data locality and map-apply operations upon the developer's thought process.
+`assemble()` was running with OpenMP, but it wasn't updated.
+The popcorn DSL is agnostic to the target processor, and the architecture is designed with GPU execution in mind.
+The current project goal is to write a PETSc backend for the hypergraph types and manage ghost zones and distributed matrices through the Vec and Mat types automatically.
+The hypergraph of the problem is used to distribute the computations in parallel by assigning edges to processors using the overlap of vertices to minimize the communication.
+The parallel vectors can then be distributed by figuring out where vertices ended up.
+However, the architecture is still in flux and I cannot commit the manhours to actually implementing any of these parallel models yet.
 
 Quick Preview
 -------------
@@ -202,13 +207,18 @@ which will have to be evaluated millions of times. In TensorFlow, the graph node
 larger computations that are chained together in a Directed Acyclic Graph, whose edges
 describes _the interdependencies for the ordering_ for the calculations. The concepts are not
 mutually exclusive. On another front, I'm interested in writing a TensorFlow op for calling
-cornflakes assemblies.
+cornflakes assemblies (to train codes), *and* an cornflakes assemble interface for calling TensorFlow models (to use those codes.)
 
 
 Requirements
 ------------
 
-Popcorn in path, scipy, numpy. Output is to vtk or silo files. PETSc and LIS support is optional.
+The following packages are the minimum: `gcc cmake python numpy scipy swig gsl`.
+Just install them with your package manager.
+Cornflakes currently only runs in Python 2.7, a design decision due to other interacting libraries that were still on 2.7 when development started.
+(Everything is slowly getting ported to Python 3, but the Swig interface is a hassle!)
+
+Popcorn should be installed in the same path. Vtk and silo files are the primary output format. PETSc and LIS support is optional. 
 
 Installing
 ----------
