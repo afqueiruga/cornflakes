@@ -1,15 +1,15 @@
 Cornflakes
 ==========
 
-Alejandro F Queiruga  
-Lawrence Berkeley Lab  
+Alejandro F Queiruga
+Lawrence Berkeley Lab
 2015-2018
 
 Intro
 -----
 
 Cornflakes and [popcorn](https://github.com/afqueiruga/popcorn) are a new general purpose scientific package.
-It's designed to enable super-quick design of standard 
+It's designed to enable super-quick design of standard
 scientific codes with a flexible architecture suitable for both
 prototyping and deployable code.
 It supports the Scipy backend for interactively designing problems,
@@ -32,16 +32,16 @@ Every **hypervertex** in the graph represents a location with associated data., 
 - Particle methods: the edge is a neighbor list
 
 Or, in pictures, comparing each of those typical ideas on the left to the abstract hypergraph on the right,
-![hypergraphs](doc/figures/hypergraphs.png)  
- The result of each edge computation is a contribution to the global system whose local results are put together in the "big A" assembly:  
+![hypergraphs](doc/figures/hypergraphs.png)
+ The result of each edge computation is a contribution to the global system whose local results are put together in the "big A" assembly:
 ![bigA](
   http://latex.codecogs.com/gif.latex?\dpi{120}&space;\large&space;\mathbf{K}=\underset{\mathtt{edge}\in\mathcal{H}}&space;{\operatorname{\raisebox{-5pt}{\mbox{&space;\Huge&space;\textsf{\textbf{A}}}}}}&space;\mathbf{k}\left%28u\left[\mathtt{edge}\right]\right%29
-  )  
+  )
 The $\mathbf{K}$ is usually something like the stiffness matrix, a load vector, or even some set of properties
 based on the state of the system. $u[\mathtt{edge}]$ are the important variables that correspond to the
 vertices included in the edge, e.g. the pressures, temperatures, and material properties of the grid points.
 A scientific program is repeated applications of `Assemble` and solutions of the resulting system of equations.
-Cornflakes also includes helpers for forming graphs by loading from a finite element mesh or building a 
+Cornflakes also includes helpers for forming graphs by loading from a finite element mesh or building a
 neighbor list for a particle cloud, and writing out data to VTK or silo files.
 
 Cornflakes is designed to be run in parallel (but, like many things,
@@ -49,7 +49,7 @@ I haven't gotten to that part yet. I might just rewrite it
 all in Julia first.)  The hypergraph of the problem is used to distribute the computations in parallel by assigning edges to processors using the overlap of vertices to minimize the communication. The parallel vectors can then be distributed figuring out where vertices ended up. The popcorn DSL is agnostic to the target processor, and the architecture is also designed with GPU execution in mind. (However, the architecture is still in flux enough that I cannot commit the manhours to actually implementing this yet.)
 
 Quick Preview
--------
+-------------
 
 What does that mean? Well, this is a very simple kernel:
 ```python
@@ -191,7 +191,7 @@ The design of cornflakes is similar to the following libraries:
 1. [MOOSE](https://mooseframework.org) - No control over main; no DSL
 1. [PyOp2](https://github.com/OP2/PyOP2) - Assembler only. It seems great, but it was developed in parallel to cornflakes! It's only been used for FEniCS kernels, and seems married to the interpretation as a physical mesh.
 
-[Tensorflow](https://tensorflow.org) has a similar idea to describing calculations as a graph, 
+[Tensorflow](https://tensorflow.org) has a similar idea to describing calculations as a graph,
 but the graph entities represent different things.
 In cornflakes, each Hypergraph represents
 kernel calculations that _can happen in parallel_, with the graph connectivity representing
@@ -246,9 +246,9 @@ A superbuild and a dockerfile is coming soon. This is the general build process:
 7. make test
 8. make install
 
-After installing cornflakes, use lazyinstall.sh in popcorn to copy it over to the install prefix.
-Cornflakes installs an `env.bash.conf` and an `env.csh.conf` to the install prefix. Source the one
-corresponding to your terminal to load cornflakes into the path.
+Cornflakes installs an `env.bash.conf` and an `env.csh.conf` to the install prefix.
+Source the one corresponding to your terminal to load cornflakes into the path.
+After installing cornflakes, use the setup.py in popcorn install it in the prefix (stored in the environment variable `$CORNFLAKES_DIR`.)
 
 ### OSX Specific:
 
@@ -256,13 +256,13 @@ Things on OSX are tricky. You'll need to know where to link things. Here is how 
 the locations for a macports based system:
 
 1. set CMAKE\_C\_COMPILER and CMAKE\_CXX\_COMPILER gcc-mp-5
-2. set SWIG_EXECUTABLE:  
+2. set SWIG_EXECUTABLE:
 /opt/local/bin/swig
-3. Set EXTRA\_INCLUDES:  
+3. Set EXTRA\_INCLUDES:
 port contents numpy | grep include
-4. Set PYTHON\_INCLUDE\_DIR  
+4. Set PYTHON\_INCLUDE\_DIR
 port contents python27 | grep include
-5. Set PYTHON\_LIBRARY  
+5. Set PYTHON\_LIBRARY
 port contents python27 | grep libpython2.7
 
 The macports and homebrew toolchains will be included with the aforementioned superbuild.
@@ -271,7 +271,16 @@ License
 -------
 
 Copyright (C) Alejandro Francisco Queiruga, 2015-2018
+Lawrence Berkeley National Lab
 
 Cornflakes is released under version 3 of the GNU Lesser General Public License, as per LICENSE.txt.
 
 Cite this repository if you refer to the code or use it.
+
+Acknowledgements
+----------------
+
+Initial development was primary supported by Laboratory Directed Research and
+Development (LDRD) funding from Berkeley Lab, provided by the Director, Office
+of Science, of the U.S. Department of Energy.
+Continuous development on cornflakes/popcorn occurs to support various projects at Lawrence Berkeley National Lab.

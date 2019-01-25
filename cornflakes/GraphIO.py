@@ -1,11 +1,12 @@
 from Hypergraph import Hypergraph
 import cornflakes_library as cflib
 
+import os, errno
+import numpy as np
 #
 # IO Routines
 #
 def make_path_and_open(fname,*args,**kwargs):
-    import os, errno
     path=os.path.dirname(fname)
     if path:
         try:
@@ -107,7 +108,7 @@ def write_graph(fname, H, X, nodefields=None,edgefields=None):
              
 def write_silo(fname, H,X,cycle=0, time=0,nodefields=[], edgefields=[], PUTMESH=True, PUTCONN=True):
     from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME, DB_CLOBBER
-    import numpy as np
+    
     silo = SiloFile(fname, mode=DB_CLOBBER)
 
     pair_edges = H.view()[0]
@@ -239,11 +240,18 @@ def write_gmsh_file(fname, H,X):
 
 
 def Load_gmsh(fname,gdim=3):
+    # check if file exists
+    try:
+        with open(fname,'r') as f:
+            pass
+    except Exception as e:
+        raise e
     H = Hypergraph()
     cflib.Hypergraph_Destroy(H.hg)
     X = cflib.load_gmsh_np(gdim, H.hg, fname)
     return X,H
 def write_cloud(fname, X, nodefields):
+    # TODO ????? wut did I copy and paste in
     import cornflakes as cf
     Hcloud = cf.Hypergraph()
     for l in xrange(X.shape[0]): Hcloud.Push_Edge([l])
