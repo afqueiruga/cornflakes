@@ -19,6 +19,7 @@ def make_path_and_open(fname,*args,**kwargs):
     return fh
 
 def write_graph(fname, H, X, nodefields=None,edgefields=None):
+    """Writes to a vtk file."""
     celltypekey = {
         1:1,
         2:3,
@@ -174,6 +175,7 @@ def write_silo_meshfile(fname, H,X):
                      np.asarray(X.T,order="C"), len(pair_edges),
                      zonelist_name, None)
     silo.close()
+    
 def write_silo_datfile(fname,mname,cycle=0, time=0, nodefields=[], edgefields=[]):
     from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM,\
         DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME, DB_CLOBBER
@@ -199,7 +201,6 @@ def write_silo_datfile(fname,mname,cycle=0, time=0, nodefields=[], edgefields=[]
         putvar(n,f,DB_NODECENT)
     for n,f in edgefields:
         putvar(n,f,DB_ZONECENT)
-
     silo.close()
     
 
@@ -240,19 +241,32 @@ def write_gmsh_file(fname, H,X):
 
 
 def Load_gmsh(fname,gdim=3):
-    # check if file exists
+    """
+    Load a gmsh mesh. Requires version 2 ascii format.
+    
+    Specify gdim to weed-out irrelevant elements.
+    """
+    # check if file exists and that it's the right version
     try:
         with open(fname,'r') as f:
-            pass
+            l = f.readline()
+            if not "$MeshFormat" in l:
+                raise RuntimeError("cornflakes: Not a gmsh file.")
+            l = f.readline()
+            if not l[0]=='2':
+                raise RuntimeError("cornflakes: Not version 2 of gmsh mesh.")
     except Exception as e:
         raise e
+    # Swig wrapper initialized the hypergraph, but the C routine assumes it 
+    # wasn't initialized.
     H = Hypergraph()
     cflib.Hypergraph_Destroy(H.hg)
     X = cflib.load_gmsh_np(gdim, H.hg, fname)
     return X,H
+    
+    
 def write_cloud(fname, X, nodefields):
-    # TODO ????? wut did I copy and paste in
-    import cornflakes as cf
-    Hcloud = cf.Hypergraph()
+    """Write a pointcloud to a vtk file without a graph."""
+    Hcloud = Hypergraph()
     for l in xrange(X.shape[0]): Hcloud.Push_Edge([l])
-    cf.GraphIO.write_graph(fname, Hcloud, X,nodefields)
+    write_graph(fname, Hcloud, X,nodefields)
