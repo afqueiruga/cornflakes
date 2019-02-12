@@ -9,6 +9,7 @@
 *.o
 
 cornflakes_library.py
+husk_*
 
 .DS_Store
 .ipynb_checkpoints
