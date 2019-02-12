@@ -23,9 +23,9 @@ def Collect(ke, edge, data):
             data[name]
         except KeyError:
             print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
-            raise KeyError('kernel assembly error')
-            
+            raise KeyError('kernel assembly error')        
     return cflib.collect_np(ke,edge,data)
+    
 def Fill_Sparsity(ke, H, data, cftargets):
     cflib.fill_sparsity_np(ke,H.hg, data, cftargets)
     outps = cflib.outpArray_frompointer(ke.outp)
