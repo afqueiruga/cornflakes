@@ -25,7 +25,7 @@ class Hypergraph():
             for i in range(self.hg.n_types)
         ]
     def __iter__(self):
-        for i in xrange(self.hg.n_types):
+        for i in range(self.hg.n_types):
             ev = cflib.Hypergraph_Get_Edge_View_np(self.hg,i)
             for e in ev:
                 yield e
