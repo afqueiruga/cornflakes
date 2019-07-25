@@ -38,8 +38,9 @@ def rotated_rect_test(cen,theta, W,H):
         #print x,xR
         return ( xR[0]<=W and xR[0]>=-W and xR[1]<=H and xR[1]>=-H )
     return test
+    
 def select_nodes(X,fil):
-    return np.asarray(np.where(map(fil,X))[0],dtype=np.intc)
+    return np.asarray(np.where([ i for i in map(fil,X)])[0],dtype=np.intc)
 
 
 def delete_particles(X, conditions):
