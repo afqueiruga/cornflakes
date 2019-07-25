@@ -17,7 +17,7 @@ def Collect(ke, edge, data):
         data = dict(chain(*[f.items() for f in data]))
     # Check the input dictionary
     inps = cflib.inpArray_frompointer(ke.inp)
-    for i in xrange(ke.ninp):
+    for i in range(ke.ninp):
         name = inps[i].name
         try:
             data[name]
@@ -29,7 +29,7 @@ def Collect(ke, edge, data):
 def Fill_Sparsity(ke, H, data, cftargets):
     cflib.fill_sparsity_np(ke,H.hg, data, cftargets)
     outps = cflib.outpArray_frompointer(ke.outp)
-    onames = [ outps[j].name for j in xrange(ke.noutp) ]
+    onames = [ outps[j].name for j in range(ke.noutp) ]
     # for o in onames:
 		# try:
 		# cftargets[o][0].Finalize_Sparsity()
@@ -65,7 +65,7 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
         data = dict(chain(*[f.items() for f in data]))
     # Check the input dictionary
     inps = cflib.inpArray_frompointer(ke.inp)
-    for i in xrange(ke.ninp):
+    for i in range(ke.ninp):
         name = inps[i].name
         try:
             data[name]
@@ -75,10 +75,10 @@ def Assemble(ke,H, data, cftargets, ndof=0, wipe=True):
             
     # Sanitize the output dictionary
     outps = cflib.outpArray_frompointer(ke.outp)
-    onames = [ outps[j].name for j in xrange(ke.noutp) ]
+    onames = [ outps[j].name for j in range(ke.noutp) ]
     need_to_sparsify = False
     made_new = False
-    for  j in xrange(ke.noutp):
+    for  j in range(ke.noutp):
         name = outps[j].name
         try:
             cftargets[name]
@@ -131,7 +131,7 @@ def Filter(ke,H, data):
         data = dict(chain(*[f.items() for f in data]))
     # Check the input dictionary
     inps = cflib.inpArray_frompointer(ke.inp)
-    for i in xrange(ke.ninp):
+    for i in range(ke.ninp):
         name = inps[i].name
         try:
             data[name]

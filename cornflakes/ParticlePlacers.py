@@ -6,8 +6,8 @@ def init_grid(Nx,Ny, start,e1,e2, dev=0.0):
     e1=np.array(e1)
     e2=np.array(e2)
     x = np.zeros((Nx*Ny,len(start)),dtype=np.double)
-    for j in xrange(Ny):
-        for i in xrange(Nx):
+    for j in range(Ny):
+        for i in range(Nx):
             x[j*Nx+i,:] = start + float(i/(Nx-1.0))*e1 + float(j/(Ny-1.0))*e2 \
                            + (0.0 
                              if i==0 or i==Nx-1 or j==0 or j==Ny-1else
@@ -19,9 +19,9 @@ def init_cube(Nx,Ny,Nz, start,e1,e2,e3, dev=0.0):
     e2=np.array(e2)
     e3=np.array(e3)
     x = np.zeros((Nx*Ny*Nz,len(start)),dtype=np.double)
-    for k in xrange(Nz):
-        for j in xrange(Ny):
-            for i in xrange(Nx):
+    for k in range(Nz):
+        for j in range(Ny):
+            for i in range(Nx):
                 x[k*Nx*Ny+j*Nx+i,:] = start + float(i/(Nx-1.0))*e1 \
                               + float(j/(Ny-1.0))*e2 \
                               + float(k/(Nz-1.0))*e3 \
