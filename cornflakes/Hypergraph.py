@@ -1,5 +1,6 @@
-import cornflakes_library as cflib
 import numpy as np
+from . import cornflakes_library as cflib
+
 
 class Hypergraph():
 

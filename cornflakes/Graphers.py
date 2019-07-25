@@ -1,10 +1,10 @@
 #
 # Wrappers and Python routines for the C routines found in graphers.c
 #
-
-import cornflakes_library as cflib
-from Hypergraph import Hypergraph
 import numpy as np
+
+from . import cornflakes_library as cflib
+from .Hypergraph import Hypergraph
 
 def Build_Pair_Graph(x, cutoff, y=None):
     H = Hypergraph(0)

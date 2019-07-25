@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse
-import cornflakes_library as cflib
-from Hypergraph import Hypergraph
+from . import cornflakes_library as cflib
+from .Hypergraph import Hypergraph
 
 
 IndexMap = cflib.IndexMap
@@ -22,7 +22,7 @@ def Collect(ke, edge, data):
         try:
             data[name]
         except KeyError:
-            print "cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!"
+            print("cornflakes runtime error: kernel ", ke.name,": You're missing key ", name, " in your data dict!")
             raise KeyError('kernel assembly error')        
     return cflib.collect_np(ke,edge,data)
     
