@@ -159,14 +159,14 @@ include(${SWIG_USE_FILE})
 set(CMAKE_SWIG_FLAGS "")
 
 # find_package(PythonLibs 3.7 REQUIRED)
-find_package(Python3 3.7 REQUIRED)
-include_directories(${PYTHON_INCLUDE_PATH})
+find_package(Python3 3.7 REQUIRED COMPONENTS Interpreter Development)
+include_directories(${Python3_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set_source_files_properties(src/cornflakes_library_swig.i PROPERTIES SWIG_FLAGS "-includeall")
 swig_add_module(cornflakes_library python src/cornflakes_library_swig.i ${SOURCES})
 
-swig_link_libraries(cornflakes_library m ${PYTHON_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
+swig_link_libraries(cornflakes_library m ${Python3_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
 
 
 #
