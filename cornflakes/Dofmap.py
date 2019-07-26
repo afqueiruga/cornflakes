@@ -1,4 +1,4 @@
-import cornflakes_library as cflib
+from . import cornflakes_library as cflib
 
 Dofmap = cflib.Dofmap
 Dofmap_Strided = cflib.Dofmap_Strided

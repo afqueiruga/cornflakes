@@ -1,8 +1,9 @@
-from Hypergraph import Hypergraph
-import cornflakes_library as cflib
-
 import os, errno
 import numpy as np
+
+from .Hypergraph import Hypergraph
+from . import cornflakes_library as cflib
+
 #
 # IO Routines
 #

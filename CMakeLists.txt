@@ -88,7 +88,7 @@ include_directories(src/)
 #
 # Options
 #
-set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
+set(EXTRA_INCLUDES "/opt/local/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/numpy/core/include/" CACHE STRING "Extra includes; e.g. location to numpy/core/include/")
 list(APPEND CORNFLAKES_INCLUDES ${EXTRA_INCLUDES})
 
 include_directories(${EXTRA_INCLUDES})
@@ -158,14 +158,15 @@ find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 set(CMAKE_SWIG_FLAGS "")
 
-find_package(PythonLibs 2.7 REQUIRED)
-include_directories(${PYTHON_INCLUDE_PATH})
+# find_package(PythonLibs 3.7 REQUIRED)
+find_package(Python3 3.7 REQUIRED COMPONENTS Interpreter Development)
+include_directories(${Python3_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set_source_files_properties(src/cornflakes_library_swig.i PROPERTIES SWIG_FLAGS "-includeall")
 swig_add_module(cornflakes_library python src/cornflakes_library_swig.i ${SOURCES})
 
-swig_link_libraries(cornflakes_library m ${PYTHON_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
+swig_link_libraries(cornflakes_library m ${Python3_LIBRARIES} ${CORNFLAKES_SHARED_LIBRARIES})
 
 
 #
